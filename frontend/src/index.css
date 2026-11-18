@@ -1,0 +1,15 @@
+/*
+ * index.css — Global styles.
+ *
+ * Tailwind's three layers are injected here.  Any custom global
+ * CSS goes below them.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Custom global styles ── */
+body {
+  @apply bg-gray-50 text-gray-900 antialiased;
+}
