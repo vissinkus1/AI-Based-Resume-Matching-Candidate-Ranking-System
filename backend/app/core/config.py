@@ -5,7 +5,7 @@ Reads from environment variables (and an optional .env file).
 Defaults are tuned for local development with SQLite.
 """
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -24,10 +24,11 @@ class Settings(BaseSettings):
     # Origins allowed to call the API (React dev server by default).
     CORS_ORIGINS: list[str] = ["http://localhost:5173"]
 
-    class Config:
-        env_file = ".env"          # Optional .env in backend/
-        env_file_encoding = "utf-8"
-        case_sensitive = True
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=True,
+    )
 
 
 # Singleton instance used throughout the app via `from app.core.config import settings`

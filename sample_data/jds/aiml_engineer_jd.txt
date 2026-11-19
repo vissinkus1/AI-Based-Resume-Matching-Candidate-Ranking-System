@@ -1,0 +1,41 @@
+AI/ML Engineer - Natural Language Processing
+
+Role: AI/ML Engineer
+Location: Hyderabad, India
+Type: Full-Time
+
+About the Position:
+Join our AI research and engineering team to develop cutting-edge NLP solutions.
+You will work on building intelligent text processing systems, search engines,
+and recommendation platforms that leverage state-of-the-art machine learning models.
+
+Responsibilities:
+- Design and implement NLP pipelines for text classification, NER, and sentiment analysis
+- Fine-tune pre-trained transformer models (BERT, GPT) for domain-specific tasks
+- Build and deploy ML models using Python, PyTorch, and Hugging Face Transformers
+- Develop feature engineering pipelines and data preprocessing workflows
+- Conduct experiments and evaluate model performance using appropriate metrics
+- Collaborate with data engineers to build scalable data pipelines
+- Write technical documentation and present research findings to stakeholders
+- Stay current with the latest developments in AI/ML and NLP research
+
+Requirements:
+- Minimum 3 years of experience in machine learning or data science
+- Strong proficiency in Python and ML frameworks (PyTorch, TensorFlow, scikit-learn)
+- Hands-on experience with NLP libraries: spaCy, NLTK, Hugging Face
+- Experience with deep learning architectures (CNNs, RNNs, LSTMs, Transformers)
+- Proficiency in data manipulation with Pandas, NumPy, and SQL
+- Understanding of statistical analysis and probability theory
+- Experience with MLOps practices and model deployment (Docker, FastAPI)
+- Master's degree or Ph.D. in Computer Science, Data Science, Mathematics, or related field
+
+Good to Have:
+- Experience with large language models (LLMs) and prompt engineering
+- Knowledge of computer vision and OpenCV
+- Familiarity with cloud platforms (AWS, GCP) for ML workloads
+- Experience with Apache Spark for large-scale data processing
+- Published research papers in top AI/ML conferences
+- Experience with LangChain or similar LLM frameworks
+- Knowledge of Elasticsearch for semantic search
+
+Experience: three to five years

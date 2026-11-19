@@ -1,0 +1,44 @@
+Senior React Frontend Developer
+
+Job Title: Senior React Frontend Developer
+Location: Pune, India (Remote-Friendly)
+Department: Product Engineering
+
+About Us:
+DataViz Inc. builds next-generation analytics dashboards for enterprise clients.
+Our frontend team creates responsive, performant web applications used by
+thousands of data analysts daily.
+
+What You Will Do:
+- Build and maintain complex React.js applications with modern JavaScript (ES6+)
+- Develop reusable UI components and design systems using Tailwind CSS
+- Integrate REST APIs and GraphQL endpoints with Axios and Apollo Client
+- Implement state management using Redux Toolkit and React Context
+- Write comprehensive unit tests with Jest and React Testing Library
+- Optimize frontend performance including lazy loading, code splitting, and caching
+- Collaborate closely with UX designers, backend engineers, and product owners
+- Participate in agile ceremonies including sprint planning and retrospectives
+- Ensure web accessibility (WCAG 2.1) and cross-browser compatibility
+
+Must Have Skills:
+- 4+ years of professional experience in frontend development
+- Expert-level proficiency in React.js and JavaScript/TypeScript
+- Strong experience with HTML5, CSS3, and responsive design
+- Experience with Tailwind CSS or Bootstrap for styling
+- Proficiency with state management (Redux, Context API)
+- Experience consuming REST APIs using Axios or Fetch
+- Solid understanding of version control with Git
+- Knowledge of build tools like Webpack or Vite
+- Experience with testing frameworks like Jest and Cypress
+- B.Tech or B.E. in Computer Science or equivalent
+
+Preferred Skills:
+- Experience with Next.js for server-side rendering
+- Familiarity with TypeScript in production applications
+- Knowledge of CI/CD pipelines (GitHub Actions, GitLab CI)
+- Understanding of Node.js backend development
+- Experience with Figma or design collaboration tools
+- Familiarity with Storybook for component development
+- Experience with performance monitoring tools
+
+Experience Required: Minimum 4 years in frontend development

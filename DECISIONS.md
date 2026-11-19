@@ -16,3 +16,15 @@
 | D7 | Tailwind CSS via PostCSS (standard setup) | Vite + PostCSS is the recommended Tailwind path; simple and fast. |
 | D8 | Axios instance in `frontend/src/api/client.js` with `baseURL` pointing to `http://localhost:8000` | Single place to change the backend URL; interceptors can be added later. |
 | D9 | pnpm as the Node package manager | Already available in the environment; faster and more disk-efficient than npm. |
+
+## Phase 1
+
+| # | Decision | Rationale |
+|---|----------|-----------|
+| D10 | Shared text extraction service in `services/text_extractor.py` | Extracts PDF, DOCX (paragraphs + tables), and TXT with clean normalization; generic for reuse in Phase 2 for resumes. |
+| D11 | Skills taxonomy in `data/skills_taxonomy.json` with 327 canonical skills and 700+ aliases | O(1) case-insensitive alias-to-canonical lookup across 12 domains; shared by JD parser, resume parser, and matching engine. |
+| D12 | spaCy PhraseMatcher + custom whole-word boundary check (`_is_whole_word_match`) | Eliminates false-positive substring matches (e.g. "Java" inside "JavaScript") while preserving case-insensitive multi-word aliases. |
+| D13 | Section-guided required vs. preferred skill classification with inline fallback | Context-aware categorization using section headings ("Requirements" vs "Nice to Have") and sentence cues. |
+| D14 | Range-first experience extraction with English word-to-number mapping | Prioritizes ranges ("3-5 years", "three to five years") over single digits to capture both min and max years accurately. |
+| D15 | Repository pattern (`JDRepository`) for database access | Decouples SQLAlchemy ORM from FastAPI routes; supports transparent PostgreSQL swap in Phase 4. |
+| D16 | React `JDContext` for shared active JD state across views | Allows Home, Dashboard, and Candidate Detail pages to access current JD without prop drilling. |

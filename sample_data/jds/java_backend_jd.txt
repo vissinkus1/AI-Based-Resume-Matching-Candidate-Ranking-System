@@ -1,0 +1,40 @@
+Senior Java/Spring Boot Backend Developer
+
+Company: TechSoft Solutions Pvt. Ltd.
+Location: Bangalore, India (Hybrid)
+Employment Type: Full-Time
+
+About the Role:
+We are looking for an experienced Senior Java Backend Developer to join our
+platform engineering team. You will design and build scalable microservices
+that power our financial services platform serving 2 million+ users.
+
+Key Responsibilities:
+- Design, develop, and maintain RESTful APIs and microservices using Java and Spring Boot
+- Write clean, testable code following SOLID principles and design patterns
+- Collaborate with frontend engineers, product managers, and DevOps teams
+- Conduct code reviews and mentor junior developers
+- Optimize application performance and troubleshoot production issues
+- Participate in system design discussions and architecture decisions
+- Write unit and integration tests to ensure code quality
+- Work with CI/CD pipelines for automated build and deployment
+
+Requirements:
+- 5+ years of experience in backend development with Java
+- Strong proficiency in Spring Boot, Spring MVC, and Spring Security
+- Experience with PostgreSQL, Redis, and MongoDB
+- Solid understanding of microservices architecture and distributed systems
+- Proficiency in RESTful API design and development
+- Experience with Docker and Kubernetes for containerization
+- Strong knowledge of data structures, algorithms, and OOP concepts
+- Experience with Git and CI/CD tools like Jenkins or GitHub Actions
+- Bachelor's degree in Computer Science, IT, or related field
+
+Nice to Have:
+- Experience with Apache Kafka or RabbitMQ for event-driven architecture
+- Knowledge of AWS services (EC2, S3, Lambda, RDS)
+- Familiarity with GraphQL
+- Experience with Elasticsearch for search functionality
+- Master's degree in Computer Science or related field
+
+Experience: 5-8 years
