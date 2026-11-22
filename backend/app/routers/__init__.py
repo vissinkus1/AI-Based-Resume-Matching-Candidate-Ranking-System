@@ -2,6 +2,6 @@
 routers package — FastAPI APIRouters.
 """
 
-from app.routers import health, jd, resumes
+from app.routers import health, jd, resumes, match
 
-__all__ = ["health", "jd", "resumes"]
+__all__ = ["health", "jd", "resumes", "match"]

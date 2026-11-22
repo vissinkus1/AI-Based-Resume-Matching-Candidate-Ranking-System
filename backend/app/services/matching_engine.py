@@ -21,12 +21,13 @@ Features:
 """
 
 import math
+import re
 from dataclasses import dataclass, field
 from typing import Any
 
 import numpy as np
 
-from app.core.scoring_config import SCORING, ScoringWeights
+from app.core.scoring_config import SCORING, ScoringWeights, GENERIC_SKILLS
 from app.services.skills_taxonomy import get_taxonomy, SkillsTaxonomy
 from app.services.embedding_service import get_embedding_service, EmbeddingService, calibrate_cosine
 from app.services.jd_parser import ParsedJD
@@ -42,9 +43,11 @@ class MatchedSkillItem:
     """Details of a matched or partially matched skill."""
     jd_skill: str
     candidate_skill: str
-    match_type: str        # "exact" | "child_of_parent" | "parent_of_child" | "semantic_soft"
+    match_type: str        # "exact" | "child_of_parent" | "parent_of_child" | "semantic_soft" | "inferred_from_experience"
     credit: float
     tier: str              # "core" | "supporting" | "soft"
+    is_required: bool = True
+    evidence_snippet: str | None = None
 
 
 @dataclass
@@ -126,6 +129,13 @@ class MatchResult:
     gaps: list[str]
     reasons: list[FactorReason]
 
+    # Extended Skill Separation & Display (Phase 4 A1, A6)
+    matched_required: list[MatchedSkillItem] = field(default_factory=list)
+    matched_preferred: list[MatchedSkillItem] = field(default_factory=list)
+    partially_matched_required: list[MatchedSkillItem] = field(default_factory=list)
+    partially_matched_preferred: list[MatchedSkillItem] = field(default_factory=list)
+    matched_top: list[MatchedSkillItem] = field(default_factory=list)
+
     def to_dict(self) -> dict[str, Any]:
         """Convert MatchResult to JSON-serializable dictionary."""
         return {
@@ -152,8 +162,39 @@ class MatchResult:
                         "match_type": m.match_type,
                         "credit": m.credit,
                         "tier": m.tier,
+                        "is_required": m.is_required,
                     }
                     for m in self.matched_skills
+                ],
+                "matched_required": [
+                    {
+                        "jd_skill": m.jd_skill,
+                        "candidate_skill": m.candidate_skill,
+                        "match_type": m.match_type,
+                        "credit": m.credit,
+                        "tier": m.tier,
+                    }
+                    for m in self.matched_required
+                ],
+                "matched_preferred": [
+                    {
+                        "jd_skill": m.jd_skill,
+                        "candidate_skill": m.candidate_skill,
+                        "match_type": m.match_type,
+                        "credit": m.credit,
+                        "tier": m.tier,
+                    }
+                    for m in self.matched_preferred
+                ],
+                "matched_top": [
+                    {
+                        "jd_skill": m.jd_skill,
+                        "candidate_skill": m.candidate_skill,
+                        "match_type": m.match_type,
+                        "credit": m.credit,
+                        "tier": m.tier,
+                    }
+                    for m in self.matched_top
                 ],
                 "partially_matched": [
                     {
@@ -162,8 +203,29 @@ class MatchResult:
                         "match_type": m.match_type,
                         "credit": m.credit,
                         "tier": m.tier,
+                        "is_required": m.is_required,
                     }
                     for m in self.partially_matched
+                ],
+                "partially_matched_required": [
+                    {
+                        "jd_skill": m.jd_skill,
+                        "candidate_skill": m.candidate_skill,
+                        "match_type": m.match_type,
+                        "credit": m.credit,
+                        "tier": m.tier,
+                    }
+                    for m in self.partially_matched_required
+                ],
+                "partially_matched_preferred": [
+                    {
+                        "jd_skill": m.jd_skill,
+                        "candidate_skill": m.candidate_skill,
+                        "match_type": m.match_type,
+                        "credit": m.credit,
+                        "tier": m.tier,
+                    }
+                    for m in self.partially_matched_preferred
                 ],
                 "missing_required": self.missing_required_skills,
                 "missing_preferred": self.missing_preferred_skills,
@@ -223,23 +285,39 @@ class MatchResult:
 # Component 1: Skill Matching & Family Collapse
 # ------------------------------------------------------------------
 
+COLLAPSIBLE_FAMILIES: set[str] = {
+    "AWS",
+    "Amazon Web Services",
+    "Azure",
+    "Microsoft Azure",
+    "GCP",
+    "Google Cloud",
+    "Google Cloud Platform",
+    "Git",
+    "CI/CD",
+}
+
+
 def collapse_jd_skill_families(
     jd_skills: list[str], taxonomy: SkillsTaxonomy
 ) -> list[str]:
     """
     Collapse skill families in JD requirements.
 
-    If the JD lists both a parent skill and its child skills (e.g.,
-    AWS + AWS S3 + AWS EC2, or Git + GitHub), score the parent once and
-    DROP the children from the scoring denominator to prevent artificial inflation.
+    Prunes child skills from JD requirements when their parent platform/infrastructure
+    is also present (e.g., AWS + AWS S3 -> keep AWS, drop AWS S3; Git + GitHub -> keep Git).
+    Crucially, programming language frameworks (Spring Boot, FastAPI, Django, React)
+    are NEVER collapsed into their language parent because they represent independent
+    core technical competencies that recruiters require separately.
     """
     skill_set = set(jd_skills)
     collapsed: list[str] = []
 
     for s in jd_skills:
         entry = taxonomy.get_entry(s)
-        # If this skill has a parent that is ALSO requested in the JD, drop child
-        if entry and entry.parent and entry.parent in skill_set:
+        # Only collapse if parent is an infrastructure/tool platform in COLLAPSIBLE_FAMILIES
+        # Never collapse core programming language frameworks
+        if entry and entry.parent and entry.parent in skill_set and entry.parent in COLLAPSIBLE_FAMILIES:
             continue
         collapsed.append(s)
 
@@ -255,7 +333,7 @@ def compute_skill_score(
 ) -> tuple[float, list[MatchedSkillItem], list[MatchedSkillItem], list[str], list[str], list[str], float]:
     """
     Calculate explainable skill score (0–100) using exact aliases, parent/child relationships,
-    and soft embedding similarities.
+    soft embedding similarities, and experience-inferred concepts for supporting/soft skills.
 
     Returns:
         (skill_score, matched_skills, partially_matched, missing_required, missing_preferred,
@@ -268,13 +346,30 @@ def compute_skill_score(
     cand_skill_names = [s.name for s in cand_skill_entries]
     cand_skill_set = set(cand_skill_names)
 
-    # 2. Collapse JD skill families
+    # 2. Collapse JD skill families (cloud/tool families only; never frameworks)
     req_skills = collapse_jd_skill_families(jd.required_skills, taxonomy)
     pref_skills = collapse_jd_skill_families(jd.preferred_skills, taxonomy)
 
     # Pre-embed candidate skills for soft matching
     cand_embeddings = (
         embed_service.embed(cand_skill_names) if cand_skill_names else np.empty((0, 384))
+    )
+
+    # Experience sentence snippets for inferring supporting/soft concepts (Fix A4)
+    exp_snippets: list[str] = []
+    for e in candidate.experience_entries:
+        if not e.description:
+            continue
+        for line in e.description.split("\n"):
+            line = line.strip(" -*•\t")
+            if not line:
+                continue
+            for part in line.split(". "):
+                part = part.strip().rstrip(".")
+                if len(part) >= 15:
+                    exp_snippets.append(part)
+    exp_embeddings = (
+        embed_service.embed(exp_snippets) if exp_snippets else np.empty((0, 384))
     )
 
     matched_skills: list[MatchedSkillItem] = []
@@ -319,6 +414,7 @@ def compute_skill_score(
             best_credit = 0.0
             best_type = ""
             best_cand_skill = ""
+            snippet_evidence = None
 
             # Check 1: Exact canonical or alias match
             if target in cand_skill_set:
@@ -351,19 +447,42 @@ def compute_skill_score(
                 best_j = int(np.argmax(sim_matrix[i]))
                 max_cos = float(sim_matrix[i, best_j])
                 if max_cos >= config.skill_soft_match_threshold:
-                    # Scaled credit up to credit_semantic_soft_match_max
                     soft_credit = min(config.credit_semantic_soft_match_max, max_cos)
                     if soft_credit > best_credit:
                         best_credit = soft_credit
                         best_type = "semantic_soft"
                         best_cand_skill = cand_skill_names[best_j]
 
+            # Check 5: Concept skills inferred credit (supporting / soft tier only) — Fix A4
+            # Never infer for core tier skills (languages, frameworks, databases must be explicit)
+            if (
+                not best_type
+                and best_credit < 0.40
+                and tier in {"supporting", "soft"}
+                and exp_embeddings.size > 0
+            ):
+                target_emb = target_embeddings[i:i+1] if target_embeddings.size > 0 else embed_service.embed_single(target)
+                exp_sims = embed_service.cosine_matrix(target_emb, exp_embeddings)[0]
+                best_snip_idx = int(np.argmax(exp_sims))
+                best_snip_sim = float(exp_sims[best_snip_idx])
+                if best_snip_sim >= config.inferred_concept_threshold:
+                    inferred_credit = min(
+                        config.inferred_concept_credit_max,
+                        max(0.50, round(best_snip_sim, 2)),
+                    )
+                    if inferred_credit > best_credit:
+                        best_credit = inferred_credit
+                        best_type = "inferred_from_experience"
+                        best_cand_skill = f"{target} (inferred)"
+                        snippet_evidence = exp_snippets[best_snip_idx][:140]
+
             total_weighted_credit += best_credit * tier_w
 
             if is_required and tier == "core" and best_credit >= 0.50:
                 core_matched += 1
 
-            # Categorize into matched, partial, or missing
+            # Categorize into strictly disjoint lists (Fix A1)
+            # Never count a skill twice (in both matched and partial)
             if best_credit >= 0.80:
                 matched_skills.append(
                     MatchedSkillItem(
@@ -372,6 +491,8 @@ def compute_skill_score(
                         match_type=best_type,
                         credit=round(best_credit, 2),
                         tier=tier,
+                        is_required=is_required,
+                        evidence_snippet=snippet_evidence,
                     )
                 )
             elif best_credit >= 0.40:
@@ -382,6 +503,8 @@ def compute_skill_score(
                         match_type=best_type,
                         credit=round(best_credit, 2),
                         tier=tier,
+                        is_required=is_required,
+                        evidence_snippet=snippet_evidence,
                     )
                 )
             else:
@@ -414,6 +537,16 @@ def compute_skill_score(
 
     skill_score = round(max(0.0, min(100.0, skill_score)), 1)
 
+    # Sort matched and partial lists for display (Fix A6):
+    # Tier weight descending (core -> supporting -> soft), then credit descending, then name
+    tier_order = {"core": 0, "supporting": 1, "soft": 2}
+    matched_skills.sort(
+        key=lambda m: (tier_order.get(m.tier, 9), -m.credit, m.jd_skill.lower())
+    )
+    partially_matched.sort(
+        key=lambda m: (tier_order.get(m.tier, 9), -m.credit, m.jd_skill.lower())
+    )
+
     # Extra relevant candidate skills (core skills not requested in JD)
     all_jd_skills = set(req_skills) | set(pref_skills)
     extra_relevant: list[str] = []
@@ -440,6 +573,44 @@ def compute_skill_score(
 # Component 2: Semantic Similarity & Evidence Alignment
 # ------------------------------------------------------------------
 
+BOILERPLATE_DUTY_PREFIXES: tuple[str, ...] = (
+    "we are looking",
+    "about the role",
+    "about our team",
+    "about us",
+    "about techsoft",
+    "the ideal candidate",
+    "role overview",
+    "who you are",
+    "company:",
+    "location:",
+    "employment type:",
+    "what we offer",
+    "benefits:",
+)
+
+
+def _is_real_duty_sentence(text: str) -> bool:
+    """
+    Validate that a sentence is an actionable job duty, not boilerplate introductory prose.
+    Must have >= 6 words, not start with boilerplate greetings/company intros, and contain a verb.
+    """
+    s = text.strip()
+    words = s.split()
+    if len(words) < 6:
+        return False
+    lower = s.lower()
+    if any(lower.startswith(prefix) for prefix in BOILERPLATE_DUTY_PREFIXES):
+        return False
+    try:
+        from app.services.jd_parser import _get_nlp
+        nlp = _get_nlp()
+        doc = nlp(s[:250])
+        return any(token.pos_ in {"VERB", "AUX"} for token in doc)
+    except Exception:
+        return True
+
+
 def compute_semantic_score(
     jd: ParsedJD,
     candidate: ParsedResume,
@@ -448,27 +619,31 @@ def compute_semantic_score(
 ) -> tuple[float, float, float, list[ResponsibilityEvidence]]:
     """
     Calculate semantic similarity (0–100) using:
-      1. Requirement-unit coverage (max cosine across resume chunks per JD duty)
+      1. Requirement-unit coverage (max cosine across resume chunks per filtered JD duty)
       2. Whole-document similarity (mean-pooled embeddings)
       3. Evidence snippet extraction for top JD responsibilities
 
     Returns:
         (semantic_score, req_coverage_score, whole_doc_score, top_evidence)
     """
-    # 1. Build JD requirement units
+    # 1. Build JD requirement units (filtered to genuine duty sentences; drop boilerplate)
     jd_units: list[str] = []
     for resp in jd.responsibilities:
-        if resp.strip():
+        if resp.strip() and _is_real_duty_sentence(resp):
             jd_units.append(resp.strip())
 
     for skill, ev in jd.skill_evidence.items():
         sent = ev.get("sentence", "").strip()
-        if sent and sent not in jd_units:
+        if sent and sent not in jd_units and _is_real_duty_sentence(sent):
             jd_units.append(sent)
 
     if not jd_units:
-        # Fallback to splitting JD text
-        jd_units = [jd.title or "Software Professional"]
+        # Fallback if no duties passed filter
+        for resp in jd.responsibilities:
+            if resp.strip():
+                jd_units.append(resp.strip())
+        if not jd_units:
+            jd_units = [jd.title or "Software Professional"]
 
     # 2. Build resume chunks
     resume_chunks: list[str] = []
@@ -550,10 +725,11 @@ def compute_experience_score(
     candidate: ParsedResume,
     embed_service: EmbeddingService,
     config: ScoringWeights = SCORING,
+    taxonomy: SkillsTaxonomy | None = None,
 ) -> tuple[float, float, float, str, float]:
     """
     Calculate experience match score (0–100) using:
-      - Relevant experience duration (merged without overlap)
+      - Domain-relevant experience duration (generic tools excluded from domain count)
       - Proportional credit against min requirement
       - Cap / floor for over-qualification
       - Internship discounting at 50%
@@ -561,14 +737,32 @@ def compute_experience_score(
     Returns:
         (experience_score, total_years, relevant_years, verdict, gap_years)
     """
+    tax = taxonomy or get_taxonomy()
     total_years = candidate.total_experience_years + (
         (candidate.internship_months / 12.0) * config.internship_credit_factor
     )
 
     jd_text = (jd.title or "") + " " + " ".join(jd.required_skills)
-    jd_core_skills = {
-        s for s in jd.required_skills
-    }
+
+    # Configure generic skills set for this JD (Fix A2)
+    # Python is treated as a generic scripting tool unless the JD explicitly targets a pure Python developer
+    # (for AI/ML roles, true domain core skills are ML frameworks like PyTorch, TensorFlow, Deep Learning)
+    generic = set(config.generic_skills)
+    is_pure_python_dev = "python" in (jd.title or "").lower() and not any(
+        kw in (jd.title or "").lower() for kw in ["ai", "ml", "machine learning", "deep learning", "data science"]
+    )
+    if not is_pure_python_dev:
+        generic.add("Python")
+    else:
+        generic.discard("Python")
+
+    # Domain core JD skills: required skills that are core tier and NOT generic (Fix A2)
+    domain_jd_core_skills: set[str] = set()
+    for s in jd.required_skills:
+        entry = tax.get_entry(s)
+        tier = entry.tier if entry else "core"
+        if tier == "core" and s not in generic:
+            domain_jd_core_skills.add(s)
 
     relevant_intervals: list[tuple[int, int]] = []
     relevant_internship_months = 0
@@ -598,10 +792,16 @@ def compute_experience_score(
             embed_service.embed_single(jd_text),
         )
 
-        core_overlap = len(set(e.skills_in_entry) & jd_core_skills)
-        is_relevant = (sim >= config.exp_relevance_threshold) or (
-            core_overlap >= config.exp_min_core_skills_for_relevance
-        )
+        if not domain_jd_core_skills:
+            # Fallback when JD has no specific domain core skills (e.g. minimal test JD)
+            is_relevant = sim >= config.exp_relevance_threshold
+        else:
+            # Rule A2: An entry is relevant if it has >= 2 DOMAIN core JD skills, OR
+            # (semantic similarity >= threshold AND >= 1 domain core skill).
+            domain_overlap = len(set(e.skills_in_entry) & domain_jd_core_skills)
+            is_relevant = (domain_overlap >= config.exp_min_core_skills_for_relevance) or (
+                sim >= config.exp_relevance_threshold and domain_overlap >= 1
+            )
 
         if is_relevant:
             if e.is_internship:
@@ -715,6 +915,21 @@ def compute_qualification_score(
 # Component 5: Title Relevance Matching
 # ------------------------------------------------------------------
 
+def normalize_title(title: str, seniority_tokens: frozenset[str] | set[str] | None = None) -> str:
+    """
+    Normalize job title by removing seniority prefixes/suffixes and punctuation (Fix A3).
+    Allows true domain semantic comparison (e.g. 'Frontend Developer' vs 'Backend Developer')
+    without artificial score inflation from shared generic seniority tokens ('Senior', 'Lead').
+    """
+    if not title:
+        return ""
+    # Lowercase and replace non-alphanumeric chars with space
+    t = re.sub(r"[^\w\s]", " ", title.lower())
+    tokens = seniority_tokens or SCORING.seniority_tokens
+    words = [w for w in t.split() if w not in tokens]
+    return " ".join(words).strip() or title.strip()
+
+
 def compute_title_relevance_score(
     jd: ParsedJD,
     candidate: ParsedResume,
@@ -723,16 +938,21 @@ def compute_title_relevance_score(
 ) -> tuple[float, str | None, float, bool]:
     """
     Calculate past title relevance score (0–100) against the JD role title.
-    Falls back to summary / projects similarity if candidate has no past job titles (e.g. fresher).
+    Normalizes seniority prefixes/suffixes and punctuation before embedding (Fix A3).
+    Falls back to summary / projects similarity if candidate has no past job titles.
 
     Returns:
         (title_score, best_matching_title, raw_similarity, used_summary_fallback)
     """
-    jd_title = jd.title or "Software Professional"
-    jd_emb = embed_service.embed_single(jd_title)
+    jd_raw_title = jd.title or "Software Professional"
+    jd_norm_title = normalize_title(jd_raw_title, config.seniority_tokens)
+    jd_emb = embed_service.embed_single(jd_norm_title)
 
     if candidate.job_titles:
-        title_embs = embed_service.embed(candidate.job_titles)
+        cand_norm_titles = [
+            normalize_title(t, config.seniority_tokens) for t in candidate.job_titles
+        ]
+        title_embs = embed_service.embed(cand_norm_titles)
         sims = [embed_service.cosine_similarity(jd_emb, t) for t in title_embs]
         best_idx = int(np.argmax(sims))
         best_title = candidate.job_titles[best_idx]
@@ -741,7 +961,8 @@ def compute_title_relevance_score(
     else:
         # Fallback to candidate summary or projects
         fallback_text = candidate.summary or "Computer Science Graduate"
-        fallback_emb = embed_service.embed_single(fallback_text)
+        fallback_norm = normalize_title(fallback_text, config.seniority_tokens)
+        fallback_emb = embed_service.embed_single(fallback_norm)
         best_sim = embed_service.cosine_similarity(jd_emb, fallback_emb)
         best_title = "Inferred from summary"
         used_summary = True
@@ -764,7 +985,7 @@ def generate_reasons_and_narrative(
     experience_score: float,
     qualification_score: float,
     title_score: float,
-    matched_skills: list[MatchedSkillItem],
+    matched_required: list[MatchedSkillItem],
     missing_required: list[str],
     core_req_coverage: float,
     total_years: float,
@@ -774,28 +995,56 @@ def generate_reasons_and_narrative(
     best_title: str | None,
     top_evidence: list[ResponsibilityEvidence],
     config: ScoringWeights = SCORING,
+    taxonomy: SkillsTaxonomy | None = None,
 ) -> tuple[list[FactorReason], str, list[str], list[str]]:
     """
-    Generate deterministic, specific, plain-English explanations for every factor.
+    Generate deterministic, specific, plain-English explanations for every factor (Fix A1, A5).
     Zero LLM dependencies.
     """
+    tax = taxonomy or get_taxonomy()
     reasons: list[FactorReason] = []
     strengths: list[str] = []
     gaps: list[str] = []
 
-    # 1. Skill Reason
-    req_total = len(jd.required_skills)
+    # 1. Skill Reason (counts REQUIRED skills only; Fix A1)
+    req_skills_collapsed = collapse_jd_skill_families(jd.required_skills, tax)
+    req_total = len(req_skills_collapsed)
     cov_pct = int(round(core_req_coverage * 100))
-    top_matched_names = [m.jd_skill for m in matched_skills[:4]]
-    top_missing_names = missing_required[:3]
+
+    # Top matched required skills
+    top_matched_names = [m.jd_skill for m in matched_required[:4]]
+
+    # Gaps: order by core tier first, then supporting/soft (Fix A5)
+    missing_core = [
+        s for s in missing_required
+        if (tax.get_entry(s).tier if tax.get_entry(s) else "core") == "core"
+    ]
+    missing_other = [s for s in missing_required if s not in missing_core]
+    ordered_missing = missing_core + missing_other
+    top_missing_names = ordered_missing[:3]
 
     skill_verdict = "strong" if skill_score >= 70 else ("ok" if skill_score >= 45 else "weak")
-    matched_txt = ", ".join(top_matched_names) if top_matched_names else "none"
-    missing_txt = f"Missing: {', '.join(top_missing_names)}." if top_missing_names else "All required skills met."
-    skill_text = (
-        f"Covers {len(matched_skills)} of {req_total} required skills ({cov_pct}%), "
-        f"including {matched_txt}. {missing_txt}"
+
+    matched_count = len(matched_required)
+    if matched_count > 0 and top_matched_names:
+        matched_txt = f", including {', '.join(top_matched_names)}"
+    else:
+        matched_txt = ""
+
+    missing_txt = (
+        f"Missing: {', '.join(top_missing_names)}."
+        if top_missing_names
+        else "All required skills met."
     )
+
+    if matched_count == 0:
+        skill_text = f"0 of {req_total} required skills verified (0%). {missing_txt}"
+    else:
+        skill_text = (
+            f"Covers {matched_count} of {req_total} required skills ({cov_pct}%)"
+            f"{matched_txt}. {missing_txt}"
+        )
+
     reasons.append(
         FactorReason(
             factor="skill",
@@ -809,8 +1058,8 @@ def generate_reasons_and_narrative(
 
     if skill_score >= 70:
         strengths.append(f"Strong required skill coverage ({cov_pct}% of core skills verified)")
-    elif missing_required:
-        gaps.append(f"Lacks key required skills: {', '.join(missing_required[:3])}")
+    elif ordered_missing:
+        gaps.append(f"Lacks key required skills: {', '.join(ordered_missing[:3])}")
 
     # 2. Semantic Reason
     sem_verdict = "strong" if semantic_score >= 70 else ("ok" if semantic_score >= 45 else "weak")
@@ -946,6 +1195,13 @@ def match(
         core_req_coverage,
     ) = compute_skill_score(jd, candidate, tax, emb, config)
 
+    # Separate required vs preferred matched/partial lists (Fix A1)
+    matched_required = [m for m in matched_skills if m.is_required]
+    matched_preferred = [m for m in matched_skills if not m.is_required]
+    partially_matched_required = [m for m in partially_matched if m.is_required]
+    partially_matched_preferred = [m for m in partially_matched if not m.is_required]
+    matched_top = matched_skills[:6]
+
     (
         sem_score,
         req_cov_score,
@@ -959,7 +1215,7 @@ def match(
         rel_years,
         exp_verdict,
         gap_years,
-    ) = compute_experience_score(jd, candidate, emb, config)
+    ) = compute_experience_score(jd, candidate, emb, config, taxonomy=tax)
 
     (
         qual_score,
@@ -1019,14 +1275,14 @@ def match(
     else:
         band = "Weak match"
 
-    # 5. Narrative explanations
+    # 5. Narrative explanations (uses strictly matched_required; Fix A1)
     reasons, narrative_summary, strengths, gaps = generate_reasons_and_narrative(
         skill_score=skill_score,
         semantic_score=sem_score,
         experience_score=exp_score,
         qualification_score=qual_score,
         title_score=title_score,
-        matched_skills=matched_skills,
+        matched_required=matched_required,
         missing_required=missing_req,
         core_req_coverage=core_req_coverage,
         total_years=tot_years,
@@ -1036,6 +1292,7 @@ def match(
         best_title=best_title,
         top_evidence=top_evidence,
         config=config,
+        taxonomy=tax,
     )
 
     if is_knockout and knockout_reason:
@@ -1060,6 +1317,11 @@ def match(
         missing_preferred_skills=missing_pref,
         extra_relevant_skills=extra_relevant,
         core_required_coverage=core_req_coverage,
+        matched_required=matched_required,
+        matched_preferred=matched_preferred,
+        partially_matched_required=partially_matched_required,
+        partially_matched_preferred=partially_matched_preferred,
+        matched_top=matched_top,
         requirement_coverage_score=req_cov_score,
         whole_doc_similarity_score=whole_doc_score,
         responsibility_evidence=top_evidence,

@@ -16,6 +16,7 @@
  */
 
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { parseJDText, parseJDFile, updateJD } from "../api/jd";
 import {
   uploadResumes,
@@ -23,14 +24,21 @@ import {
   deleteCandidate,
   clearAllCandidates,
 } from "../api/resumes";
+import { runMatch } from "../api/match";
 import { useJD } from "../context/JDContext";
 import SkillChips from "../components/SkillChips";
 import API from "../api/client";
 
 function Home() {
+  const navigate = useNavigate();
+
   // Backend health status
   const [healthStatus, setHealthStatus] = useState(null);
   const [healthLoading, setHealthLoading] = useState(true);
+
+  // Matching trigger state
+  const [matching, setMatching] = useState(false);
+  const [matchError, setMatchError] = useState(null);
 
   // ── Step 1: JD input state ──
   const [activeTab, setActiveTab] = useState("paste"); // "paste" | "upload"
@@ -931,22 +939,63 @@ function Home() {
           )}
         </div>
 
-        {/* ── Callout for Matching (Phase 3 readiness) ── */}
-        <div className="mt-6 p-4 rounded-xl bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-100 flex items-center justify-between">
+        {/* ── Callout for AI Matching Execution ── */}
+        <div className="mt-6 p-4 rounded-xl bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h4 className="text-sm font-bold text-gray-900">
               Ready for AI Matching &amp; Candidate Ranking?
             </h4>
             <p className="text-xs text-gray-600 mt-0.5">
-              Requires 1 Active Job Description + Parsed Candidate Resumes.
+              {!(jdId || activeJD?.id)
+                ? "Step 1: Please analyze or select an active Job Description above."
+                : candidates.length === 0
+                ? "Step 2: Please upload at least one candidate resume."
+                : `Ready to evaluate ${candidates.length} candidate${candidates.length > 1 ? "s" : ""} against the active JD.`}
             </p>
+            {matchError && (
+              <p className="text-xs text-red-600 font-medium mt-1">
+                ⚠️ {matchError}
+              </p>
+            )}
           </div>
           <button
-            disabled
-            className="px-5 py-2.5 rounded-lg bg-gray-300 text-gray-600 font-semibold text-xs cursor-not-allowed shadow-none"
-            title="Matching Engine will be activated in Phase 3"
+            onClick={async () => {
+              const targetJdId = jdId || activeJD?.id;
+              if (!targetJdId) {
+                setMatchError("Please select or parse a Job Description first.");
+                return;
+              }
+              if (candidates.length === 0) {
+                setMatchError("Please upload at least one candidate resume.");
+                return;
+              }
+              setMatching(true);
+              setMatchError(null);
+              try {
+                const runRes = await runMatch(targetJdId);
+                navigate(`/dashboard?run=${runRes.id}`);
+              } catch (err) {
+                const msg = err.response?.data?.detail || "Failed to execute AI matching.";
+                setMatchError(msg);
+              } finally {
+                setMatching(false);
+              }
+            }}
+            disabled={!(jdId || activeJD?.id) || candidates.length === 0 || matching}
+            className={`px-5 py-2.5 rounded-lg font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-sm ${
+              !(jdId || activeJD?.id) || candidates.length === 0 || matching
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed shadow-none"
+                : "bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer shadow-indigo-200"
+            }`}
           >
-            Run Matching &amp; Ranking (Coming in Phase 3) 🚀
+            {matching ? (
+              <>
+                <Spinner />
+                <span>Running Multi-Factor Ranking...</span>
+              </>
+            ) : (
+              <span>Run AI Matching &amp; Ranking 🚀</span>
+            )}
           </button>
         </div>
       </section>

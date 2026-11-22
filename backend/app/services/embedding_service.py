@@ -46,6 +46,16 @@ class EmbeddingService:
         self._model: Any = None
         self._cache: dict[str, np.ndarray] = {}
 
+    def is_ready(self) -> bool:
+        """Return True if the underlying model is already loaded and ready."""
+        return self._model is not None
+
+    def warmup(self) -> None:
+        """Pre-load model weights and perform a dummy encoding so first API call is instant."""
+        logger.info("Warming up EmbeddingService...")
+        self.embed(["Warmup text to prime SentenceTransformer weights and cache."])
+        logger.info("EmbeddingService warmup complete.")
+
     def _get_model(self):
         """Lazy load the sentence transformer model."""
         if self._model is None:

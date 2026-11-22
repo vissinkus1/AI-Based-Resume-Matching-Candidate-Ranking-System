@@ -52,6 +52,10 @@ class ScoringWeights:
     credit_parent_of_required_child: float = 0.6    # JD wants AWS S3, candidate only has AWS
     credit_semantic_soft_match_max: float = 0.70    # Max credit for embedding soft-match
 
+    # Concept skills inferred from experience entries (supporting/soft skills only)
+    inferred_concept_threshold: float = 0.60        # Min cosine between concept & experience snippet
+    inferred_concept_credit_max: float = 0.70       # Credit awarded when concept is inferred from experience
+
     # Cosine similarity threshold for embedding soft-matching of skill names
     skill_soft_match_threshold: float = 0.62
 
@@ -66,7 +70,7 @@ class ScoringWeights:
 
     # Calibration bounds for raw cosine similarity to 0-100 rescale
     semantic_raw_cos_low: float = 0.15
-    semantic_raw_cos_high: float = 0.65
+    semantic_raw_cos_high: float = 0.70
 
     # Blend between requirement-unit coverage and whole-document similarity
     semantic_blend_req_coverage: float = 0.60
@@ -78,6 +82,15 @@ class ScoringWeights:
     # ------------------------------------------------------------------
     # 4. Experience Parameters
     # ------------------------------------------------------------------
+    # Generic tools/skills that do NOT confer domain experience on their own
+    generic_skills: frozenset[str] = field(
+        default_factory=lambda: frozenset({
+            "Git", "GitHub", "Docker", "AWS", "Linux", "SQL",
+            "CI/CD", "Agile", "REST API", "Jira", "Postman",
+            "Communication", "Teamwork", "Problem Solving", "Code Review",
+        })
+    )
+
     # Cosine similarity threshold for an experience entry to be deemed relevant to JD
     exp_relevance_threshold: float = 0.35
 
@@ -114,8 +127,15 @@ class ScoringWeights:
     # ------------------------------------------------------------------
     # 6. Title Relevance Parameters
     # ------------------------------------------------------------------
+    # Seniority tokens stripped during title normalization
+    seniority_tokens: frozenset[str] = field(
+        default_factory=lambda: frozenset({
+            "senior", "sr", "junior", "jr", "lead", "principal", "staff",
+            "associate", "trainee", "intern", "head", "director", "vp",
+        })
+    )
     title_raw_cos_low: float = 0.15
-    title_raw_cos_high: float = 0.65
+    title_raw_cos_high: float = 0.70
 
     # ------------------------------------------------------------------
     # 7. Knockout & Safeguards
@@ -171,3 +191,4 @@ class ScoringWeights:
 
 # Global singleton instance
 SCORING = ScoringWeights()
+GENERIC_SKILLS = SCORING.generic_skills

@@ -234,6 +234,18 @@ def run():
 
         print(f"{name:<24} | #{kp:<17} | #{sp:<18} | #{hp:<11} | {diff_note}")
 
+    # 5. Hand-written Semantic Verification Test (E4)
+    print("\n" + "=" * 110)
+    print("[5/5] HAND-WRITTEN SEMANTIC TEST (E4)")
+    print("=" * 110)
+    text_a = "Built event-driven microservices using Kafka and Golang"
+    text_b = "Architected distributed messaging pipelines with Go and Apache Kafka"
+    emb_a = emb_service.embed_single(text_a)
+    emb_b = emb_service.embed_single(text_b)
+    cos_ab = emb_service.cosine_similarity(emb_a, emb_b)
+    print(f"  Text A: '{text_a}'")
+    print(f"  Text B: '{text_b}'")
+    print(f"  Cosine Similarity: {cos_ab:.4f} (Expected > 0.75: {'PASS' if cos_ab > 0.75 else 'FAIL'})")
     print("=" * 110 + "\n")
 
 

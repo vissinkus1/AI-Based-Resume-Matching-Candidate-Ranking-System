@@ -57,3 +57,18 @@
 | D33 | Domain knockout safeguard cap at 35.0 | Caps overall score at 35.0 when core required skill coverage is below 25%, preventing off-domain resumes with good prose from gaming ranks. |
 | D34 | Pure algorithmic deterministic narrative explanations (zero LLMs) | Produces explainable human-readable breakdown sentences, strengths, and gaps from mathematical contributions and evidence snippets. |
 | D35 | Unbiased ground truth validation via `build_expected_tiers.py` | Assigns expected match tiers prior to running algorithm; verifies system against objective annotations (achieving 100% tier agreement and Spearman > 0.81). |
+
+## Phase 4
+
+| # | Decision | Rationale |
+|---|----------|-----------|
+| D36 | Language frameworks exempted from skill family collapse | Core language frameworks (Spring Boot, FastAPI, Django, React) are independent competencies and must not be collapsed into their language parent; only cloud platforms (AWS, Azure, GCP) and tools (Git, CI/CD) are collapsed. |
+| D37 | Generic skills exclusion from domain experience calculation | Tools like Git, Docker, AWS, SQL, and generic scripting Python do not confer domain experience on their own; entries require $\ge 2$ domain core skills, or ($sim \ge 0.35$ and $\ge 1$ domain skill), preventing false cross-domain years. |
+| D38 | Seniority token removal and title normalization | Strips seniority words (senior, lead, junior) and punctuation before embedding past titles against JD title, preventing false 100% scores between frontend and backend roles. |
+| D39 | Inferred concept credit for supporting and soft skills | Missing supporting/soft skills (e.g. Clean Architecture, Agile) receive up to 0.70 credit if sentence-level experience cosine $\ge 0.60$ with snippet evidence; core skills are strictly exempt from inference. |
+| D40 | Boilerplate duty sentence filtering & calibration bounds update | Excludes company/role intro boilerplate (< 6 words or lacking a verb) from semantic duty matching; adjusted upper cosine calibration bounds to 0.70 to prevent 100% saturation. |
+| D41 | Deterministic SHA-256 snapshot hashing for Job Description staleness detection | Hashing the canonical JSON serialized JD on execution enables $O(1)$ stale checks on `GET /api/match/runs/{id}` without re-evaluating embeddings. |
+| D42 | Composite index on `(run_id, rank)` in `match_results` | Guarantees instant sub-millisecond retrieval of paginated ranking leaderboards and deterministic tie-breaking. |
+| D43 | DB Cascade delete on MatchRun with nullable candidate FK | Deleting a MatchRun cascades to all results; deleting a Candidate sets `candidate_id=NULL` but retains historical auditable scoring records. |
+| D44 | Lifespan embedding model warmup & `/health` readiness check | Pre-warms SentenceTransformer weights in FastAPI lifespan startup, preventing first-request cold-start latency spikes. |
+| D45 | Streaming CSV export without disk file accumulation | Streams candidate evaluation reports directly via Starlette StreamingResponse with standard RFC-4180 escaping. |

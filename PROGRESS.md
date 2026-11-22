@@ -352,7 +352,98 @@ Documentation:
 - **HuggingFace Network Telemetry on Windows:** In isolated sandbox environments, unconfigured `SentenceTransformer` attempted online commit hash lookups. Mitigated by setting `local_files_only=True` first, guaranteeing instantaneous local offline loads from disk cache.
 
 ## Phase 4 — API + DB Integration
-**Status:** TODO
+
+**Status:** ✅ DONE
+
+### Checklist
+
+- [x] Part A: Matching Engine Fixes (verified with 9 dedicated unit tests):
+  - [x] A1: Skill integrity & family collapse fix (`Java` and `Spring Boot` preserved; strictly separated `matched_required`, `matched_preferred`, `missing_required`, `missing_preferred`; required-only narrative counts)
+  - [x] A2: Relevant experience generic skills exclusion (`GENERIC_SKILLS` defined; requires $\ge 2$ domain core skills, or $sim \ge 0.35$ with $\ge 1$ domain core skill)
+  - [x] A3: Title normalization stripping seniority tokens (`senior`, `lead`, `junior`, `principal`, etc.) and punctuation before embedding
+  - [x] A4: Inferred concept credit for supporting/soft skills (sentence-level experience cosine $\ge 0.60$, up to 0.70 credit; core tier strictly excluded)
+  - [x] A5: Boilerplate duty sentence filtering ($\ge 6$ words + verb required) and polished narrative explanations without "including none"
+  - [x] A6: Matched skills sorted by tier (core first), credit descending, and alphabetical; added `matched_top` (up to 6)
+  - [x] A7: Calibrated cosine upper bounds raised to 0.70 preventing 100% score saturation
+- [x] Part B: Database Integration:
+  - [x] `MatchRun` model (`id`, `jd_id`, `jd_snapshot_hash`, `candidate_count`, `duration_ms`, `config_snapshot`, `created_at`)
+  - [x] `MatchResultDB` model (`id`, `run_id`, `candidate_id`, `rank`, `final_score`, `band`, `is_knockout`, `result_json`, `created_at`) with composite index on `(run_id, rank)`
+  - [x] Cascade deletion configured for runs; candidates set null on delete to preserve scoring audit trail; SQLite foreign keys enabled via connection listener
+  - [x] `MatchRepository` with `create_run`, `get_run`, `list_runs`, `get_run_results`, `get_candidate_result`, `delete_run`, and `compute_jd_hash`
+  - [x] Real-time JD staleness detection comparing stored SHA-256 snapshot hash to current JD content
+- [x] Part C: REST API Endpoints under `/api/match`:
+  - [x] `POST /api/match/run` (triggers matching run with timing and persistence)
+  - [x] `GET /api/match/runs` (lists historical runs with `is_stale` flag)
+  - [x] `GET /api/match/runs/{run_id}` (detailed summary, distribution across bands, and top candidate)
+  - [x] `GET /api/match/runs/{run_id}/results` (paginated results with sorting by rank/final_score/created_at, band filter, min_score filter)
+  - [x] `GET /api/match/runs/{run_id}/results/{candidate_id}` (exhaustive candidate explainable breakdown)
+  - [x] `GET /api/match/runs/{run_id}/export.csv` (RFC-4180 streaming CSV export)
+  - [x] `DELETE /api/match/runs/{run_id}` (deletes run and cascade cleans up results)
+  - [x] `GET /api/match/config` (exposes active scoring weights, tiers, thresholds)
+  - [x] Lifespan embedding model pre-warming during FastAPI startup; `/health` reports `model_ready: True`
+- [x] Part D: Frontend Wiring:
+  - [x] `frontend/src/api/match.js` Axios API client methods
+  - [x] Interactive "Run AI Matching & Ranking" button in `Home.jsx` with spinner and auto-navigation to `/dashboard?run=<id>`
+  - [x] Verification list and run selector in `Dashboard.jsx` (summary cards, staleness alert, ranking table, knockout badges, CSV download)
+  - [x] Vite production build verified passing (108 modules, 0 errors)
+- [x] Part E: Verification & Testing:
+  - [x] Pytest suite `backend/tests/test_match_api.py` (9 tests covering health, config, runs, pagination, staleness, CSV, cascade deletes)
+  - [x] End-to-end API smoke test script `backend/scripts/api_smoke_test.py` (10 steps end-to-end against live endpoints)
+  - [x] 122 automated pytest tests passing across all suites (100% pass rate)
+
+### Files Created & Modified
+
+```
+Backend Models & Repository:
+  backend/app/models/match.py                  # MatchRun and MatchResultDB ORM models
+  backend/app/models/__init__.py               # Exported MatchRun & MatchResultDB
+  backend/app/repositories/match_repository.py # MatchRepository data access layer + compute_jd_hash
+  backend/app/repositories/__init__.py         # Exported MatchRepository & compute_jd_hash
+  backend/app/db/database.py                   # Added SQLite PRAGMA foreign_keys=ON listener
+
+Backend API & Services:
+  backend/app/schemas/match.py                 # Pydantic request/response schemas for match runs & results
+  backend/app/schemas/__init__.py              # Exported match schemas
+  backend/app/services/match_service.py        # MatchService orchestrator hydrating ORM models to ParsedJD/Resume
+  backend/app/services/embedding_service.py    # Added warmup() and is_ready() methods
+  backend/app/routers/match.py                 # REST API endpoints (/api/match/*)
+  backend/app/routers/health.py                # Updated /health to report model_ready
+  backend/app/routers/__init__.py              # Exported match router
+  backend/app/main.py                          # Lifespan embedding warmup + registered match router
+
+Frontend:
+  frontend/src/api/match.js                    # Axios client for matching API
+  frontend/src/pages/Home.jsx                  # Wired "Run AI Matching" button and navigation
+  frontend/src/pages/Dashboard.jsx             # Added run query param reading, summary stats, verification list, CSV export
+
+Verification & Tests:
+  backend/tests/test_match_api.py              # 9 API integration tests
+  backend/tests/test_matching_fixes_phase4.py  # 9 matching fix unit tests (A1-A7)
+  backend/scripts/api_smoke_test.py            # 10-step end-to-end smoke test script
+```
+
+### Test Results Summary
+
+| Test Suite | Total Tests | Passed | Result |
+|------------|-------------|--------|--------|
+| `test_jd_parser.py` (JD Parsing & NLP) | 44 | 44 | ✅ 100% Pass |
+| `test_jd_api.py` (JD REST API) | 12 | 12 | ✅ 100% Pass |
+| `test_resume_parser.py` (Resume Parsing) | 21 | 21 | ✅ 100% Pass |
+| `test_resumes_api.py` (Resumes REST API) | 9 | 9 | ✅ 100% Pass |
+| `test_matching_engine.py` (Matching Engine) | 18 | 18 | ✅ 100% Pass |
+| `test_matching_fixes_phase4.py` (Phase 4 Fixes A1-A7) | 9 | 9 | ✅ 100% Pass |
+| `test_match_api.py` (Matching REST API) | 9 | 9 | ✅ 100% Pass |
+| **Total Automated Pytest Suite** | **122** | **122** | **✅ 100% Pass** |
+| `api_smoke_test.py` (End-to-End API Smoke Test) | 10 Steps | 10 | **✅ 100% Pass** |
+| `evaluate_parsing.py` (Resume Parsing Accuracy) | 12 Resumes | 12 | **✅ 96.2% Accuracy** |
+
+### Benchmark Evaluation Metrics Across 3 Target JDs
+
+| Target Job Description | Cohort | Match Latency | Tier Agreement | Spearman Rank Correlation |
+|------------------------|--------|---------------|----------------|--------------------------|
+| **Java/Spring Boot Backend** | 12 resumes | 3144.9 ms (cold) / 88 ms (warm) | **100.0%** | **+0.916** |
+| **React Frontend Developer** | 12 resumes | 1730.0 ms | **100.0%** | **+0.972** |
+| **AI/ML Engineer** | 12 resumes | 2128.0 ms | **100.0%** | **+0.832** |
 
 ## Phase 5 — Ranking Dashboard
 **Status:** TODO
