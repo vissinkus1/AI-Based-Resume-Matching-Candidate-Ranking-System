@@ -87,10 +87,14 @@ def _get_extension(filename: str) -> str:
 
 def _extract_pdf(file_bytes: bytes, filename: str) -> str:
     """
-    Extract text from a PDF using PyMuPDF (fitz).
+    Extract text from a PDF using PyMuPDF (fitz) with column-aware reading order.
 
-    Iterates over every page and concatenates the text blocks.
-    Raises CorruptFileError if fitz cannot open the file.
+    Handles standard 1-column layouts, top headers, and 2-column sidebar layouts
+    by sorting text blocks geometrically:
+      1. Top header blocks spanning across columns (e.g. name, contact info)
+      2. Left column blocks sorted by y
+      3. Right column blocks sorted by y
+      4. Single column fallback sorted by y
     """
     try:
         doc = fitz.open(stream=file_bytes, filetype="pdf")
@@ -99,18 +103,67 @@ def _extract_pdf(file_bytes: bytes, filename: str) -> str:
 
     pages: list[str] = []
     for page in doc:
-        pages.append(page.get_text("text"))
-    doc.close()
+        page_rect = page.rect
+        page_width = page_rect.width
+        page_height = page_rect.height
 
-    return "\n".join(pages)
+        # Get text blocks: (x0, y0, x1, y1, text, block_no, block_type)
+        raw_blocks = [b for b in page.get_text("blocks") if b[6] == 0 and b[4].strip()]
+        if not raw_blocks:
+            continue
+
+        # Check if the page displays a multi-column layout
+        # A 2-column layout typically has blocks clearly separated across mid_x
+        mid_x = page_width / 2.0
+        left_blocks = []
+        right_blocks = []
+        header_blocks = []
+        full_width_blocks = []
+
+        # Find potential 2-column separation
+        has_left = any(b[2] < mid_x + 20 and b[0] < mid_x * 0.7 for b in raw_blocks)
+        has_right = any(b[0] > mid_x - 20 and b[2] > mid_x * 1.3 for b in raw_blocks)
+        is_two_column = has_left and has_right
+
+        if is_two_column:
+            for b in raw_blocks:
+                x0, y0, x1, y1, text, bno, btype = b
+                # Top header (name, contact info spanning near top)
+                if y0 < page_height * 0.25 and (x1 - x0 > page_width * 0.5 or (x0 < mid_x and x1 > mid_x)):
+                    header_blocks.append(b)
+                elif x1 <= mid_x + 30:
+                    left_blocks.append(b)
+                elif x0 >= mid_x - 30:
+                    right_blocks.append(b)
+                else:
+                    full_width_blocks.append(b)
+
+            # Sort each group top-to-bottom
+            header_blocks.sort(key=lambda b: (b[1], b[0]))
+            left_blocks.sort(key=lambda b: (b[1], b[0]))
+            right_blocks.sort(key=lambda b: (b[1], b[0]))
+            full_width_blocks.sort(key=lambda b: (b[1], b[0]))
+
+            # Reading order: header -> left column -> right column -> full width
+            ordered_blocks = header_blocks + left_blocks + right_blocks + full_width_blocks
+        else:
+            # Standard single-column: top-to-bottom reading order
+            ordered_blocks = sorted(raw_blocks, key=lambda b: (b[1], b[0]))
+
+        page_text = "\n".join(b[4].strip() for b in ordered_blocks if b[4].strip())
+        if page_text:
+            pages.append(page_text)
+
+    doc.close()
+    return "\n\n".join(pages)
 
 
 def _extract_docx(file_bytes: bytes, filename: str) -> str:
     """
     Extract text from a DOCX file using python-docx.
 
-    Extracts from both paragraphs and table cells so that
-    tabular content (common in resumes) is not lost.
+    Extracts from headers, paragraphs, and table cells so that
+    all resume content (including contact tables and sidebars) is captured.
     """
     import io
 
@@ -121,20 +174,33 @@ def _extract_docx(file_bytes: bytes, filename: str) -> str:
 
     parts: list[str] = []
 
-    # 1. Paragraphs
+    # 1. Section headers (some resumes place contact info in headers)
+    for section in doc.sections:
+        if section.header:
+            for para in section.header.paragraphs:
+                text = para.text.strip()
+                if text and text not in parts:
+                    parts.append(text)
+
+    # 2. Main paragraphs
     for para in doc.paragraphs:
         text = para.text.strip()
         if text:
             parts.append(text)
 
-    # 2. Tables (row by row, cell by cell)
+    # 3. Tables (row by row, cell by cell)
     for table in doc.tables:
         for row in table.rows:
-            row_text = " | ".join(
-                cell.text.strip() for cell in row.cells if cell.text.strip()
-            )
-            if row_text:
-                parts.append(row_text)
+            # Extract distinct cell texts to avoid duplicates from merged cells
+            seen_cells = set()
+            cell_texts = []
+            for cell in row.cells:
+                t = cell.text.strip()
+                if t and t not in seen_cells:
+                    seen_cells.add(t)
+                    cell_texts.append(t)
+            if cell_texts:
+                parts.append(" | ".join(cell_texts))
 
     return "\n".join(parts)
 

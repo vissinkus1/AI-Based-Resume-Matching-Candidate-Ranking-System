@@ -12,7 +12,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.db.database import engine, Base
 from app.models.jd import JobDescription  # noqa: F401 — registers table with Base
-from app.routers import health, jd
+from app.models.candidate import Candidate  # noqa: F401 — registers table with Base
+from app.routers import health, jd, resumes
 
 
 # ------------------------------------------------------------------
@@ -56,3 +57,4 @@ app.add_middleware(
 # ------------------------------------------------------------------
 app.include_router(health.router)
 app.include_router(jd.router)
+app.include_router(resumes.router)

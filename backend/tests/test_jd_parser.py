@@ -72,6 +72,28 @@ class TestSkillsTaxonomy:
         phrases = tax.all_phrases()
         assert len(phrases) > 500  # Should have many more phrases than skills
 
+    def test_taxonomy_parents_and_tiers(self):
+        """A2 & A3: Check parent mappings and tiers."""
+        tax = get_taxonomy()
+        aws_ec2 = tax.get_entry("AWS EC2")
+        assert aws_ec2 is not None
+        assert aws_ec2.parent == "AWS"
+        assert aws_ec2.tier == "core"
+
+        agile = tax.get_entry("Agile")
+        assert agile is not None
+        assert agile.tier == "supporting"
+
+        tech_writing = tax.get_entry("Technical Writing")
+        assert tech_writing is not None
+        assert tech_writing.tier == "soft"
+
+        # Apache standalone removed/renamed
+        assert tax.find("apache") is None
+        apache_http = tax.get_entry("Apache HTTP Server")
+        assert apache_http is not None
+        assert "httpd" in apache_http.aliases
+
 
 # ==================================================================
 # 2. Experience Extraction Tests
@@ -246,6 +268,55 @@ Requirements:
 """
         parsed = parse_jd(jd_text)
         assert "JavaScript" in parsed.required_skills
+
+    def test_longest_match_wins_apache_kafka(self):
+        """A1: 'Apache Kafka' must not extract standalone 'Apache'."""
+        jd_text = """
+Backend Developer
+
+Requirements:
+- Experience with Apache Kafka and Apache Spark
+"""
+        parsed = parse_jd(jd_text)
+        assert "Apache Kafka" in parsed.required_skills
+        assert "Apache Spark" in parsed.required_skills
+        assert "Apache" not in parsed.required_skills
+        assert "Apache HTTP Server" not in parsed.required_skills
+
+    def test_qualification_min_and_preferred_levels(self):
+        """A4: Minimum and preferred qualification level determination."""
+        jd_text_1 = """
+Engineer
+
+Requirements:
+- Bachelor's or Master's degree in Computer Science
+"""
+        parsed_1 = parse_jd(jd_text_1)
+        assert parsed_1.min_required_level == "bachelor"
+
+        jd_text_2 = """
+Research Scientist
+
+Requirements:
+- Master's or Ph.D. in Computer Science
+"""
+        parsed_2 = parse_jd(jd_text_2)
+        assert parsed_2.min_required_level == "master"
+
+    def test_skill_evidence_recorded(self):
+        """A5: Skill evidence contains sentence, section and classification."""
+        jd_text = """
+Engineer
+
+Requirements:
+- Strong knowledge of Python and FastAPI
+"""
+        parsed = parse_jd(jd_text)
+        assert "Python" in parsed.skill_evidence
+        ev = parsed.skill_evidence["Python"]
+        assert ev["section"] == "required"
+        assert "Python" in ev["sentence"]
+        assert ev["classification"] == "required"
 
 
 # ==================================================================

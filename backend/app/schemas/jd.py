@@ -24,8 +24,11 @@ class ParsedJDData(BaseModel):
     min_experience_years: float | None = None
     max_experience_years: float | None = None
     qualifications: list[QualificationSchema] = []
+    min_required_level: str | None = None
+    preferred_level: str | None = None
     responsibilities: list[str] = []
     keywords: list[str] = []
+    skill_evidence: dict[str, dict[str, str]] = {}
 
 
 # ------------------------------------------------------------------

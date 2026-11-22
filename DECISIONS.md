@@ -28,3 +28,17 @@
 | D14 | Range-first experience extraction with English word-to-number mapping | Prioritizes ranges ("3-5 years", "three to five years") over single digits to capture both min and max years accurately. |
 | D15 | Repository pattern (`JDRepository`) for database access | Decouples SQLAlchemy ORM from FastAPI routes; supports transparent PostgreSQL swap in Phase 4. |
 | D16 | React `JDContext` for shared active JD state across views | Allows Home, Dashboard, and Candidate Detail pages to access current JD without prop drilling. |
+
+## Phase 2
+
+| # | Decision | Rationale |
+|---|----------|-----------|
+| D17 | Longest-match-wins via spaCy `filter_spans` for skill matching | Prevents false substring matches (e.g., "Apache Kafka" extracted without trailing "Apache"). |
+| D18 | Hierarchical skill taxonomy with explicit `parent` links | Allows child skills (e.g. AWS EC2, S3) to roll up to parent category credit in matching without losing specificity. |
+| D19 | Tri-tier taxonomy categorization (`core`, `supporting`, `soft`) | Enables tiered weighting so core frameworks and languages contribute more to match scores than soft skills. |
+| D20 | Dual qualification levels: `min_required_level` and `preferred_level` | Accurately models "Bachelor's or Master's" as min=bachelor, avoiding false penalties for bachelor candidates. |
+| D21 | Sentence-level evidence tracking for all extracted skills | Records originating sentence and section heading to provide clear, explainable justification in the UI and interview. |
+| D22 | Multi-column bounding-box block sorting in PDF text extractor | Sorts blocks primarily by column horizontal origin (`x0`) then vertical (`y0`), preventing cross-column text interleaving in two-column resumes. |
+| D23 | Date range merging via non-overlapping interval union | Accurately calculates total career experience without double-counting parallel jobs or concurrent consulting roles. |
+| D24 | Career gap and sabbatical exclusion heuristic in work experience | Detects terms like "sabbatical" and "career break", excluding non-working intervals from total experience calculations. |
+| D25 | Isolated per-file batch resume upload API | Ensures invalid, oversized, or corrupt files in a batch fail individually without aborting valid candidate resumes. |

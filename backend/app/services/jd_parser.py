@@ -19,6 +19,8 @@ from dataclasses import dataclass, field
 
 import spacy
 from spacy.matcher import PhraseMatcher
+from spacy.tokens import Span
+from spacy.util import filter_spans
 
 from app.services.skills_taxonomy import get_taxonomy
 
@@ -43,8 +45,11 @@ class ParsedJD:
     min_experience_years: float | None = None
     max_experience_years: float | None = None
     qualifications: list[QualificationInfo] = field(default_factory=list)
+    min_required_level: str | None = None
+    preferred_level: str | None = None
     responsibilities: list[str] = field(default_factory=list)
     keywords: list[str] = field(default_factory=list)
+    skill_evidence: dict[str, dict[str, str]] = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         """Serialise to a plain dict (for JSON / Pydantic)."""
@@ -58,8 +63,11 @@ class ParsedJD:
                 {"level": q.level, "raw_phrase": q.raw_phrase}
                 for q in self.qualifications
             ],
+            "min_required_level": self.min_required_level,
+            "preferred_level": self.preferred_level,
             "responsibilities": self.responsibilities,
             "keywords": self.keywords,
+            "skill_evidence": self.skill_evidence,
         }
 
 
@@ -259,24 +267,28 @@ def _is_whole_word_match(doc, start: int, end: int) -> bool:
 
 def _extract_skills(
     text: str, sections: dict[str, str], nlp
-) -> tuple[list[str], list[str]]:
+) -> tuple[list[str], list[str], dict[str, dict[str, str]]]:
     """
-    Extract required and preferred skills from JD text.
+    Extract required and preferred skills from JD text with evidence.
 
     Uses spaCy PhraseMatcher with the skills taxonomy for case-insensitive
-    matching, then classifies each skill as required or preferred based
-    on which section it was found in.
+    matching, resolves overlapping spans via longest-match-wins (spacy filter_spans),
+    and classifies each skill as required or preferred based on section context.
 
     Returns:
-        (required_skills, preferred_skills): Lists of canonical skill names.
+        (required_skills, preferred_skills, skill_evidence):
+        - required_skills: sorted list of canonical skill names
+        - preferred_skills: sorted list of canonical skill names
+        - skill_evidence: dict mapping canonical name -> {section, sentence, classification}
     """
     matcher, span_to_canonical = _build_phrase_matcher(nlp)
 
-    # Determine which sections contain "preferred" language
+    # Section categories
     preferred_section_names = {"preferred"}
     required_section_names = {"required", "qualifications"}
+    has_explicit_required_section = any(s in sections for s in required_section_names)
 
-    # Also check for inline cue phrases in sentences
+    # Inline cue phrases for preferred/nice-to-have in sentences
     _preferred_cues = re.compile(
         r"nice\s*to\s*have|preferred|bonus|good\s*to\s*have|"
         r"desirable|advantageous|a\s*plus|not\s*required|optional",
@@ -285,8 +297,8 @@ def _extract_skills(
 
     required_skills: set[str] = set()
     preferred_skills: set[str] = set()
+    evidence: dict[str, dict[str, str]] = {}
 
-    # Process each section separately to know the context
     for section_name, section_text in sections.items():
         if not section_text.strip():
             continue
@@ -294,47 +306,90 @@ def _extract_skills(
         doc = nlp(section_text)
         matches = matcher(doc)
 
+        # Build candidate Spans and enforce whole-word boundaries
+        raw_spans = []
         for match_id, start, end in matches:
-            # Verify whole-word match (prevents "Java" inside "JavaScript")
-            if not _is_whole_word_match(doc, start, end):
-                continue
+            if _is_whole_word_match(doc, start, end):
+                raw_spans.append(Span(doc, start, end, label=match_id))
 
-            # Get canonical skill name
-            matched_text = doc[start:end].text.lower()
+        # A1: Longest-match-wins: filter_spans removes overlaps, keeping longest
+        filtered_spans = filter_spans(raw_spans)
+
+        for span in filtered_spans:
+            matched_text = span.text.lower()
             canonical = span_to_canonical.get(matched_text)
             if not canonical:
-                # Fallback: use the matcher rule ID (which is the canonical name)
-                canonical = nlp.vocab.strings[match_id]
+                canonical = doc.vocab.strings[span.label]
 
-            # Classify as required or preferred
+            sent_text = _get_sentence_text(doc, span.start, span.end).strip()
+
+            # Classification logic
             if section_name in preferred_section_names:
-                preferred_skills.add(canonical)
+                classification = "preferred"
             elif section_name in required_section_names:
-                required_skills.add(canonical)
-            else:
-                # Check for inline preferred cues in the surrounding sentence
-                sent_text = _get_sentence_text(doc, start, end)
                 if _preferred_cues.search(sent_text):
-                    preferred_skills.add(canonical)
+                    classification = "preferred"
                 else:
-                    # Default to required (as specified)
-                    required_skills.add(canonical)
+                    classification = "required"
+            elif section_name in {"responsibilities", "body", "title"}:
+                # If the JD has an explicit requirements section, duties in
+                # responsibilities are daily tasks, not mandatory prerequisites.
+                if has_explicit_required_section:
+                    classification = "preferred"
+                else:
+                    if _preferred_cues.search(sent_text):
+                        classification = "preferred"
+                    else:
+                        classification = "required"
+            else:
+                classification = "required"
 
-    # A skill in both → keep it in required, remove from preferred
+            # Register skill and evidence
+            if classification == "required":
+                required_skills.add(canonical)
+                # If previously recorded as preferred, upgrade evidence to required
+                evidence[canonical] = {
+                    "section": section_name,
+                    "sentence": sent_text,
+                    "classification": "required",
+                }
+            else:
+                preferred_skills.add(canonical)
+                if canonical not in evidence or evidence[canonical]["classification"] != "required":
+                    evidence[canonical] = {
+                        "section": section_name,
+                        "sentence": sent_text,
+                        "classification": "preferred",
+                    }
+
+    # Skills present in required take precedence over preferred
     preferred_skills -= required_skills
+    for skill in required_skills:
+        if skill in evidence:
+            evidence[skill]["classification"] = "required"
 
-    return sorted(required_skills), sorted(preferred_skills)
+    return sorted(required_skills), sorted(preferred_skills), evidence
 
 
 def _get_sentence_text(doc, start: int, end: int) -> str:
-    """Get the sentence text containing the matched span."""
+    """Get the specific line or bullet containing the matched span."""
+    text = doc.text
+    span_start = doc[start].idx
+    span_end = doc[end - 1].idx + len(doc[end - 1].text)
+    line_start = text.rfind("\n", 0, span_start)
+    line_start = 0 if line_start == -1 else line_start + 1
+    line_end = text.find("\n", span_end)
+    line_end = len(text) if line_end == -1 else line_end
+    line_text = text[line_start:line_end].strip()
+    # Strip leading bullet dashes or asterisks
+    cleaned_line = re.sub(r"^[\d.\-–•*]+\s*", "", line_text).strip()
+    if cleaned_line:
+        return cleaned_line
+
     token = doc[start]
     if token.sent is not None:
-        return token.sent.text
-    # Fallback: return a window of text around the match
-    context_start = max(0, start - 10)
-    context_end = min(len(doc), end + 10)
-    return doc[context_start:context_end].text
+        return token.sent.text.strip()
+    return doc[max(0, start - 10):min(len(doc), end + 10)].text.strip()
 
 
 # ------------------------------------------------------------------
@@ -481,31 +536,31 @@ def _extract_experience(
 _DEGREE_PATTERNS: list[tuple[re.Pattern, str]] = [
     # PhD / Doctorate
     (re.compile(
-        r"(?:ph\.?d|doctorate|doctor\s*of\s*philosophy)",
+        r"\b(?:ph\.?d|doctorate|doctor\s*of\s*philosophy)\b",
         re.IGNORECASE,
     ), "phd"),
     # Master's
     (re.compile(
-        r"(?:master'?s?\s*(?:degree)?|m\.?s\.?c?\.?|m\.?tech|m\.?e\.?|"
-        r"mca|m\.?b\.?a\.?|m\.?c\.?a\.?|post\s*graduat(?:e|ion))",
+        r"\b(?:master'?s?\s*(?:degree)?|m\.?s\.?c?\.?|m\.?tech|m\.?e\.?|"
+        r"mca|m\.?b\.?a\.?|m\.?c\.?a\.?|post\s*graduat(?:e|ion))\b",
         re.IGNORECASE,
     ), "master"),
     # Bachelor's
     (re.compile(
-        r"(?:bachelor'?s?\s*(?:degree)?|b\.?s\.?c?\.?|b\.?tech|b\.?e\.?|"
+        r"\b(?:bachelor'?s?\s*(?:degree)?|b\.?s\.?c?\.?|b\.?tech|b\.?e\.?|"
         r"bca|b\.?c\.?a\.?|b\.?b\.?a\.?|under\s*graduat(?:e|ion)|"
-        r"(?:4|four)\s*year\s*degree)",
+        r"(?:4|four)\s*year\s*degree)\b",
         re.IGNORECASE,
     ), "bachelor"),
     # Diploma
     (re.compile(
-        r"(?:diploma|associate'?s?\s*degree|polytechnic)",
+        r"\b(?:diploma|associate'?s?\s*degree|polytechnic)\b",
         re.IGNORECASE,
     ), "diploma"),
     # Any degree / generic
     (re.compile(
-        r"(?:degree\s+in|any\s+degree|relevant\s+degree|"
-        r"equivalent\s+degree|graduation)",
+        r"\b(?:degree\s+in|any\s+degree|relevant\s+degree|"
+        r"equivalent\s+degree|graduation)\b",
         re.IGNORECASE,
     ), "any"),
 ]
@@ -561,6 +616,68 @@ def _extract_qualifications(
                     seen_levels.add(level)
 
     return found
+
+
+_LEVEL_RANKS = {"diploma": 1, "bachelor": 2, "master": 3, "phd": 4}
+
+
+def _determine_qualification_levels(
+    qualifications: list[QualificationInfo],
+    sections: dict[str, str],
+) -> tuple[str | None, str | None]:
+    """
+    Determine min_required_level and preferred_level (A4).
+
+    - min_required_level is the LOWEST level when the text uses 'or'/'equivalent'
+      (e.g. 'Bachelor's or Master's' -> bachelor, 'Master's or Ph.D.' -> master).
+    - preferred_level is a higher level when marked preferred/plus, or the higher
+      alternative option in a qualification requirement.
+    """
+    if not qualifications:
+        return None, None
+
+    preferred_sec = sections.get("preferred", "").lower()
+    required_sec = sections.get("required", "").lower() + " " + sections.get("qualifications", "").lower()
+
+    required_levels: list[str] = []
+    preferred_levels: list[str] = []
+
+    for q in qualifications:
+        if q.level not in _LEVEL_RANKS:
+            continue
+
+        raw_lower = q.raw_phrase.lower()
+
+        # Check if raw phrase is in preferred section or contains preferred cue
+        is_pref = (
+            raw_lower in preferred_sec
+            or "preferred" in raw_lower
+            or "plus" in raw_lower
+            or "bonus" in raw_lower
+            or "nice to have" in raw_lower
+        )
+
+        if is_pref:
+            preferred_levels.append(q.level)
+        else:
+            required_levels.append(q.level)
+
+    min_required_level = None
+    preferred_level = None
+
+    if required_levels:
+        # Lowest level in required is the minimum requirement
+        sorted_req = sorted(required_levels, key=lambda l: _LEVEL_RANKS[l])
+        min_required_level = sorted_req[0]
+        # If multiple levels in required (e.g. "Master's or Ph.D." or "Bachelor's or Master's")
+        if len(sorted_req) > 1 and not preferred_levels:
+            preferred_level = sorted_req[-1]
+
+    if preferred_levels:
+        sorted_pref = sorted(preferred_levels, key=lambda l: _LEVEL_RANKS[l])
+        preferred_level = sorted_pref[-1]
+
+    return min_required_level, preferred_level
 
 
 # ------------------------------------------------------------------
@@ -687,11 +804,12 @@ def parse_jd(text: str) -> ParsedJD:
     # 2. Extract each field
     title = _extract_title(text, sections)
 
-    required_skills, preferred_skills = _extract_skills(text, sections, nlp)
+    required_skills, preferred_skills, skill_evidence = _extract_skills(text, sections, nlp)
 
     min_exp, max_exp = _extract_experience(text, sections)
 
     qualifications = _extract_qualifications(text, sections)
+    min_qual_level, pref_qual_level = _determine_qualification_levels(qualifications, sections)
 
     responsibilities = _extract_responsibilities(text, sections)
 
@@ -705,6 +823,9 @@ def parse_jd(text: str) -> ParsedJD:
         min_experience_years=min_exp,
         max_experience_years=max_exp,
         qualifications=qualifications,
+        min_required_level=min_qual_level,
+        preferred_level=pref_qual_level,
         responsibilities=responsibilities,
         keywords=keywords,
+        skill_evidence=skill_evidence,
     )

@@ -157,10 +157,120 @@ Sample Data:
 ---
 
 ## Phase 2 — Resume Parsing
-**Status:** TODO
+**Status:** ✅ DONE
 
-## Phase 2 — Resume Parsing
-**Status:** TODO
+### Checklist
+
+- [x] **Phase 1 Enhancements (Part A):**
+  - [x] A1: Longest-match-wins implemented via `filter_spans` in `jd_parser.py` and `resume_parser.py`. Standalone "Apache" removed in favor of "Apache HTTP Server".
+  - [x] A2: Hierarchical skills taxonomy with `parent` tracking (e.g., AWS EC2/S3/Lambda -> AWS, GitHub -> Git) across 327 skills.
+  - [x] A3: Tri-tier skill classification (`core`, `supporting`, `soft`) added to taxonomy and schema.
+  - [x] A4: Normalized dual qualification levels (`min_required_level` and `preferred_level`) extracted from JDs.
+  - [x] A5: Sentence-level evidence tracking (`skill_evidence`) mapping every extracted skill to its section and sentence; verified via `backend/scripts/debug_jd.py`.
+- [x] **Resume Parser Service (Part B1):**
+  - [x] `backend/app/services/resume_parser.py`: Multi-format date extraction, non-overlapping date interval merger with injectable `today`, education degree/level normalization, candidate contact extraction (email, phone, socials, location), and section segmentation.
+  - [x] Multi-column PDF reading-order preservation in `backend/app/services/text_extractor.py` (sorting blocks by `x0` then `y0`).
+- [x] **Database & Repositories (Part B2):**
+  - [x] SQLAlchemy model `Candidate` in `backend/app/models/candidate.py` (columns: `id`, `filename`, `name`, `email`, `phone`, `total_experience_years`, `parsed_json`, `raw_text`, `created_at`).
+  - [x] `CandidateRepository` in `backend/app/repositories/candidate_repository.py` with CRUD, listing, deletion, and bulk clear.
+  - [x] Pydantic schemas in `backend/app/schemas/candidate.py` (`CandidateResponse`, `CandidateListItem`, `SingleUploadResult`, `BatchUploadResponse`).
+- [x] **Batch Intake & Candidate Management API (Part B3):**
+  - [x] `POST /api/resumes/upload`: Up to 50 files, 5 MB limit, PDF/DOCX only, independent file error isolation.
+  - [x] `GET /api/resumes`: Candidate listing with top 5 skills and warning counts.
+  - [x] `GET /api/resumes/{id}`: Detailed parsed candidate view.
+  - [x] `DELETE /api/resumes/{id}` and `DELETE /api/resumes`: Individual deletion and bulk clearing.
+- [x] **Frontend Resume Intake UI (Part B4):**
+  - [x] Step 2 multi-file drag-and-drop zone on `frontend/src/pages/Home.jsx`.
+  - [x] Selected files staging list with file count recommendation (10+).
+  - [x] Upload progress bar and per-file status badges.
+  - [x] Interactive parsed candidates table (Name, Email/Phone, Experience, Top Skills, Warnings, Delete).
+  - [x] Step 1 active JD persistent indicator and "Run Matching" callout banner.
+- [x] **Synthetic Evaluation Dataset & Ground Truth (Part B5):**
+  - [x] Generator script `backend/scripts/generate_sample_resumes.py` creating 12 synthetic resumes (7 PDF, 5 DOCX) in `sample_data/resumes/`.
+  - [x] Diverse test cases: two-column layout, contact tables, non-standard dates ("Jun'19", "Since 2022"), fresher (0 yrs), overlapping jobs, career break sabbatical, 9.5y senior, digital marketer negative example.
+  - [x] Ground truth dataset `sample_data/resumes/ground_truth.json`.
+  - [x] Benchmark script `backend/scripts/evaluate_parsing.py` achieving **96.2% overall accuracy** (all categories >= 85%).
+- [x] **Automated Test Suite (Part B6):**
+  - [x] 18 unit tests in `backend/tests/test_resume_parser.py`.
+  - [x] 9 API integration tests in `backend/tests/test_resumes_api.py`.
+  - [x] Full test suite (83 tests) passing with 100% pass rate.
+
+### Files Created / Modified
+
+```
+Backend:
+  backend/app/models/candidate.py              # Candidate SQLAlchemy ORM model
+  backend/app/models/__init__.py               # Export Candidate
+  backend/app/repositories/candidate_repository.py # Candidate CRUD operations
+  backend/app/repositories/__init__.py         # Export CandidateRepository
+  backend/app/schemas/candidate.py             # Pydantic schemas for candidate intake
+  backend/app/schemas/jd.py                    # Added min_required_level, preferred_level, skill_evidence
+  backend/app/services/text_extractor.py       # Two-column PDF block sorting
+  backend/app/services/skills_taxonomy.py      # Parent tracking and tri-tier taxonomy loading
+  backend/app/services/jd_parser.py            # Longest-match-wins, qualification levels, evidence
+  backend/app/services/resume_parser.py        # Comprehensive resume parsing service
+  backend/app/routers/resumes.py               # Batch upload & candidate management endpoints
+  backend/app/routers/__init__.py              # Export resumes router
+  backend/app/main.py                          # Register candidate model & resumes router
+  backend/app/data/skills_taxonomy.json        # 327 skills with parent and tier attributes
+  backend/scripts/generate_sample_resumes.py   # Generates 12 synthetic PDF/DOCX resumes
+  backend/scripts/evaluate_parsing.py          # Benchmark evaluation script
+  backend/scripts/debug_jd.py                  # JD parsing & evidence verification script
+  backend/tests/test_resume_parser.py          # 18 unit tests for resume parsing
+  backend/tests/test_resumes_api.py            # 9 API integration tests for resume upload
+  backend/tests/test_jd_parser.py              # 44 JD parser tests (including A1-A5 checks)
+
+Frontend:
+  frontend/src/api/resumes.js                  # Axios client for /api/resumes endpoints
+  frontend/src/pages/Home.jsx                  # Batch dropzone, progress bar, parsed candidate table
+
+Sample Data:
+  sample_data/resumes/candidate_01_aravind_sharma_java.pdf
+  sample_data/resumes/candidate_02_priya_patel_react.docx
+  sample_data/resumes/candidate_03_rohit_verma_aiml.pdf
+  sample_data/resumes/candidate_04_ananya_iyer_fullstack.docx
+  sample_data/resumes/candidate_05_deepak_nair_fresher.pdf
+  sample_data/resumes/candidate_06_vikram_singh_overlap.docx
+  sample_data/resumes/candidate_07_meera_deshmukh_gap.pdf
+  sample_data/resumes/candidate_08_siddharth_reddy_senior.docx
+  sample_data/resumes/candidate_09_kavita_krishnan_data_nlp.pdf
+  sample_data/resumes/candidate_10_pooja_hegde_marketer.docx
+  sample_data/resumes/candidate_11_rahul_kapoor_devops.pdf
+  sample_data/resumes/candidate_12_sneha_banerjee_react_java.pdf
+  sample_data/resumes/ground_truth.json        # Ground truth annotations
+```
+
+### Test Results
+
+| Test Suite | Total Tests | Passed | Result |
+|------------|-------------|--------|--------|
+| `test_jd_parser.py` (JD Parsing & NLP) | 44 | 44 | ✅ 100% Pass |
+| `test_jd_api.py` (JD REST API) | 12 | 12 | ✅ 100% Pass |
+| `test_resume_parser.py` (Resume Parsing) | 18 | 18 | ✅ 100% Pass |
+| `test_resumes_api.py` (Resumes REST API) | 9 | 9 | ✅ 100% Pass |
+| **Total Automated Tests** | **83** | **83** | **✅ 100% Pass** |
+| `evaluate_parsing.py` (Ground Truth Benchmark) | 12 Resumes | 12 | **✅ 96.2% Accuracy** |
+| `vite build` (Frontend SPA) | 107 modules | 107 | ✅ 100% Pass (9.16s) |
+
+### Benchmark Evaluation Summary
+
+| Metric | Target | Measured | Result |
+|--------|--------|----------|--------|
+| Name Extraction Accuracy | >= 85% | **100.0%** | ✅ PASS |
+| Email Extraction Accuracy | >= 85% | **100.0%** | ✅ PASS |
+| Phone Extraction Accuracy | >= 85% | **100.0%** | ✅ PASS |
+| Experience Accuracy (within ±0.5 yr) | >= 85% | **100.0%** | ✅ PASS |
+| Education Level Accuracy | >= 85% | **100.0%** | ✅ PASS |
+| Skill Recall | >= 85% | **87.7%** | ✅ PASS |
+| Skill Precision | — | **69.3%** | Informational |
+| **Overall System Accuracy** | **>= 85%** | **96.2%** | **✅ PASS** |
+
+### Known Issues & Mitigations
+
+- **Skill Precision (69.3%):** Taxonomy phrase matching picks up foundational skills mentioned in project descriptions and course titles beyond strict core competencies. This is addressed in Phase 3 where skills are weighted by tier (`core`, `supporting`, `soft`) and section confidence (`strong`, `medium`, `basic`).
+- **Two-Column PDF OCR/Rendering:** If a PDF has unstructured non-standard text column coordinates with overlapping bounding boxes, block-sorting by `x0` column groups handles standard layouts cleanly. Unusual multi-grid resumes may trigger a parse warning.
+
+---
 
 ## Phase 3 — Matching Engine
 **Status:** TODO

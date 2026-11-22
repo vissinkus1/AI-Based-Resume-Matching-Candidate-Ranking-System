@@ -25,7 +25,9 @@ class SkillEntry:
     """One skill from the taxonomy."""
     canonical: str           # e.g. "JavaScript"
     category: str            # e.g. "programming_languages"
-    aliases: list[str]       # e.g. ["js", "java script", "ecmascript"]
+    aliases: list[str] = field(default_factory=list) # e.g. ["js", "java script", "ecmascript"]
+    parent: str | None = None # e.g. "AWS" for "AWS EC2", "CI/CD" for "GitHub Actions"
+    tier: str = "core"       # "core" | "supporting" | "soft"
 
 
 class SkillsTaxonomy:
@@ -41,6 +43,11 @@ class SkillsTaxonomy:
 
     def __init__(self, skills: list[SkillEntry]):
         self._skills = skills
+
+        # Fast direct lookup by canonical name
+        self._by_canonical: dict[str, SkillEntry] = {
+            s.canonical: s for s in skills
+        }
 
         # Build lookup: lowercased phrase → canonical name
         # Both the canonical name and every alias are indexed.
@@ -89,10 +96,7 @@ class SkillsTaxonomy:
 
     def get_entry(self, canonical: str) -> SkillEntry | None:
         """Return the SkillEntry for a canonical name, or None."""
-        for s in self._skills:
-            if s.canonical == canonical:
-                return s
-        return None
+        return self._by_canonical.get(canonical)
 
     def __len__(self) -> int:
         return len(self._skills)
@@ -133,6 +137,8 @@ def get_taxonomy(path: Path | None = None) -> SkillsTaxonomy:
             canonical=item["canonical"],
             category=item["category"],
             aliases=item.get("aliases", []),
+            parent=item.get("parent"),
+            tier=item.get("tier", "core"),
         )
         for item in data["skills"]
     ]

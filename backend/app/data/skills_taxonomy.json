@@ -9,7 +9,9 @@
         "python3",
         "python 3",
         "py"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Java",
@@ -20,7 +22,9 @@
         "java ee",
         "j2ee",
         "j2se"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "JavaScript",
@@ -37,7 +41,9 @@
         "es2021",
         "vanilla js",
         "vanilla javascript"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "TypeScript",
@@ -45,7 +51,9 @@
       "aliases": [
         "ts",
         "type script"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "C",
@@ -53,7 +61,9 @@
       "aliases": [
         "c language",
         "c programming"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "C++",
@@ -62,7 +72,9 @@
         "cpp",
         "c plus plus",
         "cplusplus"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "C#",
@@ -71,14 +83,18 @@
         "csharp",
         "c sharp",
         "c-sharp"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Go",
       "category": "programming_languages",
       "aliases": [
         "golang"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Rust",
@@ -86,14 +102,18 @@
       "aliases": [
         "rust lang",
         "rustlang"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Ruby",
       "category": "programming_languages",
       "aliases": [
         "ruby lang"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "PHP",
@@ -101,7 +121,9 @@
       "aliases": [
         "php7",
         "php8"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Swift",
@@ -109,21 +131,27 @@
       "aliases": [
         "swift lang",
         "swiftui"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Kotlin",
       "category": "programming_languages",
       "aliases": [
         "kotlin lang"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Scala",
       "category": "programming_languages",
       "aliases": [
         "scala lang"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "R",
@@ -132,14 +160,18 @@
         "r language",
         "r programming",
         "r-lang"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "MATLAB",
       "category": "programming_languages",
       "aliases": [
         "mat lab"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Perl",
@@ -147,7 +179,9 @@
       "aliases": [
         "perl5",
         "perl 5"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Shell Scripting",
@@ -159,42 +193,54 @@
         "zsh",
         "bash scripting",
         "shell script"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "SQL",
       "category": "programming_languages",
       "aliases": [
         "structured query language"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Dart",
       "category": "programming_languages",
       "aliases": [
         "dart lang"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Lua",
       "category": "programming_languages",
       "aliases": [
         "lua lang"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Haskell",
       "category": "programming_languages",
       "aliases": [
         "haskell lang"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Elixir",
       "category": "programming_languages",
       "aliases": [
         "elixir lang"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Groovy",
@@ -202,7 +248,9 @@
       "aliases": [
         "groovy lang",
         "apache groovy"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "React",
@@ -211,7 +259,9 @@
         "reactjs",
         "react.js",
         "react js"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Angular",
@@ -226,7 +276,9 @@
         "angular 12",
         "angular 14",
         "angular 16"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Vue.js",
@@ -236,7 +288,9 @@
         "vuejs",
         "vue js",
         "vue 3"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Next.js",
@@ -244,7 +298,9 @@
       "aliases": [
         "nextjs",
         "next js"
-      ]
+      ],
+      "tier": "core",
+      "parent": "React"
     },
     {
       "canonical": "Nuxt.js",
@@ -253,7 +309,9 @@
         "nuxtjs",
         "nuxt js",
         "nuxt"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Vue.js"
     },
     {
       "canonical": "Svelte",
@@ -261,7 +319,9 @@
       "aliases": [
         "sveltejs",
         "svelte js"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "HTML",
@@ -269,7 +329,9 @@
       "aliases": [
         "html5",
         "html 5"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "CSS",
@@ -277,7 +339,9 @@
       "aliases": [
         "css3",
         "css 3"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Tailwind CSS",
@@ -285,7 +349,9 @@
       "aliases": [
         "tailwind",
         "tailwindcss"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Bootstrap",
@@ -294,7 +360,9 @@
         "bootstrap 4",
         "bootstrap 5",
         "twitter bootstrap"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "SASS",
@@ -302,7 +370,9 @@
       "aliases": [
         "scss",
         "sass css"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Material UI",
@@ -311,7 +381,9 @@
         "mui",
         "material-ui",
         "material design"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "jQuery",
@@ -319,7 +391,9 @@
       "aliases": [
         "jquery js",
         "j query"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Redux",
@@ -328,14 +402,18 @@
         "react redux",
         "redux toolkit",
         "rtk"
-      ]
+      ],
+      "tier": "core",
+      "parent": "React"
     },
     {
       "canonical": "Webpack",
       "category": "frontend",
       "aliases": [
         "web pack"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Vite",
@@ -343,7 +421,9 @@
       "aliases": [
         "vitejs",
         "vite js"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Gatsby",
@@ -351,7 +431,9 @@
       "aliases": [
         "gatsbyjs",
         "gatsby js"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Ember.js",
@@ -359,14 +441,18 @@
       "aliases": [
         "ember",
         "emberjs"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Storybook",
       "category": "frontend",
       "aliases": [
         "storybook js"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Responsive Design",
@@ -375,7 +461,9 @@
         "responsive web design",
         "rwd",
         "mobile-first design"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Progressive Web Apps",
@@ -383,7 +471,9 @@
       "aliases": [
         "pwa",
         "progressive web app"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Web Accessibility",
@@ -393,14 +483,18 @@
         "wcag",
         "aria",
         "accessibility"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Flutter",
       "category": "frontend",
       "aliases": [
         "flutter sdk"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "React Native",
@@ -408,7 +502,9 @@
       "aliases": [
         "react-native",
         "rn"
-      ]
+      ],
+      "tier": "core",
+      "parent": "React"
     },
     {
       "canonical": "Node.js",
@@ -417,7 +513,9 @@
         "nodejs",
         "node js",
         "node"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Express.js",
@@ -426,7 +524,9 @@
         "express",
         "expressjs",
         "express js"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Node.js"
     },
     {
       "canonical": "Django",
@@ -434,14 +534,18 @@
       "aliases": [
         "django framework",
         "django rest"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Python"
     },
     {
       "canonical": "Flask",
       "category": "backend",
       "aliases": [
         "flask framework"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Python"
     },
     {
       "canonical": "FastAPI",
@@ -449,7 +553,9 @@
       "aliases": [
         "fast api",
         "fast-api"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Python"
     },
     {
       "canonical": "Spring Boot",
@@ -458,8 +564,11 @@
         "springboot",
         "spring-boot",
         "spring framework",
-        "spring"
-      ]
+        "spring",
+        "spring security"
+      ],
+      "tier": "core",
+      "parent": "Java"
     },
     {
       "canonical": "ASP.NET",
@@ -471,7 +580,9 @@
         ".net",
         ".net core",
         "asp net"
-      ]
+      ],
+      "tier": "core",
+      "parent": "C#"
     },
     {
       "canonical": "Ruby on Rails",
@@ -479,14 +590,18 @@
       "aliases": [
         "rails",
         "ror"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Ruby"
     },
     {
       "canonical": "Laravel",
       "category": "backend",
       "aliases": [
         "laravel framework"
-      ]
+      ],
+      "tier": "core",
+      "parent": "PHP"
     },
     {
       "canonical": "NestJS",
@@ -494,14 +609,18 @@
       "aliases": [
         "nest js",
         "nest.js"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Node.js"
     },
     {
       "canonical": "GraphQL",
       "category": "backend",
       "aliases": [
         "graph ql"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "REST API",
@@ -514,14 +633,18 @@
         "restful apis",
         "restful services",
         "rest services"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "gRPC",
       "category": "backend",
       "aliases": [
         "grpc framework"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Microservices",
@@ -531,7 +654,9 @@
         "micro services",
         "micro-services",
         "microservice architecture"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "WebSocket",
@@ -541,14 +666,18 @@
         "web socket",
         "web sockets",
         "socket.io"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Celery",
       "category": "backend",
       "aliases": [
         "celery task queue"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Python"
     },
     {
       "canonical": "RabbitMQ",
@@ -556,14 +685,18 @@
       "aliases": [
         "rabbit mq",
         "rabbitmq server"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Apache Kafka",
       "category": "backend",
       "aliases": [
         "kafka"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Hibernate",
@@ -571,14 +704,18 @@
       "aliases": [
         "hibernate orm",
         "hibernate framework"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Java"
     },
     {
       "canonical": "SQLAlchemy",
       "category": "backend",
       "aliases": [
         "sql alchemy"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Python"
     },
     {
       "canonical": "PostgreSQL",
@@ -588,7 +725,9 @@
         "psql",
         "postgresql db",
         "pg"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "MySQL",
@@ -596,7 +735,9 @@
       "aliases": [
         "my sql",
         "mysql db"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "SQLite",
@@ -604,7 +745,9 @@
       "aliases": [
         "sqlite3",
         "sqlite db"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "MongoDB",
@@ -613,7 +756,9 @@
         "mongo",
         "mongo db",
         "mongodb atlas"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Redis",
@@ -621,7 +766,9 @@
       "aliases": [
         "redis cache",
         "redis db"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Elasticsearch",
@@ -630,14 +777,18 @@
         "elastic search",
         "elastic",
         "elk"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Cassandra",
       "category": "databases",
       "aliases": [
         "apache cassandra"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "DynamoDB",
@@ -646,7 +797,9 @@
         "dynamo db",
         "amazon dynamodb",
         "aws dynamodb"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Oracle Database",
@@ -657,7 +810,9 @@
         "oracle sql",
         "pl/sql",
         "plsql"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Microsoft SQL Server",
@@ -668,7 +823,9 @@
         "sql server",
         "t-sql",
         "tsql"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Firebase",
@@ -677,7 +834,9 @@
         "firebase db",
         "firestore",
         "firebase firestore"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Neo4j",
@@ -685,7 +844,9 @@
       "aliases": [
         "neo 4j",
         "graph database"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "CouchDB",
@@ -693,14 +854,18 @@
       "aliases": [
         "couch db",
         "apache couchdb"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "MariaDB",
       "category": "databases",
       "aliases": [
         "maria db"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "AWS",
@@ -708,7 +873,9 @@
       "aliases": [
         "amazon web services",
         "amazon aws"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "AWS EC2",
@@ -716,7 +883,9 @@
       "aliases": [
         "ec2",
         "elastic compute cloud"
-      ]
+      ],
+      "tier": "core",
+      "parent": "AWS"
     },
     {
       "canonical": "AWS S3",
@@ -724,7 +893,9 @@
       "aliases": [
         "s3",
         "simple storage service"
-      ]
+      ],
+      "tier": "core",
+      "parent": "AWS"
     },
     {
       "canonical": "AWS Lambda",
@@ -732,7 +903,9 @@
       "aliases": [
         "lambda",
         "aws lambda functions"
-      ]
+      ],
+      "tier": "core",
+      "parent": "AWS"
     },
     {
       "canonical": "AWS RDS",
@@ -740,7 +913,9 @@
       "aliases": [
         "rds",
         "relational database service"
-      ]
+      ],
+      "tier": "core",
+      "parent": "AWS"
     },
     {
       "canonical": "AWS ECS",
@@ -748,7 +923,9 @@
       "aliases": [
         "ecs",
         "elastic container service"
-      ]
+      ],
+      "tier": "core",
+      "parent": "AWS"
     },
     {
       "canonical": "AWS EKS",
@@ -756,7 +933,9 @@
       "aliases": [
         "eks",
         "elastic kubernetes service"
-      ]
+      ],
+      "tier": "core",
+      "parent": "AWS"
     },
     {
       "canonical": "Azure",
@@ -765,7 +944,9 @@
         "microsoft azure",
         "ms azure",
         "azure cloud"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Google Cloud Platform",
@@ -774,7 +955,9 @@
         "gcp",
         "google cloud",
         "gcloud"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Docker",
@@ -784,7 +967,9 @@
         "docker containers",
         "containerization",
         "dockerfile"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Kubernetes",
@@ -792,7 +977,9 @@
       "aliases": [
         "k8s",
         "kube"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Terraform",
@@ -800,14 +987,18 @@
       "aliases": [
         "terraform iac",
         "hashicorp terraform"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Ansible",
       "category": "cloud_devops",
       "aliases": [
         "ansible automation"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Jenkins",
@@ -815,7 +1006,9 @@
       "aliases": [
         "jenkins ci",
         "jenkins pipeline"
-      ]
+      ],
+      "tier": "core",
+      "parent": "CI/CD"
     },
     {
       "canonical": "GitHub Actions",
@@ -823,7 +1016,9 @@
       "aliases": [
         "gh actions",
         "github ci"
-      ]
+      ],
+      "tier": "core",
+      "parent": "CI/CD"
     },
     {
       "canonical": "GitLab CI/CD",
@@ -831,14 +1026,18 @@
       "aliases": [
         "gitlab ci",
         "gitlab pipeline"
-      ]
+      ],
+      "tier": "core",
+      "parent": "CI/CD"
     },
     {
       "canonical": "CircleCI",
       "category": "cloud_devops",
       "aliases": [
         "circle ci"
-      ]
+      ],
+      "tier": "core",
+      "parent": "CI/CD"
     },
     {
       "canonical": "CI/CD",
@@ -849,23 +1048,30 @@
         "continuous deployment",
         "continuous delivery",
         "ci cd"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Nginx",
       "category": "cloud_devops",
       "aliases": [
         "nginx server"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
-      "canonical": "Apache",
+      "canonical": "Apache HTTP Server",
       "category": "cloud_devops",
       "aliases": [
-        "apache server",
         "apache http",
+        "apache http server",
+        "apache server",
         "httpd"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Linux",
@@ -877,35 +1083,45 @@
         "centos",
         "rhel",
         "debian"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Prometheus",
       "category": "cloud_devops",
       "aliases": [
         "prometheus monitoring"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Grafana",
       "category": "cloud_devops",
       "aliases": [
         "grafana dashboard"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Helm",
       "category": "cloud_devops",
       "aliases": [
         "helm charts"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Vagrant",
       "category": "cloud_devops",
       "aliases": [
         "hashicorp vagrant"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Serverless",
@@ -914,28 +1130,36 @@
         "serverless framework",
         "serverless computing",
         "faas"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Heroku",
       "category": "cloud_devops",
       "aliases": [
         "heroku cloud"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Vercel",
       "category": "cloud_devops",
       "aliases": [
         "vercel deploy"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Netlify",
       "category": "cloud_devops",
       "aliases": [
         "netlify deploy"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Machine Learning",
@@ -943,7 +1167,9 @@
       "aliases": [
         "ml",
         "machine-learning"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Deep Learning",
@@ -951,7 +1177,9 @@
       "aliases": [
         "dl",
         "deep-learning"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Natural Language Processing",
@@ -961,7 +1189,9 @@
         "natural language understanding",
         "nlu",
         "text mining"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Computer Vision",
@@ -971,7 +1201,9 @@
         "image recognition",
         "image processing",
         "object detection"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "TensorFlow",
@@ -980,7 +1212,9 @@
         "tensorflow 2",
         "tf",
         "tensor flow"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Deep Learning"
     },
     {
       "canonical": "PyTorch",
@@ -988,14 +1222,18 @@
       "aliases": [
         "pytorch framework",
         "torch"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Deep Learning"
     },
     {
       "canonical": "Keras",
       "category": "ai_ml",
       "aliases": [
         "keras api"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Deep Learning"
     },
     {
       "canonical": "scikit-learn",
@@ -1004,7 +1242,9 @@
         "sklearn",
         "scikit learn",
         "sci-kit learn"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Machine Learning"
     },
     {
       "canonical": "Hugging Face",
@@ -1013,7 +1253,9 @@
         "huggingface",
         "hf transformers",
         "transformers"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Natural Language Processing"
     },
     {
       "canonical": "OpenCV",
@@ -1021,28 +1263,36 @@
       "aliases": [
         "open cv",
         "opencv python"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Computer Vision"
     },
     {
       "canonical": "spaCy",
       "category": "ai_ml",
       "aliases": [
         "spacy nlp"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Natural Language Processing"
     },
     {
       "canonical": "NLTK",
       "category": "ai_ml",
       "aliases": [
         "natural language toolkit"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Natural Language Processing"
     },
     {
       "canonical": "LangChain",
       "category": "ai_ml",
       "aliases": [
         "lang chain"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Natural Language Processing"
     },
     {
       "canonical": "Large Language Models",
@@ -1051,7 +1301,9 @@
         "llm",
         "llms",
         "large language model"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Natural Language Processing"
     },
     {
       "canonical": "GPT",
@@ -1061,7 +1313,9 @@
         "gpt-4",
         "chatgpt",
         "openai gpt"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Natural Language Processing"
     },
     {
       "canonical": "Generative AI",
@@ -1070,7 +1324,9 @@
         "genai",
         "gen ai",
         "generative artificial intelligence"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Reinforcement Learning",
@@ -1078,7 +1334,9 @@
       "aliases": [
         "rl",
         "reinforcement-learning"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "MLOps",
@@ -1086,7 +1344,9 @@
       "aliases": [
         "ml ops",
         "machine learning operations"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Model Deployment",
@@ -1094,7 +1354,9 @@
       "aliases": [
         "model serving",
         "model inference"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Feature Engineering",
@@ -1102,7 +1364,9 @@
       "aliases": [
         "feature extraction",
         "feature selection"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Neural Networks",
@@ -1115,7 +1379,9 @@
         "rnn",
         "lstm",
         "gru"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Recommendation Systems",
@@ -1123,7 +1389,9 @@
       "aliases": [
         "recommender systems",
         "recommendation engine"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Time Series Analysis",
@@ -1131,7 +1399,9 @@
       "aliases": [
         "time series forecasting",
         "time-series"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Pandas",
@@ -1139,7 +1409,9 @@
       "aliases": [
         "pandas library",
         "python pandas"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Python"
     },
     {
       "canonical": "NumPy",
@@ -1147,28 +1419,36 @@
       "aliases": [
         "numpy library",
         "python numpy"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Python"
     },
     {
       "canonical": "Matplotlib",
       "category": "data",
       "aliases": [
         "matplotlib library"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Python"
     },
     {
       "canonical": "Seaborn",
       "category": "data",
       "aliases": [
         "seaborn library"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Python"
     },
     {
       "canonical": "Plotly",
       "category": "data",
       "aliases": [
         "plotly dash"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Apache Spark",
@@ -1177,7 +1457,9 @@
         "spark",
         "pyspark",
         "spark sql"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Apache Hadoop",
@@ -1186,14 +1468,18 @@
         "hadoop",
         "hdfs",
         "mapreduce"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Apache Airflow",
       "category": "data",
       "aliases": [
         "airflow"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "ETL",
@@ -1202,7 +1488,9 @@
         "extract transform load",
         "data pipeline",
         "data pipelines"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Data Warehousing",
@@ -1211,7 +1499,9 @@
         "data warehouse",
         "dwh",
         "olap"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Power BI",
@@ -1219,7 +1509,9 @@
       "aliases": [
         "powerbi",
         "power bi dashboard"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Tableau",
@@ -1227,14 +1519,18 @@
       "aliases": [
         "tableau desktop",
         "tableau server"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Data Engineering",
       "category": "data",
       "aliases": [
         "data engineer"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Data Analysis",
@@ -1242,28 +1538,36 @@
       "aliases": [
         "data analytics",
         "data analyst"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Data Science",
       "category": "data",
       "aliases": [
         "data scientist"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Big Data",
       "category": "data",
       "aliases": [
         "big-data"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Data Visualization",
       "category": "data",
       "aliases": [
         "data viz"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Statistical Analysis",
@@ -1271,7 +1575,9 @@
       "aliases": [
         "statistics",
         "statistical modeling"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Jupyter",
@@ -1280,7 +1586,9 @@
         "jupyter notebook",
         "jupyter lab",
         "jupyterlab"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Snowflake",
@@ -1288,14 +1596,18 @@
       "aliases": [
         "snowflake db",
         "snowflake data"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "dbt",
       "category": "data",
       "aliases": [
         "data build tool"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Unit Testing",
@@ -1303,7 +1615,9 @@
       "aliases": [
         "unit tests",
         "unit test"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Integration Testing",
@@ -1311,7 +1625,9 @@
       "aliases": [
         "integration tests",
         "integration test"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "End-to-End Testing",
@@ -1320,21 +1636,27 @@
         "e2e testing",
         "e2e tests",
         "end to end testing"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Test-Driven Development",
       "category": "testing",
       "aliases": [
         "tdd"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Behavior-Driven Development",
       "category": "testing",
       "aliases": [
         "bdd"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "pytest",
@@ -1342,7 +1664,9 @@
       "aliases": [
         "py test",
         "python pytest"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": "Python"
     },
     {
       "canonical": "JUnit",
@@ -1350,7 +1674,9 @@
       "aliases": [
         "junit5",
         "junit 5"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": "Java"
     },
     {
       "canonical": "Jest",
@@ -1358,7 +1684,9 @@
       "aliases": [
         "jest js",
         "jest testing"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": "JavaScript"
     },
     {
       "canonical": "Cypress",
@@ -1366,7 +1694,9 @@
       "aliases": [
         "cypress io",
         "cypress testing"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": "JavaScript"
     },
     {
       "canonical": "Selenium",
@@ -1374,35 +1704,45 @@
       "aliases": [
         "selenium webdriver",
         "selenium testing"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Playwright",
       "category": "testing",
       "aliases": [
         "playwright testing"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": "JavaScript"
     },
     {
       "canonical": "Mocha",
       "category": "testing",
       "aliases": [
         "mocha js"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "TestNG",
       "category": "testing",
       "aliases": [
         "testng framework"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Postman",
       "category": "testing",
       "aliases": [
         "postman api"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Load Testing",
@@ -1411,35 +1751,45 @@
         "performance testing",
         "stress testing",
         "jmeter"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Git",
       "category": "tools",
       "aliases": [
         "git version control"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "GitHub",
       "category": "tools",
       "aliases": [
         "github.com"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": "Git"
     },
     {
       "canonical": "GitLab",
       "category": "tools",
       "aliases": [
         "gitlab.com"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": "Git"
     },
     {
       "canonical": "Bitbucket",
       "category": "tools",
       "aliases": [
         "atlassian bitbucket"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": "Git"
     },
     {
       "canonical": "Jira",
@@ -1447,21 +1797,27 @@
       "aliases": [
         "atlassian jira",
         "jira software"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Confluence",
       "category": "tools",
       "aliases": [
         "atlassian confluence"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Slack",
       "category": "tools",
       "aliases": [
         "slack messaging"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "VS Code",
@@ -1469,7 +1825,9 @@
       "aliases": [
         "visual studio code",
         "vscode"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "IntelliJ IDEA",
@@ -1477,35 +1835,45 @@
       "aliases": [
         "intellij",
         "jetbrains intellij"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Eclipse",
       "category": "tools",
       "aliases": [
         "eclipse ide"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Figma",
       "category": "tools",
       "aliases": [
         "figma design"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "npm",
       "category": "tools",
       "aliases": [
         "node package manager"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Yarn",
       "category": "tools",
       "aliases": [
         "yarn package manager"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "pip",
@@ -1513,21 +1881,27 @@
       "aliases": [
         "pip install",
         "python pip"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Maven",
       "category": "tools",
       "aliases": [
         "apache maven"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Gradle",
       "category": "tools",
       "aliases": [
         "gradle build"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "SonarQube",
@@ -1535,7 +1909,9 @@
       "aliases": [
         "sonar qube",
         "sonar"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Swagger",
@@ -1544,21 +1920,27 @@
         "swagger ui",
         "openapi",
         "openapi spec"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Notion",
       "category": "tools",
       "aliases": [
         "notion app"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Trello",
       "category": "tools",
       "aliases": [
         "trello board"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Agile",
@@ -1567,7 +1949,9 @@
         "agile methodology",
         "agile development",
         "agile practices"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Scrum",
@@ -1576,7 +1960,9 @@
         "scrum methodology",
         "scrum master",
         "scrum framework"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Kanban",
@@ -1584,7 +1970,9 @@
       "aliases": [
         "kanban board",
         "kanban methodology"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Problem Solving",
@@ -1593,7 +1981,9 @@
         "problem-solving",
         "analytical thinking",
         "critical thinking"
-      ]
+      ],
+      "tier": "soft",
+      "parent": null
     },
     {
       "canonical": "Communication",
@@ -1602,7 +1992,9 @@
         "communication skills",
         "verbal communication",
         "written communication"
-      ]
+      ],
+      "tier": "soft",
+      "parent": null
     },
     {
       "canonical": "Teamwork",
@@ -1612,7 +2004,9 @@
         "collaboration",
         "team collaboration",
         "cross-functional"
-      ]
+      ],
+      "tier": "soft",
+      "parent": null
     },
     {
       "canonical": "Leadership",
@@ -1622,7 +2016,9 @@
         "team leadership",
         "tech lead",
         "technical leadership"
-      ]
+      ],
+      "tier": "soft",
+      "parent": null
     },
     {
       "canonical": "Project Management",
@@ -1630,7 +2026,9 @@
       "aliases": [
         "project planning",
         "project delivery"
-      ]
+      ],
+      "tier": "soft",
+      "parent": null
     },
     {
       "canonical": "Time Management",
@@ -1638,7 +2036,9 @@
       "aliases": [
         "time-management",
         "prioritization"
-      ]
+      ],
+      "tier": "soft",
+      "parent": null
     },
     {
       "canonical": "Mentoring",
@@ -1646,7 +2046,9 @@
       "aliases": [
         "mentorship",
         "coaching"
-      ]
+      ],
+      "tier": "soft",
+      "parent": null
     },
     {
       "canonical": "Code Review",
@@ -1654,7 +2056,9 @@
       "aliases": [
         "code reviews",
         "peer review"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Technical Writing",
@@ -1662,7 +2066,9 @@
       "aliases": [
         "documentation",
         "technical documentation"
-      ]
+      ],
+      "tier": "soft",
+      "parent": null
     },
     {
       "canonical": "Design Patterns",
@@ -1671,7 +2077,9 @@
         "software design patterns",
         "gang of four",
         "gof patterns"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Data Structures",
@@ -1679,14 +2087,18 @@
       "aliases": [
         "data structures and algorithms",
         "dsa"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Algorithms",
       "category": "concepts",
       "aliases": [
         "algorithm design"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Object-Oriented Programming",
@@ -1696,7 +2108,9 @@
         "oops",
         "object oriented design",
         "ooad"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Functional Programming",
@@ -1704,7 +2118,9 @@
       "aliases": [
         "fp",
         "functional paradigm"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "System Design",
@@ -1716,7 +2132,9 @@
         "hld",
         "low level design",
         "lld"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "API Design",
@@ -1724,7 +2142,9 @@
       "aliases": [
         "api development",
         "api architecture"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Database Design",
@@ -1734,14 +2154,18 @@
         "schema design",
         "data modeling",
         "er diagrams"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Distributed Systems",
       "category": "concepts",
       "aliases": [
         "distributed computing"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Event-Driven Architecture",
@@ -1750,7 +2174,9 @@
         "event driven",
         "event sourcing",
         "cqrs"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Clean Architecture",
@@ -1759,14 +2185,18 @@
         "clean code",
         "solid principles",
         "solid"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Domain-Driven Design",
       "category": "concepts",
       "aliases": [
         "ddd"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Version Control",
@@ -1774,7 +2204,9 @@
       "aliases": [
         "source control",
         "scm"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "OAuth",
@@ -1784,7 +2216,9 @@
         "oauth 2.0",
         "openid connect",
         "oidc"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "JWT",
@@ -1792,7 +2226,9 @@
       "aliases": [
         "json web token",
         "json web tokens"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Authentication",
@@ -1800,7 +2236,9 @@
       "aliases": [
         "auth",
         "user authentication"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Authorization",
@@ -1809,7 +2247,9 @@
         "rbac",
         "role-based access control",
         "access control"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Cybersecurity",
@@ -1817,8 +2257,11 @@
       "aliases": [
         "information security",
         "infosec",
-        "security"
-      ]
+        "cyber security",
+        "cybersecurity"
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "OWASP",
@@ -1826,7 +2269,9 @@
       "aliases": [
         "owasp top 10",
         "web security"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Encryption",
@@ -1836,7 +2281,9 @@
         "ssl",
         "tls",
         "https"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Penetration Testing",
@@ -1844,14 +2291,18 @@
       "aliases": [
         "pen testing",
         "ethical hacking"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Julia",
       "category": "programming_languages",
       "aliases": [
         "julia lang"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Solidity",
@@ -1859,7 +2310,9 @@
       "aliases": [
         "solidity lang",
         "smart contracts"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Fortran",
@@ -1867,14 +2320,18 @@
       "aliases": [
         "fortran 90",
         "fortran 95"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Erlang",
       "category": "programming_languages",
       "aliases": [
         "erlang otp"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Clojure",
@@ -1882,14 +2339,18 @@
       "aliases": [
         "clojurescript",
         "clojure lang"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Zig",
       "category": "programming_languages",
       "aliases": [
         "zig lang"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Visual Basic",
@@ -1898,7 +2359,9 @@
         "vb.net",
         "vba",
         "visual basic .net"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Delphi",
@@ -1906,7 +2369,9 @@
       "aliases": [
         "object pascal",
         "delphi pascal"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "SolidJS",
@@ -1914,7 +2379,9 @@
       "aliases": [
         "solid.js",
         "solid js"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Astro",
@@ -1922,7 +2389,9 @@
       "aliases": [
         "astro.build",
         "astro framework"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Alpine.js",
@@ -1930,14 +2399,18 @@
       "aliases": [
         "alpinejs",
         "alpine js"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Chakra UI",
       "category": "frontend",
       "aliases": [
         "chakra-ui"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Ant Design",
@@ -1945,21 +2418,27 @@
       "aliases": [
         "antd",
         "ant-design"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Semantic UI",
       "category": "frontend",
       "aliases": [
         "semantic-ui"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Bulma",
       "category": "frontend",
       "aliases": [
         "bulma css"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "RxJS",
@@ -1967,21 +2446,27 @@
       "aliases": [
         "reactive extensions",
         "rxjs library"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "MobX",
       "category": "frontend",
       "aliases": [
         "mobx state tree"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Zustand",
       "category": "frontend",
       "aliases": [
         "zustand state"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Web Components",
@@ -1989,7 +2474,9 @@
       "aliases": [
         "custom elements",
         "shadow dom"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Three.js",
@@ -1998,7 +2485,9 @@
         "threejs",
         "three js",
         "webgl 3d"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Quarkus",
@@ -2006,14 +2495,18 @@
       "aliases": [
         "quarkus io",
         "quarkus framework"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Micronaut",
       "category": "backend",
       "aliases": [
         "micronaut framework"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Gin",
@@ -2021,7 +2514,9 @@
       "aliases": [
         "gin-gonic",
         "gin web framework"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Go"
     },
     {
       "canonical": "Fiber",
@@ -2029,7 +2524,9 @@
       "aliases": [
         "go fiber",
         "gofiber"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Go"
     },
     {
       "canonical": "Actix",
@@ -2037,14 +2534,18 @@
       "aliases": [
         "actix-web",
         "actix web"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Rust"
     },
     {
       "canonical": "Axum",
       "category": "backend",
       "aliases": [
         "axum framework"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Rust"
     },
     {
       "canonical": "Phoenix",
@@ -2052,7 +2553,9 @@
       "aliases": [
         "phoenix framework",
         "elixir phoenix"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Vert.x",
@@ -2060,35 +2563,45 @@
       "aliases": [
         "vertx",
         "eclipse vert.x"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Sanic",
       "category": "backend",
       "aliases": [
         "sanic framework"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Tornado",
       "category": "backend",
       "aliases": [
         "tornado web"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Pyramid",
       "category": "backend",
       "aliases": [
         "pyramid framework"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Ktor",
       "category": "backend",
       "aliases": [
         "ktor framework"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Symfony",
@@ -2096,42 +2609,54 @@
       "aliases": [
         "symfony framework",
         "symfony php"
-      ]
+      ],
+      "tier": "core",
+      "parent": "PHP"
     },
     {
       "canonical": "CodeIgniter",
       "category": "backend",
       "aliases": [
         "codeigniter framework"
-      ]
+      ],
+      "tier": "core",
+      "parent": "PHP"
     },
     {
       "canonical": "Sinatra",
       "category": "backend",
       "aliases": [
         "sinatra rb"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Ruby"
     },
     {
       "canonical": "Dropwizard",
       "category": "backend",
       "aliases": [
         "dropwizard framework"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "ClickHouse",
       "category": "databases",
       "aliases": [
         "clickhouse db"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "DuckDB",
       "category": "databases",
       "aliases": [
         "duck db"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "CockroachDB",
@@ -2139,7 +2664,9 @@
       "aliases": [
         "cockroach db",
         "cockroach"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "ScyllaDB",
@@ -2147,7 +2674,9 @@
       "aliases": [
         "scylla db",
         "scylladb"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "TimescaleDB",
@@ -2155,7 +2684,9 @@
       "aliases": [
         "timescale db",
         "timescaledb"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "InfluxDB",
@@ -2163,7 +2694,9 @@
       "aliases": [
         "influx db",
         "influxdb"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Apache HBase",
@@ -2171,14 +2704,18 @@
       "aliases": [
         "hbase",
         "hadoop hbase"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Couchbase",
       "category": "databases",
       "aliases": [
         "couchbase server"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Pinecone",
@@ -2186,7 +2723,9 @@
       "aliases": [
         "pinecone vector db",
         "pinecone db"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "ChromaDB",
@@ -2194,28 +2733,36 @@
       "aliases": [
         "chroma db",
         "chromadb"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Weaviate",
       "category": "databases",
       "aliases": [
         "weaviate vector db"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Qdrant",
       "category": "databases",
       "aliases": [
         "qdrant vector db"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Milvus",
       "category": "databases",
       "aliases": [
         "milvus vector db"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Supabase",
@@ -2223,21 +2770,27 @@
       "aliases": [
         "supabase db",
         "supabase platform"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "OpenStack",
       "category": "cloud_devops",
       "aliases": [
         "openstack cloud"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Podman",
       "category": "cloud_devops",
       "aliases": [
         "podman containers"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "HashiCorp Vault",
@@ -2245,7 +2798,9 @@
       "aliases": [
         "vault",
         "hashicorp vault"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "HashiCorp Consul",
@@ -2253,21 +2808,27 @@
       "aliases": [
         "consul",
         "hashicorp consul"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Nomad",
       "category": "cloud_devops",
       "aliases": [
         "hashicorp nomad"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Pulumi",
       "category": "cloud_devops",
       "aliases": [
         "pulumi iac"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "AWS CloudFormation",
@@ -2275,7 +2836,9 @@
       "aliases": [
         "cloudformation",
         "cfn"
-      ]
+      ],
+      "tier": "core",
+      "parent": "AWS"
     },
     {
       "canonical": "Datadog",
@@ -2283,7 +2846,9 @@
       "aliases": [
         "datadog monitoring",
         "datadog apm"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "New Relic",
@@ -2291,7 +2856,9 @@
       "aliases": [
         "newrelic",
         "new relic apm"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Splunk",
@@ -2299,7 +2866,9 @@
       "aliases": [
         "splunk enterprise",
         "splunk logging"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "ArgoCD",
@@ -2307,21 +2876,27 @@
       "aliases": [
         "argo cd",
         "argocd"
-      ]
+      ],
+      "tier": "core",
+      "parent": "CI/CD"
     },
     {
       "canonical": "Istio",
       "category": "cloud_devops",
       "aliases": [
         "istio service mesh"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Traefik",
       "category": "cloud_devops",
       "aliases": [
         "traefik proxy"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "OpenShift",
@@ -2329,14 +2904,18 @@
       "aliases": [
         "red hat openshift",
         "openshift container platform"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "XGBoost",
       "category": "ai_ml",
       "aliases": [
         "xgboost algorithm"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Machine Learning"
     },
     {
       "canonical": "LightGBM",
@@ -2344,14 +2923,18 @@
       "aliases": [
         "light gbm",
         "lightgbm algorithm"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Machine Learning"
     },
     {
       "canonical": "CatBoost",
       "category": "ai_ml",
       "aliases": [
         "catboost algorithm"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Machine Learning"
     },
     {
       "canonical": "Retrieval-Augmented Generation",
@@ -2359,7 +2942,9 @@
       "aliases": [
         "rag",
         "retrieval augmented generation"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Natural Language Processing"
     },
     {
       "canonical": "LlamaIndex",
@@ -2367,7 +2952,9 @@
       "aliases": [
         "llama index",
         "gpt index"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Natural Language Processing"
     },
     {
       "canonical": "Whisper",
@@ -2375,7 +2962,9 @@
       "aliases": [
         "openai whisper",
         "whisper asr"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Natural Language Processing"
     },
     {
       "canonical": "Stable Diffusion",
@@ -2383,7 +2972,9 @@
       "aliases": [
         "stability ai",
         "stable-diffusion"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Vector Database",
@@ -2392,7 +2983,9 @@
         "vector search",
         "vector embeddings",
         "vector databases"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Semantic Search",
@@ -2400,7 +2993,9 @@
       "aliases": [
         "neural search",
         "semantic retrieval"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "LoRA",
@@ -2409,7 +3004,9 @@
         "low rank adaptation",
         "qlora",
         "peft"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Gensim",
@@ -2417,7 +3014,9 @@
       "aliases": [
         "gensim library",
         "word2vec"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "SciPy",
@@ -2425,7 +3024,9 @@
       "aliases": [
         "scipy library",
         "python scipy"
-      ]
+      ],
+      "tier": "core",
+      "parent": "Python"
     },
     {
       "canonical": "Google BigQuery",
@@ -2434,7 +3035,9 @@
         "bigquery",
         "big query",
         "bq"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Amazon Redshift",
@@ -2442,7 +3045,9 @@
       "aliases": [
         "redshift",
         "aws redshift"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Databricks",
@@ -2450,7 +3055,9 @@
       "aliases": [
         "databricks lakehouse",
         "databricks platform"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Apache Flink",
@@ -2458,7 +3065,9 @@
       "aliases": [
         "flink",
         "apache flink stream"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Trino",
@@ -2466,7 +3075,9 @@
       "aliases": [
         "trino query engine",
         "prestosql"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Presto",
@@ -2474,21 +3085,27 @@
       "aliases": [
         "prestodb",
         "presto query"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Dagster",
       "category": "data",
       "aliases": [
         "dagster orchestrator"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Prefect",
       "category": "data",
       "aliases": [
         "prefect orchestrator"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Great Expectations",
@@ -2496,21 +3113,27 @@
       "aliases": [
         "great-expectations",
         "gx data quality"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Luigi",
       "category": "data",
       "aliases": [
         "spotify luigi"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Vitest",
       "category": "testing",
       "aliases": [
         "vitest framework"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": "JavaScript"
     },
     {
       "canonical": "React Testing Library",
@@ -2518,14 +3141,18 @@
       "aliases": [
         "rtl",
         "testing-library"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Mockito",
       "category": "testing",
       "aliases": [
         "mockito framework"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": "Java"
     },
     {
       "canonical": "k6",
@@ -2533,28 +3160,36 @@
       "aliases": [
         "k6 load testing",
         "grafana k6"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Locust",
       "category": "testing",
       "aliases": [
         "locust load testing"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "NUnit",
       "category": "testing",
       "aliases": [
         "nunit framework"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "xUnit",
       "category": "testing",
       "aliases": [
         "xunit framework"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Behave",
@@ -2562,21 +3197,27 @@
       "aliases": [
         "behave bdd",
         "python behave"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Docker Compose",
       "category": "tools",
       "aliases": [
         "docker-compose"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "pnpm",
       "category": "tools",
       "aliases": [
         "pnpm package manager"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Turborepo",
@@ -2584,21 +3225,27 @@
       "aliases": [
         "turbopack",
         "turbo repo"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Postman API",
       "category": "tools",
       "aliases": [
         "newman runner"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "Insomnia",
       "category": "tools",
       "aliases": [
         "insomnia rest"
-      ]
+      ],
+      "tier": "supporting",
+      "parent": null
     },
     {
       "canonical": "OAuth 2.0",
@@ -2606,7 +3253,9 @@
       "aliases": [
         "oauth 2",
         "oauth2.0"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Identity and Access Management",
@@ -2614,7 +3263,9 @@
       "aliases": [
         "iam",
         "identity management"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Single Sign-On",
@@ -2622,14 +3273,18 @@
       "aliases": [
         "sso",
         "saml sso"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "SIEM",
       "category": "security",
       "aliases": [
         "security information and event management"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     },
     {
       "canonical": "Vulnerability Assessment",
@@ -2637,7 +3292,9 @@
       "aliases": [
         "vulnerability scanning",
         "vapt"
-      ]
+      ],
+      "tier": "core",
+      "parent": null
     }
   ]
 }
