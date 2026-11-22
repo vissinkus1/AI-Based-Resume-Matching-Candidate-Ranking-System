@@ -40,6 +40,8 @@ class ExperienceEntry:
     months: int = 0
     is_current: bool = False
     is_internship: bool = False
+    description: str = ""
+    skills_in_entry: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -114,6 +116,8 @@ class ParsedResume:
                     "months": e.months,
                     "is_current": e.is_current,
                     "is_internship": e.is_internship,
+                    "description": e.description,
+                    "skills_in_entry": e.skills_in_entry,
                 }
                 for e in self.experience_entries
             ],
@@ -577,84 +581,199 @@ def _merge_date_intervals(intervals: list[tuple[int, int]]) -> int:
     return total_months
 
 
+_COMMON_TITLES_PATTERN = re.compile(
+    r"\b(?:software\s+engineer|senior\s+backend\s+engineer|backend\s+engineer|"
+    r"frontend\s+developer|frontend\s+web\s+developer|senior\s+frontend\s+developer|"
+    r"full\s*stack\s+developer|full\s*stack\s+engineer|senior\s+full\s*stack\s+engineer|"
+    r"developer|frontend|backend|full\s*stack|"
+    r"data\s+scientist|data\s+engineer|ai\s+engineer|ml\s+engineer|machine\s+learning\s+engineer|"
+    r"devops\s+engineer|cloud\s+engineer|cloud\s+consultant|cloud\s+infrastructure\s+engineer|lead\s+cloud\s+infrastructure\s+engineer|"
+    r"research\s+scientist|staff\s+research\s+scientist|growth\s+marketing\s+lead|digital\s+marketing\s+specialist|marketing\s+specialist|"
+    r"intern|internship|tech\s+lead|team\s+lead|principal\s+architect|manager|analyst|"
+    r"consultant|architect|specialist|programmer|trainee)\b",
+    re.IGNORECASE,
+)
+
+
+def _clean_job_title_and_company(raw_title: str, existing_company: str = "") -> tuple[str, str]:
+    """
+    Ensure job title contains ONLY the role title, never "Title | Company, City".
+    Handles separators:
+      - " | " (pipe)
+      - " - " / " – " / " — " (dash/hyphen with spaces)
+      - " at "
+      - " @ "
+      - ", " (comma)
+    """
+    if not raw_title:
+        return "", existing_company
+
+    title = raw_title.strip()
+    company = (existing_company or "").strip()
+
+    # 1. Pipe: "Senior Backend Engineer | Infosys Ltd, Bangalore"
+    if " | " in title:
+        parts = title.split(" | ", 1)
+        title = parts[0].strip()
+        if not company:
+            company = parts[1].strip()
+
+    # 2. " at " or " @ "
+    elif re.search(r"(?i)\s+at\s+", title):
+        parts = re.split(r"(?i)\s+at\s+", title, maxsplit=1)
+        title = parts[0].strip()
+        if not company:
+            company = parts[1].strip()
+
+    elif " @ " in title:
+        parts = title.split(" @ ", 1)
+        title = parts[0].strip()
+        if not company:
+            company = parts[1].strip()
+
+    # 3. Dash: "Software Developer - StartupHub Technologies, Bangalore"
+    elif re.search(r"\s+[-–—]\s+", title):
+        parts = re.split(r"\s+[-–—]\s+", title, maxsplit=1)
+        title = parts[0].strip()
+        if not company:
+            company = parts[1].strip()
+
+    # 4. Comma: "Senior Developer, TechCorp India"
+    elif "," in title:
+        parts = [p.strip() for p in title.split(",", 1)]
+        if _COMMON_TITLES_PATTERN.search(parts[0]):
+            title = parts[0]
+            if not company:
+                company = parts[1]
+
+    # Clean any trailing punctuation
+    title = re.sub(r"^[\s\|\-–—,]+|[\s\|\-–—,]+$", "", title).strip()
+
+    # Clean company if it has trailing location, e.g. "Infosys Ltd, Bangalore"
+    if company and "," in company:
+        comp_parts = [c.strip() for c in company.split(",")]
+        company = comp_parts[0]
+
+    return title, company
+
+
+def _extract_skills_from_snippet(snippet: str, nlp, taxonomy: SkillsTaxonomy) -> list[str]:
+    """Find taxonomy skills mentioned in an experience description snippet."""
+    if not snippet or not snippet.strip():
+        return []
+    from app.services.jd_parser import _build_phrase_matcher, _is_whole_word_match
+    matcher, span_to_canonical = _build_phrase_matcher(nlp)
+    doc = nlp(snippet)
+    matches = matcher(doc)
+    raw_spans = []
+    for match_id, start, end in matches:
+        if _is_whole_word_match(doc, start, end):
+            raw_spans.append(Span(doc, start, end, label=match_id))
+    filtered = filter_spans(raw_spans)
+    found = set()
+    for span in filtered:
+        canonical = span_to_canonical.get(span.text.lower())
+        if not canonical:
+            canonical = doc.vocab.strings[span.label]
+        found.add(canonical)
+    return sorted(list(found))
+
+
 def _parse_experience_section(
-    exp_text: str, today: tuple[int, int]
+    exp_text: str, today: tuple[int, int], nlp=None, taxonomy=None
 ) -> tuple[list[ExperienceEntry], float, int, str]:
     """
-    Parse experience entries, merge overlapping dates, and compute total experience years.
+    Parse experience entries, merge overlapping dates, clean titles,
+    extract descriptions and embedded skills, and compute total experience years.
     """
+    if nlp is None:
+        nlp = _get_nlp()
+    if taxonomy is None:
+        taxonomy = get_taxonomy()
+
     lines = [l.strip() for l in exp_text.splitlines() if l.strip()]
     entries: list[ExperienceEntry] = []
     date_intervals: list[tuple[int, int]] = []
     internship_months = 0
 
-    current_entry = None
-
-    _COMMON_TITLES_PATTERN = re.compile(
-        r"\b(?:software\s+engineer|developer|frontend|backend|full\s*stack|"
-        r"data\s+scientist|data\s+engineer|ai\s+engineer|ml\s+engineer|"
-        r"intern|internship|tech\s+lead|team\s+lead|manager|analyst|"
-        r"consultant|architect|specialist|programmer|trainee)\b",
-        re.IGNORECASE,
-    )
-
+    date_line_indices: list[tuple[int, tuple[tuple[int, int], tuple[int, int], bool]]] = []
     for i, line in enumerate(lines):
         date_res = _extract_dates_from_line(line, today)
         if date_res:
-            start_date, end_date, is_current = date_res
+            date_line_indices.append((i, date_res))
 
-            # Calculate months for this entry
-            start_idx = start_date[0] * 12 + start_date[1]
-            end_idx = end_date[0] * 12 + end_date[1]
+    for idx, (i, date_res) in enumerate(date_line_indices):
+        start_date, end_date, is_current = date_res
 
-            if end_idx >= start_idx:
-                months = end_idx - start_idx + 1
-            else:
-                months = 0
+        # Calculate months for this entry
+        start_idx = start_date[0] * 12 + start_date[1]
+        end_idx = end_date[0] * 12 + end_date[1]
 
-            # Determine title and company from line or nearby lines
-            title = ""
-            company = ""
+        if end_idx >= start_idx:
+            months = end_idx - start_idx + 1
+        else:
+            months = 0
 
-            # Check line itself or previous 2 lines for title
-            surrounding = lines[max(0, i - 2):i + 1]
-            for sline in surrounding:
-                t_match = _COMMON_TITLES_PATTERN.search(sline)
-                if t_match and not title:
-                    title = sline
-                elif not company and sline != title and len(sline) < 50:
-                    # Potential company
-                    company = sline
+        # Determine title and company from line or preceding lines
+        title = ""
+        company = ""
 
-            is_internship = "intern" in (title + " " + line).lower()
-            surrounding_context = " ".join(surrounding).lower()
-            is_break = any(
-                term in (title + " " + company + " " + surrounding_context).lower()
-                for term in ["career break", "sabbatical", "career gap", "parental leave", "maternity leave"]
-            )
+        prev_limit = (date_line_indices[idx - 1][0] + 1) if idx > 0 else 0
+        surrounding = lines[max(prev_limit, i - 2):i + 1]
+        for sline in surrounding:
+            if _extract_dates_from_line(sline, today):
+                continue
+            t_match = _COMMON_TITLES_PATTERN.search(sline)
+            if t_match and not title:
+                title = sline
+            elif not company and sline != title and len(sline) < 50:
+                company = sline
 
-            entry = ExperienceEntry(
-                title=title or ("Career Break" if is_break else "Software Professional"),
-                company=company,
-                start_date=f"{start_date[0]}-{start_date[1]:02d}",
-                end_date="Present" if is_current else f"{end_date[0]}-{end_date[1]:02d}",
-                months=months,
-                is_current=is_current,
-                is_internship=is_internship,
-            )
-            entries.append(entry)
+        # Clean title & company (A1)
+        title, company = _clean_job_title_and_company(title, company)
 
-            if is_internship:
-                internship_months += months
-            elif not is_break:
-                date_intervals.append((start_idx, end_idx))
+        is_internship = "intern" in (title + " " + lines[i]).lower()
+        surrounding_context = " ".join(surrounding).lower()
+        is_break = any(
+            term in (title + " " + company + " " + surrounding_context).lower()
+            for term in ["career break", "sabbatical", "career gap", "parental leave", "maternity leave"]
+        )
+
+        # Collect description lines (A2)
+        next_date_i = date_line_indices[idx + 1][0] if idx + 1 < len(date_line_indices) else len(lines)
+        desc_lines = []
+        for dline in lines[i + 1:next_date_i]:
+            # Stop if encountering the next entry's title
+            if idx + 1 < len(date_line_indices) and _COMMON_TITLES_PATTERN.search(dline):
+                break
+            desc_lines.append(dline)
+
+        description = "\n".join(desc_lines).strip()[:1200]
+        skills_in_entry = _extract_skills_from_snippet(description, nlp, taxonomy) if (nlp and taxonomy) else []
+
+        entry = ExperienceEntry(
+            title=title or ("Career Break" if is_break else "Software Professional"),
+            company=company,
+            start_date=f"{start_date[0]}-{start_date[1]:02d}",
+            end_date="Present" if is_current else f"{end_date[0]}-{end_date[1]:02d}",
+            months=months,
+            is_current=is_current,
+            is_internship=is_internship,
+            description=description,
+            skills_in_entry=skills_in_entry,
+        )
+        entries.append(entry)
+
+        if is_internship:
+            internship_months += months
+        elif not is_break:
+            date_intervals.append((start_idx, end_idx))
 
     if date_intervals:
         total_months = _merge_date_intervals(date_intervals)
         total_years = round(total_months / 12.0, 1)
         source = "date_ranges"
     else:
-        # Fallback to stated in text (e.g. "5+ years of experience")
         stated_match = re.search(
             r"(\d+\.?\d*)\+?\s*years?\s*(?:of\s+)?(?:experience|exp)",
             exp_text,
@@ -774,7 +893,7 @@ def parse_resume(
         exp_text = sections.get("projects", "")
 
     exp_entries, total_years, internship_months, exp_source = _parse_experience_section(
-        exp_text, today
+        exp_text, today, nlp, taxonomy
     )
 
     # If no experience section, check full text
@@ -788,13 +907,19 @@ def parse_resume(
             total_years = float(stated.group(1))
             exp_source = "stated_in_text"
 
-    # Extract distinct job titles
+    # Extract distinct clean job titles
     job_titles = []
     seen_titles = set()
     for e in exp_entries:
-        if e.title and e.title.lower() not in seen_titles:
-            seen_titles.add(e.title.lower())
-            job_titles.append(e.title)
+        cleaned_t, _ = _clean_job_title_and_company(e.title, e.company)
+        lower_t = cleaned_t.lower()
+        if (
+            cleaned_t
+            and lower_t not in seen_titles
+            and lower_t not in {"career break", "software professional"}
+        ):
+            seen_titles.add(lower_t)
+            job_titles.append(cleaned_t)
 
     # 6. Extract Education
     edu_text = sections.get("education", "") + "\n" + raw_text

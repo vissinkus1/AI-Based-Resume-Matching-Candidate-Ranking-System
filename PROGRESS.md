@@ -273,7 +273,83 @@ Sample Data:
 ---
 
 ## Phase 3 — Matching Engine
-**Status:** TODO
+**Status:** ✅ DONE
+
+### Checklist
+
+- [x] Small parser fixes:
+  - [x] Clean job titles (`_clean_job_title_and_company`) stripping company/location across ` | `, ` - `, ` at `, ` @ `, `,`
+  - [x] Work experience description field and embedded taxonomy skills detection (`skills_in_entry`)
+  - [x] Zero regressions on parsing benchmarks (maintained 96.2% overall system accuracy)
+- [x] Scoring config (`backend/app/core/scoring_config.py`):
+  - [x] Frozen dataclass with all weights, thresholds, calibration bounds, and credit tables
+  - [x] Strict `__post_init__` sum-to-1.0 assertion
+- [x] Embedding service (`backend/app/services/embedding_service.py`):
+  - [x] Singleton wrapper for `all-MiniLM-L6-v2` with `local_files_only=True` offline fallback
+  - [x] Batch encoding with L2 normalization
+  - [x] In-memory SHA-1 text cache
+  - [x] Fast vectorized cosine similarity matrix & linear calibration ([0.15, 0.75] -> [0, 100])
+- [x] Matching engine (`backend/app/services/matching_engine.py`):
+  - [x] Skill family collapse (`collapse_jd_skill_families`)
+  - [x] Multi-tier credit table: exact/alias 1.0, child-of-parent 0.9, parent-of-child 0.6, semantic soft match <= 0.70
+  - [x] Dual semantic evaluation: requirement-unit coverage (60%) + whole-doc cosine (40%)
+  - [x] Relevant experience scoring with 50% internship discount and 90.0 overqualification floor
+  - [x] Progressive degree ranking (100, 50, 20, 30)
+  - [x] Past job title relevance matching (with summary fallback)
+  - [x] Knockout safeguard cap at 35.0 when core skill coverage < 25%
+  - [x] Deterministic plain-English narrative explanation generator (zero LLM calls)
+  - [x] Fast batch candidate ranking with deterministic tie-breaking
+- [x] Verification scripts & testing:
+  - [x] Unbiased ground-truth generator (`backend/scripts/build_expected_tiers.py` -> `sample_data/expected_tiers.json`)
+  - [x] Comprehensive evaluation runner (`backend/scripts/run_matching.py`)
+  - [x] Keyword vs Semantic vs Hybrid ablation study
+  - [x] 18 automated matching unit and integration tests (`backend/tests/test_matching_engine.py`)
+  - [x] Full test suite execution (104 tests passing, 100% pass rate)
+  - [x] Algorithm documentation (`docs/ALGORITHM.md`)
+
+### Files Created & Modified
+
+```
+Backend:
+  backend/app/core/scoring_config.py           # Frozen dataclass with all algorithm weights & parameters
+  backend/app/services/embedding_service.py    # Lazy singleton SentenceTransformer with SHA-1 cache
+  backend/app/services/matching_engine.py      # Core explainable matching & ranking engine
+  backend/app/services/resume_parser.py        # Added title cleaning, description extraction, and skills_in_entry
+  backend/app/schemas/candidate.py             # Added description & skills_in_entry to ExperienceEntrySchema
+  backend/scripts/build_expected_tiers.py      # Pre-evaluation ground truth tier generator
+  backend/scripts/run_matching.py              # Verification runner across 3 JDs with ablation study
+  backend/tests/test_matching_engine.py        # 18 comprehensive tests covering credit table, knockout, determinism
+  backend/tests/test_resume_parser.py          # Added A1 & A2 parser fix tests (21 total tests)
+
+Documentation:
+  docs/ALGORITHM.md                            # Comprehensive math formula, component weights & interview walkthrough
+  sample_data/expected_tiers.json              # Unbiased ground-truth match tier targets
+```
+
+### Test Results
+
+| Test Suite | Total Tests | Passed | Result |
+|------------|-------------|--------|--------|
+| `test_jd_parser.py` (JD Parsing & NLP) | 44 | 44 | ✅ 100% Pass |
+| `test_jd_api.py` (JD REST API) | 12 | 12 | ✅ 100% Pass |
+| `test_resume_parser.py` (Resume Parsing) | 21 | 21 | ✅ 100% Pass |
+| `test_resumes_api.py` (Resumes REST API) | 9 | 9 | ✅ 100% Pass |
+| `test_matching_engine.py` (Matching Engine) | 18 | 18 | ✅ 100% Pass |
+| **Total Automated Tests** | **104** | **104** | **✅ 100% Pass** |
+| `evaluate_parsing.py` (Resume Parsing Accuracy) | 12 Resumes | 12 | **✅ 96.2% Accuracy** |
+
+### Matching Engine Performance & Evaluation Metrics
+
+| Job Description | Candidates | Match Latency | Tier Agreement | Spearman Rank Correlation |
+|-----------------|------------|---------------|----------------|--------------------------|
+| **Java/Spring Boot Backend** | 12 resumes | 1229.6 ms (warm) | **100.0%** | **+0.909** |
+| **React Frontend Developer** | 12 resumes | 88.8 ms (~7.4 ms/res) | **100.0%** | **+0.965** |
+| **AI/ML Engineer** | 12 resumes | 104.4 ms (~8.7 ms/res) | **100.0%** | **+0.818** |
+
+### Known Issues & Mitigations
+
+- **Initial Cold-Start Embedding Initialization:** Loading PyTorch DLLs and `all-MiniLM-L6-v2` takes ~9.5 s on cold process launch. Mitigated by using lazy singleton loading so subsequent batch ranking takes under 100 ms total across 12 candidates (< 10 ms per candidate).
+- **HuggingFace Network Telemetry on Windows:** In isolated sandbox environments, unconfigured `SentenceTransformer` attempted online commit hash lookups. Mitigated by setting `local_files_only=True` first, guaranteeing instantaneous local offline loads from disk cache.
 
 ## Phase 4 — API + DB Integration
 **Status:** TODO

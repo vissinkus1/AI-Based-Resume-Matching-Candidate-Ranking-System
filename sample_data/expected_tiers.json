@@ -1,0 +1,347 @@
+{
+  "java": {
+    "jd_title": "Senior Java/Spring Boot Backend Developer",
+    "jd_filename": "java_backend_jd.txt",
+    "required_skills_count": 18,
+    "candidates": {
+      "candidate_01_aravind_sharma_java.pdf": {
+        "candidate_name": "Aravind Sharma",
+        "overlap_skills_count": 10,
+        "total_jd_required_skills": 18,
+        "overlap_pct": 55.6,
+        "expected_band": "Strong match",
+        "expected_tier": "strong",
+        "ground_truth_exp_years": 6.0
+      },
+      "candidate_02_priya_patel_react.docx": {
+        "candidate_name": "Priya Patel",
+        "overlap_skills_count": 2,
+        "total_jd_required_skills": 18,
+        "overlap_pct": 11.1,
+        "expected_band": "Weak match",
+        "expected_tier": "weak",
+        "ground_truth_exp_years": 6.0
+      },
+      "candidate_03_rohit_verma_aiml.pdf": {
+        "candidate_name": "Rohit Verma",
+        "overlap_skills_count": 2,
+        "total_jd_required_skills": 18,
+        "overlap_pct": 11.1,
+        "expected_band": "Weak match",
+        "expected_tier": "weak",
+        "ground_truth_exp_years": 3.4
+      },
+      "candidate_04_ananya_iyer_fullstack.docx": {
+        "candidate_name": "Ananya Iyer",
+        "overlap_skills_count": 6,
+        "total_jd_required_skills": 18,
+        "overlap_pct": 33.3,
+        "expected_band": "Good match",
+        "expected_tier": "good",
+        "ground_truth_exp_years": 7.4
+      },
+      "candidate_05_deepak_nair_fresher.pdf": {
+        "candidate_name": "Deepak Nair",
+        "overlap_skills_count": 2,
+        "total_jd_required_skills": 18,
+        "overlap_pct": 11.1,
+        "expected_band": "Weak match",
+        "expected_tier": "weak",
+        "ground_truth_exp_years": 0.0
+      },
+      "candidate_06_vikram_singh_overlap.docx": {
+        "candidate_name": "Vikram Singh",
+        "overlap_skills_count": 9,
+        "total_jd_required_skills": 18,
+        "overlap_pct": 50.0,
+        "expected_band": "Good match",
+        "expected_tier": "good",
+        "ground_truth_exp_years": 5.8
+      },
+      "candidate_07_meera_deshmukh_gap.pdf": {
+        "candidate_name": "Meera Deshmukh",
+        "overlap_skills_count": 2,
+        "total_jd_required_skills": 18,
+        "overlap_pct": 11.1,
+        "expected_band": "Weak match",
+        "expected_tier": "weak",
+        "ground_truth_exp_years": 5.4
+      },
+      "candidate_08_siddharth_reddy_senior.docx": {
+        "candidate_name": "Siddharth Reddy",
+        "overlap_skills_count": 11,
+        "total_jd_required_skills": 18,
+        "overlap_pct": 61.1,
+        "expected_band": "Strong match",
+        "expected_tier": "strong",
+        "ground_truth_exp_years": 9.5
+      },
+      "candidate_09_kavita_krishnan_data_nlp.pdf": {
+        "candidate_name": "Kavita Krishnan",
+        "overlap_skills_count": 2,
+        "total_jd_required_skills": 18,
+        "overlap_pct": 11.1,
+        "expected_band": "Weak match",
+        "expected_tier": "weak",
+        "ground_truth_exp_years": 6.8
+      },
+      "candidate_10_pooja_hegde_marketer.docx": {
+        "candidate_name": "Pooja Hegde",
+        "overlap_skills_count": 0,
+        "total_jd_required_skills": 18,
+        "overlap_pct": 0.0,
+        "expected_band": "Weak match",
+        "expected_tier": "weak",
+        "ground_truth_exp_years": 7.3
+      },
+      "candidate_11_rahul_kapoor_devops.pdf": {
+        "candidate_name": "Rahul Kapoor",
+        "overlap_skills_count": 5,
+        "total_jd_required_skills": 18,
+        "overlap_pct": 27.8,
+        "expected_band": "Partial match",
+        "expected_tier": "partial",
+        "ground_truth_exp_years": 3.8
+      },
+      "candidate_12_sneha_banerjee_react_java.pdf": {
+        "candidate_name": "Sneha Banerjee",
+        "overlap_skills_count": 5,
+        "total_jd_required_skills": 18,
+        "overlap_pct": 27.8,
+        "expected_band": "Partial match",
+        "expected_tier": "partial",
+        "ground_truth_exp_years": 3.4
+      }
+    }
+  },
+  "react": {
+    "jd_title": "Senior React Frontend Developer",
+    "jd_filename": "react_frontend_jd.docx",
+    "required_skills_count": 17,
+    "candidates": {
+      "candidate_01_aravind_sharma_java.pdf": {
+        "candidate_name": "Aravind Sharma",
+        "overlap_skills_count": 2,
+        "total_jd_required_skills": 17,
+        "overlap_pct": 11.8,
+        "expected_band": "Weak match",
+        "expected_tier": "weak",
+        "ground_truth_exp_years": 6.0
+      },
+      "candidate_02_priya_patel_react.docx": {
+        "candidate_name": "Priya Patel",
+        "overlap_skills_count": 10,
+        "total_jd_required_skills": 17,
+        "overlap_pct": 58.8,
+        "expected_band": "Strong match",
+        "expected_tier": "strong",
+        "ground_truth_exp_years": 6.0
+      },
+      "candidate_03_rohit_verma_aiml.pdf": {
+        "candidate_name": "Rohit Verma",
+        "overlap_skills_count": 1,
+        "total_jd_required_skills": 17,
+        "overlap_pct": 5.9,
+        "expected_band": "Weak match",
+        "expected_tier": "weak",
+        "ground_truth_exp_years": 3.4
+      },
+      "candidate_04_ananya_iyer_fullstack.docx": {
+        "candidate_name": "Ananya Iyer",
+        "overlap_skills_count": 7,
+        "total_jd_required_skills": 17,
+        "overlap_pct": 41.2,
+        "expected_band": "Good match",
+        "expected_tier": "good",
+        "ground_truth_exp_years": 7.4
+      },
+      "candidate_05_deepak_nair_fresher.pdf": {
+        "candidate_name": "Deepak Nair",
+        "overlap_skills_count": 4,
+        "total_jd_required_skills": 17,
+        "overlap_pct": 23.5,
+        "expected_band": "Partial match",
+        "expected_tier": "partial",
+        "ground_truth_exp_years": 0.0
+      },
+      "candidate_06_vikram_singh_overlap.docx": {
+        "candidate_name": "Vikram Singh",
+        "overlap_skills_count": 1,
+        "total_jd_required_skills": 17,
+        "overlap_pct": 5.9,
+        "expected_band": "Weak match",
+        "expected_tier": "weak",
+        "ground_truth_exp_years": 5.8
+      },
+      "candidate_07_meera_deshmukh_gap.pdf": {
+        "candidate_name": "Meera Deshmukh",
+        "overlap_skills_count": 8,
+        "total_jd_required_skills": 17,
+        "overlap_pct": 47.1,
+        "expected_band": "Good match",
+        "expected_tier": "good",
+        "ground_truth_exp_years": 5.4
+      },
+      "candidate_08_siddharth_reddy_senior.docx": {
+        "candidate_name": "Siddharth Reddy",
+        "overlap_skills_count": 2,
+        "total_jd_required_skills": 17,
+        "overlap_pct": 11.8,
+        "expected_band": "Weak match",
+        "expected_tier": "weak",
+        "ground_truth_exp_years": 9.5
+      },
+      "candidate_09_kavita_krishnan_data_nlp.pdf": {
+        "candidate_name": "Kavita Krishnan",
+        "overlap_skills_count": 1,
+        "total_jd_required_skills": 17,
+        "overlap_pct": 5.9,
+        "expected_band": "Weak match",
+        "expected_tier": "weak",
+        "ground_truth_exp_years": 6.8
+      },
+      "candidate_10_pooja_hegde_marketer.docx": {
+        "candidate_name": "Pooja Hegde",
+        "overlap_skills_count": 0,
+        "total_jd_required_skills": 17,
+        "overlap_pct": 0.0,
+        "expected_band": "Weak match",
+        "expected_tier": "weak",
+        "ground_truth_exp_years": 7.3
+      },
+      "candidate_11_rahul_kapoor_devops.pdf": {
+        "candidate_name": "Rahul Kapoor",
+        "overlap_skills_count": 1,
+        "total_jd_required_skills": 17,
+        "overlap_pct": 5.9,
+        "expected_band": "Weak match",
+        "expected_tier": "weak",
+        "ground_truth_exp_years": 3.8
+      },
+      "candidate_12_sneha_banerjee_react_java.pdf": {
+        "candidate_name": "Sneha Banerjee",
+        "overlap_skills_count": 4,
+        "total_jd_required_skills": 17,
+        "overlap_pct": 23.5,
+        "expected_band": "Partial match",
+        "expected_tier": "partial",
+        "ground_truth_exp_years": 3.4
+      }
+    }
+  },
+  "aiml": {
+    "jd_title": "AI/ML Engineer",
+    "jd_filename": "aiml_engineer_jd.pdf",
+    "required_skills_count": 19,
+    "candidates": {
+      "candidate_01_aravind_sharma_java.pdf": {
+        "candidate_name": "Aravind Sharma",
+        "overlap_skills_count": 3,
+        "total_jd_required_skills": 19,
+        "overlap_pct": 15.8,
+        "expected_band": "Partial match",
+        "expected_tier": "partial",
+        "ground_truth_exp_years": 6.0
+      },
+      "candidate_02_priya_patel_react.docx": {
+        "candidate_name": "Priya Patel",
+        "overlap_skills_count": 0,
+        "total_jd_required_skills": 19,
+        "overlap_pct": 0.0,
+        "expected_band": "Weak match",
+        "expected_tier": "weak",
+        "ground_truth_exp_years": 6.0
+      },
+      "candidate_03_rohit_verma_aiml.pdf": {
+        "candidate_name": "Rohit Verma",
+        "overlap_skills_count": 8,
+        "total_jd_required_skills": 19,
+        "overlap_pct": 42.1,
+        "expected_band": "Good match",
+        "expected_tier": "good",
+        "ground_truth_exp_years": 3.4
+      },
+      "candidate_04_ananya_iyer_fullstack.docx": {
+        "candidate_name": "Ananya Iyer",
+        "overlap_skills_count": 2,
+        "total_jd_required_skills": 19,
+        "overlap_pct": 10.5,
+        "expected_band": "Weak match",
+        "expected_tier": "weak",
+        "ground_truth_exp_years": 7.4
+      },
+      "candidate_05_deepak_nair_fresher.pdf": {
+        "candidate_name": "Deepak Nair",
+        "overlap_skills_count": 2,
+        "total_jd_required_skills": 19,
+        "overlap_pct": 10.5,
+        "expected_band": "Weak match",
+        "expected_tier": "weak",
+        "ground_truth_exp_years": 0.0
+      },
+      "candidate_06_vikram_singh_overlap.docx": {
+        "candidate_name": "Vikram Singh",
+        "overlap_skills_count": 2,
+        "total_jd_required_skills": 19,
+        "overlap_pct": 10.5,
+        "expected_band": "Weak match",
+        "expected_tier": "weak",
+        "ground_truth_exp_years": 5.8
+      },
+      "candidate_07_meera_deshmukh_gap.pdf": {
+        "candidate_name": "Meera Deshmukh",
+        "overlap_skills_count": 0,
+        "total_jd_required_skills": 19,
+        "overlap_pct": 0.0,
+        "expected_band": "Weak match",
+        "expected_tier": "weak",
+        "ground_truth_exp_years": 5.4
+      },
+      "candidate_08_siddharth_reddy_senior.docx": {
+        "candidate_name": "Siddharth Reddy",
+        "overlap_skills_count": 3,
+        "total_jd_required_skills": 19,
+        "overlap_pct": 15.8,
+        "expected_band": "Partial match",
+        "expected_tier": "partial",
+        "ground_truth_exp_years": 9.5
+      },
+      "candidate_09_kavita_krishnan_data_nlp.pdf": {
+        "candidate_name": "Kavita Krishnan",
+        "overlap_skills_count": 11,
+        "total_jd_required_skills": 19,
+        "overlap_pct": 57.9,
+        "expected_band": "Strong match",
+        "expected_tier": "strong",
+        "ground_truth_exp_years": 6.8
+      },
+      "candidate_10_pooja_hegde_marketer.docx": {
+        "candidate_name": "Pooja Hegde",
+        "overlap_skills_count": 0,
+        "total_jd_required_skills": 19,
+        "overlap_pct": 0.0,
+        "expected_band": "Weak match",
+        "expected_tier": "weak",
+        "ground_truth_exp_years": 7.3
+      },
+      "candidate_11_rahul_kapoor_devops.pdf": {
+        "candidate_name": "Rahul Kapoor",
+        "overlap_skills_count": 2,
+        "total_jd_required_skills": 19,
+        "overlap_pct": 10.5,
+        "expected_band": "Weak match",
+        "expected_tier": "weak",
+        "ground_truth_exp_years": 3.8
+      },
+      "candidate_12_sneha_banerjee_react_java.pdf": {
+        "candidate_name": "Sneha Banerjee",
+        "overlap_skills_count": 1,
+        "total_jd_required_skills": 19,
+        "overlap_pct": 5.3,
+        "expected_band": "Weak match",
+        "expected_tier": "weak",
+        "ground_truth_exp_years": 3.4
+      }
+    }
+  }
+}

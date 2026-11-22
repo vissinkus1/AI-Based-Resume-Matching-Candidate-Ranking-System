@@ -22,6 +22,7 @@ from app.services.resume_parser import (
     _extract_contact_info,
     _parse_education_section,
     _extract_name,
+    _clean_job_title_and_company,
     _get_nlp,
 )
 
@@ -274,3 +275,88 @@ def test_parse_resume_full_pipeline():
     assert "PostgreSQL" in skill_names
     assert len(parsed.education) >= 1
     assert parsed.education[0].level == "bachelor"
+
+
+# ------------------------------------------------------------------
+# Part A1 & A2 Tests: Title Cleaning and Description Skills
+# ------------------------------------------------------------------
+
+def test_clean_job_titles_separators():
+    """Verify title cleaning across pipe, dash, at, @, and comma separators."""
+    # 1. Pipe
+    t1, c1 = _clean_job_title_and_company("Senior Backend Engineer | Infosys Ltd, Bangalore")
+    assert t1 == "Senior Backend Engineer"
+    assert c1 == "Infosys Ltd"
+
+    # 2. 'at'
+    t2, c2 = _clean_job_title_and_company("Frontend Developer at Acme Corp")
+    assert t2 == "Frontend Developer"
+    assert c2 == "Acme Corp"
+
+    # 3. '@'
+    t3, c3 = _clean_job_title_and_company("Staff Research Scientist @ AI Labs")
+    assert t3 == "Staff Research Scientist"
+    assert c3 == "AI Labs"
+
+    # 4. Dash
+    t4, c4 = _clean_job_title_and_company("Lead Cloud Infrastructure Engineer - Apex Systems")
+    assert t4 == "Lead Cloud Infrastructure Engineer"
+    assert c4 == "Apex Systems"
+
+    # 5. Comma
+    t5, c5 = _clean_job_title_and_company("Senior Developer, TechCorp India")
+    assert t5 == "Senior Developer"
+    assert c5 == "TechCorp India"
+
+
+def test_experience_entry_description_and_skills():
+    """Verify description text collection and embedded skills detection per entry."""
+    sample_text = """
+    Software Engineer | CloudScale Inc
+    Jan 2023 - Present
+    • Built distributed event-driven microservices using Spring Boot and Apache Kafka.
+    • Provisioned PostgreSQL databases and deployed containers with Docker onto Kubernetes.
+    • Implemented automated CI/CD pipelines with Jenkins.
+    """
+    entries, total_years, _, _ = _parse_experience_section(
+        sample_text, today=(2026, 11)
+    )
+    assert len(entries) == 1
+    entry = entries[0]
+    assert entry.title == "Software Engineer"
+    assert entry.company == "CloudScale Inc"
+    assert "Spring Boot" in entry.description
+    assert "Apache Kafka" in entry.description
+    assert len(entry.skills_in_entry) >= 4
+    assert "Spring Boot" in entry.skills_in_entry
+    assert "Docker" in entry.skills_in_entry
+    assert "Kubernetes" in entry.skills_in_entry
+    assert "PostgreSQL" in entry.skills_in_entry
+
+
+def test_job_titles_clean_in_parsed_resume():
+    """Verify ParsedResume.job_titles contains ONLY clean titles (no company/location)."""
+    sample_text = """
+    Alice Johnson
+    alice@example.com | +1 555 987 6543
+    PROFESSIONAL EXPERIENCE
+    Senior Backend Engineer | Infosys Ltd, Bangalore
+    Nov 2022 - Present
+    • Developed Spring Boot applications.
+    Software Engineer at Wipro Technologies
+    Nov 2020 - Oct 2022
+    • Wrote Java code and REST APIs.
+    """
+    parsed = parse_resume(
+        file_bytes=sample_text.encode("utf-8"),
+        filename="alice.txt",
+        today=(2026, 11),
+    )
+    assert "Senior Backend Engineer" in parsed.job_titles
+    assert "Software Engineer" in parsed.job_titles
+    # Must NOT have pipe or company name in job_titles list
+    for t in parsed.job_titles:
+        assert "|" not in t
+        assert "Infosys" not in t
+        assert "Wipro" not in t
+

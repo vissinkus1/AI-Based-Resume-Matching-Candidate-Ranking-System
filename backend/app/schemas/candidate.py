@@ -28,6 +28,8 @@ class ExperienceEntrySchema(BaseModel):
     months: int = 0
     is_current: bool = False
     is_internship: bool = False
+    description: str = ""
+    skills_in_entry: list[str] = []
 
 
 class EducationEntrySchema(BaseModel):

@@ -42,3 +42,18 @@
 | D23 | Date range merging via non-overlapping interval union | Accurately calculates total career experience without double-counting parallel jobs or concurrent consulting roles. |
 | D24 | Career gap and sabbatical exclusion heuristic in work experience | Detects terms like "sabbatical" and "career break", excluding non-working intervals from total experience calculations. |
 | D25 | Isolated per-file batch resume upload API | Ensures invalid, oversized, or corrupt files in a batch fail individually without aborting valid candidate resumes. |
+
+## Phase 3
+
+| # | Decision | Rationale |
+|---|----------|-----------|
+| D26 | Frozen dataclass `ScoringConfig` (`backend/app/core/scoring_config.py`) | Single source of truth for all weights, calibration thresholds, and credit multipliers with strict `__post_init__` sum-to-1.0 validation. |
+| D27 | Lazy singleton `EmbeddingService` with SHA-1 cache & `local_files_only=True` fallback | Encapsulates `all-MiniLM-L6-v2`; caches repeated sentence encodings; enables offline sandbox execution without telemetry timeouts. |
+| D28 | Skill family collapse (`collapse_jd_skill_families`) | Prunes child skills from JD requirements when their parent is present (e.g. drops AWS S3 if AWS is in JD), preventing denominator inflation. |
+| D29 | Hierarchical credit table with semantic soft-matching fallback | Grants 1.0 for exact/alias, 0.9 for child-of-parent, 0.6 for parent-of-child, and caps semantic soft-matching at 0.70 with 0.62 cosine threshold. |
+| D30 | Dual semantic evaluation: requirement coverage (60%) + whole-doc similarity (40%) | Balances line-by-line duty alignment against overall career summary; calibrates raw cosine ([0.15, 0.75] -> [0, 100]) for intuitive human interpretation. |
+| D31 | Relevant experience calculation with 50% internship discount & 90.0 overqualification floor | Calculates domain-relevant tenure rather than generic years; discounts internships; protects veteran candidates from disproportionate penalties. |
+| D32 | Ordinal degree hierarchy scoring with progressive penalty scaling | Scores degree alignment as 100 (meets/exceeds), 50 (one below), 20 (two below), and 30 (none detected) without arbitrary point cliffs. |
+| D33 | Domain knockout safeguard cap at 35.0 | Caps overall score at 35.0 when core required skill coverage is below 25%, preventing off-domain resumes with good prose from gaming ranks. |
+| D34 | Pure algorithmic deterministic narrative explanations (zero LLMs) | Produces explainable human-readable breakdown sentences, strengths, and gaps from mathematical contributions and evidence snippets. |
+| D35 | Unbiased ground truth validation via `build_expected_tiers.py` | Assigns expected match tiers prior to running algorithm; verifies system against objective annotations (achieving 100% tier agreement and Spearman > 0.81). |
