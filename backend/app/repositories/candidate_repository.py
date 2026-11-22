@@ -53,16 +53,20 @@ class CandidateRepository:
         return self.db.query(Candidate).count()
 
     def delete(self, candidate_id: int) -> bool:
-        """Delete candidate by id. Returns True if found and deleted, False otherwise."""
+        """Delete candidate by id and cascade delete any match results."""
         candidate = self.get_by_id(candidate_id)
         if not candidate:
             return False
+        from app.models.match import MatchResultDB
+        self.db.query(MatchResultDB).filter(MatchResultDB.candidate_id == candidate_id).delete()
         self.db.delete(candidate)
         self.db.commit()
         return True
 
     def delete_all(self) -> int:
-        """Delete all candidates. Returns number of records deleted."""
+        """Delete all candidates and associated match results."""
+        from app.models.match import MatchResultDB
+        self.db.query(MatchResultDB).delete()
         count = self.db.query(Candidate).count()
         self.db.query(Candidate).delete()
         self.db.commit()

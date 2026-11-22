@@ -96,7 +96,7 @@ class MatchResultDB(Base):
     )
     candidate_id = Column(
         Integer,
-        ForeignKey("candidates.id", ondelete="SET NULL"),
+        ForeignKey("candidates.id", ondelete="CASCADE"),
         nullable=True,
         index=True,
     )

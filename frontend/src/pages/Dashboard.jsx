@@ -1,415 +1,302 @@
 /*
  * pages/Dashboard.jsx — AI Matching & Candidate Ranking Dashboard.
  *
- * Displays ranking verification results for a specific MatchRun (via ?run=<id>),
- * or lists recent match runs to inspect.
+ * Implements Module 4:
+ * - DashboardHeader with stale notification, re-run, CSV export.
+ * - SummaryCards with 4 clickable match band cards, pool size, avg score.
+ * - ControlsBar with debounced search, band, min score slider, experience, skill, reset.
+ * - RankingTable with strictly required column order, colored bars, rank, knockout.
+ * - URL query string synchronization for all filters and sorting.
  */
 
-import { useState, useEffect } from "react";
-import { useSearchParams, Link } from "react-router-dom";
-import { getRun, getResults, listRuns, getExportCsvUrl } from "../api/match";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
+import { getRun, getResults, listRuns, runMatch, getLatestRun } from "../api/match";
+import DashboardHeader from "../components/dashboard/DashboardHeader";
+import SummaryCards from "../components/dashboard/SummaryCards";
+import ControlsBar from "../components/dashboard/ControlsBar";
+import RankingTable from "../components/dashboard/RankingTable";
 
-function Dashboard() {
+export default function Dashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+
   const runId = searchParams.get("run");
+  const sortBy = searchParams.get("sort") || "rank";
+  const order = searchParams.get("order") || "asc";
+  const band = searchParams.get("band") || "";
+  const minScore = parseInt(searchParams.get("min_score") || "0", 10);
+  const minExperience = parseFloat(searchParams.get("min_exp") || "0");
+  const skill = searchParams.get("skill") || "";
+  const search = searchParams.get("search") || "";
 
+  // Data states
   const [loading, setLoading] = useState(false);
+  const [reRunning, setReRunning] = useState(false);
   const [error, setError] = useState(null);
-
-  // Active run state
   const [runDetail, setRunDetail] = useState(null);
-  const [results, setResults] = useState([]);
-  const [totalResults, setTotalResults] = useState(0);
+  const [resultsData, setResultsData] = useState({
+    items: [],
+    total: 0,
+    filtered_count: 0,
+    band_counts: {},
+  });
 
-  // Past runs list (if no run selected)
+  // Past runs state (if no run selected)
   const [pastRuns, setPastRuns] = useState([]);
   const [pastRunsLoading, setPastRunsLoading] = useState(false);
 
-  useEffect(() => {
-    if (runId) {
-      loadRunData(runId);
-    } else {
-      loadPastRuns();
-    }
-  }, [runId]);
-
-  const loadRunData = async (id) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [detail, resultsPage] = await Promise.all([
-        getRun(id),
-        getResults(id, { page: 1, page_size: 100, sort_by: "rank", order: "asc" }),
-      ]);
-      setRunDetail(detail);
-      setResults(resultsPage.items || []);
-      setTotalResults(resultsPage.total || 0);
-    } catch (err) {
-      setError(
-        err.response?.data?.detail || "Failed to load ranking results for this run."
+  // Helper to update query params cleanly
+  const updateQueryParam = useCallback(
+    (key, value) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (value === null || value === undefined || value === "" || value === 0) {
+            next.delete(key);
+          } else {
+            next.set(key, String(value));
+          }
+          return next;
+        },
+        { replace: true }
       );
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [setSearchParams]
+  );
 
-  const loadPastRuns = async () => {
+  // Load run metadata and results
+  const loadRun = useCallback(
+    async (id) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = {
+          limit: 100,
+          offset: 0,
+          sort_by: sortBy,
+          order: order,
+        };
+        if (band) params.band = band;
+        if (minScore > 0) params.min_score = minScore;
+        if (minExperience > 0) params.min_experience = minExperience;
+        if (skill) params.skill = skill;
+        if (search) params.search = search;
+
+        const [detail, resultsPage] = await Promise.all([
+          getRun(id),
+          getResults(id, params),
+        ]);
+
+        setRunDetail(detail);
+        setResultsData(resultsPage);
+      } catch (err) {
+        console.error("Failed to load run:", err);
+        setError(
+          err.response?.data?.detail || "Failed to load matching run results."
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [sortBy, order, band, minScore, minExperience, skill, search]
+  );
+
+  // Load past runs if no run ID in URL
+  const loadPastRuns = useCallback(async () => {
     setPastRunsLoading(true);
     try {
-      const runs = await listRuns(null, 20);
-      setPastRuns(runs);
+      const runs = await listRuns(null, 30);
+      setPastRuns(runs || []);
+      // If runs exist and no run selected, automatically load the latest
+      if (runs && runs.length > 0 && !runId) {
+        navigate(`/dashboard?run=${runs[0].id}`, { replace: true });
+      }
     } catch (err) {
-      console.error("Failed to load past runs:", err);
+      console.error("Failed to list past runs:", err);
     } finally {
       setPastRunsLoading(false);
     }
-  };
+  }, [runId, navigate]);
 
-  const getBandBadgeClass = (band) => {
-    switch (band) {
-      case "Strong match":
-        return "bg-emerald-100 text-emerald-800 border-emerald-200";
-      case "Good match":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "Partial match":
-        return "bg-amber-100 text-amber-800 border-amber-200";
-      default:
-        return "bg-gray-100 text-gray-700 border-gray-200";
+  useEffect(() => {
+    if (runId) {
+      loadRun(runId);
+    } else {
+      loadPastRuns();
+    }
+  }, [runId, loadRun, loadPastRuns]);
+
+  // Handle re-running match
+  const handleReRun = async () => {
+    if (!runDetail?.jd_id) return;
+    setReRunning(true);
+    try {
+      const newRun = await runMatch(runDetail.jd_id);
+      navigate(`/dashboard?run=${newRun.id}`);
+    } catch (err) {
+      alert("Failed to re-run match: " + (err.response?.data?.detail || err.message));
+    } finally {
+      setReRunning(false);
     }
   };
 
-  const getScoreColor = (score) => {
-    if (score >= 80) return "text-emerald-600";
-    if (score >= 65) return "text-blue-600";
-    if (score >= 50) return "text-amber-600";
-    return "text-rose-600";
+  // Filter change handlers
+  const handleSelectBand = (selectedBand) => {
+    updateQueryParam("band", selectedBand);
   };
 
-  return (
-    <div className="space-y-6">
-      {/* ── Top Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Candidate Ranking Dashboard
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Explainable AI evaluation, multi-factor scoring, and deterministic ranking.
-          </p>
+  const handleSearchChange = (val) => {
+    updateQueryParam("search", val);
+  };
+
+  const handleMinScoreChange = (val) => {
+    updateQueryParam("min_score", val);
+  };
+
+  const handleMinExperienceChange = (val) => {
+    updateQueryParam("min_exp", val);
+  };
+
+  const handleSkillChange = (val) => {
+    updateQueryParam("skill", val);
+  };
+
+  const handleSortChange = (newSort, newOrder) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.set("sort", newSort);
+        next.set("order", newOrder);
+        return next;
+      },
+      { replace: true }
+    );
+  };
+
+  const handleResetFilters = () => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams();
+        if (runId) next.set("run", runId);
+        return next;
+      },
+      { replace: true }
+    );
+  };
+
+  const hasActiveFilters = Boolean(
+    band || minScore > 0 || minExperience > 0 || skill || search
+  );
+
+  // Available skills from JD
+  const availableSkills = useMemo(() => {
+    if (!runDetail?.jd_parsed) return [];
+    const req = runDetail.jd_parsed.required_skills || [];
+    const pref = runDetail.jd_parsed.preferred_skills || [];
+    return Array.from(new Set([...req, ...pref]));
+  }, [runDetail]);
+
+  // Cohort statistics
+  const averageScore = useMemo(() => {
+    if (!resultsData.items || resultsData.items.length === 0) return null;
+    const sum = resultsData.items.reduce((acc, curr) => acc + curr.final_score, 0);
+    return sum / resultsData.items.length;
+  }, [resultsData.items]);
+
+  const topCandidate = useMemo(() => {
+    if (!resultsData.items || resultsData.items.length === 0) return null;
+    // Top candidate by score
+    return [...resultsData.items].sort((a, b) => b.final_score - a.final_score)[0];
+  }, [resultsData.items]);
+
+  // If no run selected and no past runs found
+  if (!runId && !pastRunsLoading && pastRuns.length === 0) {
+    return (
+      <div className="max-w-4xl mx-auto py-16 px-4 text-center">
+        <div className="w-16 h-16 mx-auto rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-3xl mb-4">
+          📊
         </div>
-
-        {runId && (
-          <div className="flex items-center gap-3">
-            <a
-              href={getExportCsvUrl(runId)}
-              target="_blank"
-              rel="noreferrer"
-              className="px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-lg shadow-sm flex items-center gap-2 transition"
-            >
-              <span>📥 Export CSV</span>
-            </a>
-            <Link
-              to="/"
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition"
-            >
-              + New Matching Run
-            </Link>
-          </div>
-        )}
+        <h2 className="text-2xl font-black text-white mb-2">No Matching Runs Found</h2>
+        <p className="text-slate-400 text-sm max-w-md mx-auto mb-6">
+          You haven't run any candidate evaluations yet. Start by parsing a Job Description and matching candidate resumes, or try the instant sample data demo.
+        </p>
+        <Link
+          to="/"
+          className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl transition shadow-lg shadow-indigo-500/25 inline-flex items-center gap-2"
+        >
+          <span>🚀</span> Go to Home & Match Resumes
+        </Link>
       </div>
+    );
+  }
 
-      {/* ── Error Banner ── */}
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Error Message */}
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 flex items-center justify-between">
-          <span>⚠️ {error}</span>
+        <div className="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span>⚠️</span>
+            <span>{error}</span>
+          </div>
           <button
-            onClick={() => loadRunData(runId)}
-            className="underline font-semibold hover:text-red-900 ml-4"
+            onClick={() => loadRun(runId)}
+            className="text-xs font-bold underline hover:text-white"
           >
             Retry
           </button>
         </div>
       )}
 
-      {/* ── Staleness Warning Banner ── */}
-      {runDetail?.is_stale && (
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800 flex items-start gap-3">
-          <span className="text-lg">⚠️</span>
-          <div>
-            <div className="font-bold">Job Description Modified Since This Run</div>
-            <div className="text-xs text-amber-700 mt-0.5">
-              The underlying Job Description or its required skills were updated after this matching run was executed.
-              Scores shown here reflect the JD state at run time. Re-run matching on the Home page for fresh results.
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Run Overview Statistics ── */}
+      {/* Header */}
       {runDetail && (
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-            <span className="text-xs text-gray-500 font-medium">Job Target</span>
-            <div className="text-sm font-bold text-gray-900 truncate mt-1" title={runDetail.jd_title || "Job Description"}>
-              {runDetail.jd_title || `JD #${runDetail.jd_id}`}
-            </div>
-            <div className="text-[11px] text-gray-400 mt-0.5">
-              Run #{runDetail.id} • {new Date(runDetail.created_at).toLocaleDateString()}
-            </div>
-          </div>
-
-          <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-            <span className="text-xs text-gray-500 font-medium">Cohort Evaluated</span>
-            <div className="text-lg font-bold text-gray-900 mt-1">
-              {runDetail.candidate_count} Candidates
-            </div>
-            <div className="text-[11px] text-gray-400 mt-0.5">
-              Computed in {runDetail.duration_ms} ms
-            </div>
-          </div>
-
-          <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-            <span className="text-xs text-gray-500 font-medium">Average Score</span>
-            <div className="text-lg font-bold text-indigo-600 mt-1">
-              {runDetail.average_score}%
-            </div>
-            <div className="text-[11px] text-gray-400 mt-0.5">
-              Across all candidates
-            </div>
-          </div>
-
-          <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-            <span className="text-xs text-gray-500 font-medium">Top Candidate</span>
-            <div className="text-sm font-bold text-gray-900 truncate mt-1">
-              {runDetail.top_candidate_name || "None"}
-            </div>
-            <div className="text-[11px] text-emerald-600 font-semibold mt-0.5">
-              Score: {runDetail.top_candidate_score}%
-            </div>
-          </div>
-
-          <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm col-span-2 md:col-span-1">
-            <span className="text-xs text-gray-500 font-medium">Bands</span>
-            <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">
-                S: {runDetail.band_distribution["Strong match"] || 0}
-              </span>
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 font-semibold">
-                G: {runDetail.band_distribution["Good match"] || 0}
-              </span>
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-semibold">
-                P: {runDetail.band_distribution["Partial match"] || 0}
-              </span>
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 font-semibold">
-                W: {runDetail.band_distribution["Weak match"] || 0}
-              </span>
-            </div>
-          </div>
-        </div>
+        <DashboardHeader
+          run={runDetail}
+          onReRun={handleReRun}
+          reRunning={reRunning}
+        />
       )}
 
-      {/* ── If No Run Selected: Past Runs Selector ── */}
-      {!runId && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 text-center">
-          <div className="max-w-md mx-auto space-y-3">
-            <div className="text-4xl">📊</div>
-            <h3 className="text-lg font-bold text-gray-900">
-              No Active Matching Run Selected
-            </h3>
-            <p className="text-xs text-gray-500">
-              Go to the Home page to analyze a Job Description and run AI matching, or select a previous run below.
-            </p>
-            <div className="pt-2">
-              <Link
-                to="/"
-                className="inline-block px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs rounded-lg transition"
-              >
-                Go to Upload &amp; Match
-              </Link>
-            </div>
-          </div>
+      {/* Summary Cards */}
+      <SummaryCards
+        bandCounts={resultsData.band_counts}
+        totalCount={resultsData.total}
+        averageScore={averageScore}
+        topCandidate={topCandidate}
+        selectedBand={band}
+        onSelectBand={handleSelectBand}
+      />
 
-          {pastRuns.length > 0 && (
-            <div className="mt-8 text-left border-t border-gray-100 pt-6">
-              <h4 className="text-xs font-bold uppercase text-gray-400 tracking-wider mb-3">
-                Recent Matching Runs
-              </h4>
-              <div className="divide-y divide-gray-100 border border-gray-200 rounded-lg overflow-hidden">
-                {pastRuns.map((r) => (
-                  <div
-                    key={r.id}
-                    onClick={() => setSearchParams({ run: r.id })}
-                    className="p-3.5 flex items-center justify-between hover:bg-gray-50 cursor-pointer transition text-xs"
-                  >
-                    <div>
-                      <span className="font-bold text-gray-900">
-                        {r.jd_title || `Job Description #${r.jd_id}`}
-                      </span>
-                      <span className="text-gray-400 ml-2">
-                        Run #{r.id} • {new Date(r.created_at).toLocaleString()}
-                      </span>
-                      {r.is_stale && (
-                        <span className="ml-2 text-[10px] px-1.5 py-0.5 bg-amber-100 text-amber-800 rounded font-semibold">
-                          Stale JD
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-gray-600 font-medium">
-                        {r.candidate_count} candidates
-                      </span>
-                      <span className="text-indigo-600 font-semibold">
-                        View Results →
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      {/* Controls Bar */}
+      <ControlsBar
+        search={search}
+        onSearchChange={handleSearchChange}
+        band={band}
+        onBandChange={handleSelectBand}
+        minScore={minScore}
+        onMinScoreChange={handleMinScoreChange}
+        minExperience={minExperience}
+        onMinExperienceChange={handleMinExperienceChange}
+        skill={skill}
+        onSkillChange={handleSkillChange}
+        availableSkills={availableSkills}
+        onResetFilters={handleResetFilters}
+        hasActiveFilters={hasActiveFilters}
+        filteredCount={resultsData.filtered_count}
+        totalCount={resultsData.total}
+      />
 
-      {/* ── Candidate Results Table ── */}
-      {runId && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-bold text-gray-900">
-                Ranked Candidates ({totalResults})
-              </h2>
-              <span className="text-xs text-gray-500">
-                Ordered by composite match score descending with tie-break criteria.
-              </span>
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="p-12 text-center text-sm text-gray-400 italic">
-              Loading ranked candidate cohort...
-            </div>
-          ) : results.length === 0 ? (
-            <div className="p-12 text-center text-sm text-gray-400 italic">
-              No candidate results found for this run.
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 text-left text-xs">
-                <thead className="bg-gray-50 text-gray-500 font-semibold uppercase tracking-wider">
-                  <tr>
-                    <th className="px-4 py-3 w-12 text-center">Rank</th>
-                    <th className="px-4 py-3">Candidate</th>
-                    <th className="px-4 py-3">Experience</th>
-                    <th className="px-4 py-3 text-center">Factor Scores</th>
-                    <th className="px-4 py-3 text-center">Match Score</th>
-                    <th className="px-4 py-3 text-center">Band</th>
-                    <th className="px-4 py-3">Top Matched Skills</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {results.map((c) => (
-                    <tr
-                      key={c.id}
-                      className="hover:bg-indigo-50/30 transition-colors"
-                    >
-                      {/* Rank */}
-                      <td className="px-4 py-3.5 text-center font-bold text-gray-700">
-                        #{c.rank}
-                      </td>
-
-                      {/* Candidate info */}
-                      <td className="px-4 py-3.5">
-                        <div className="font-bold text-gray-900">
-                          {c.candidate_name || "Unknown Candidate"}
-                        </div>
-                        {c.candidate_email && (
-                          <div className="text-[11px] text-gray-400">
-                            {c.candidate_email}
-                          </div>
-                        )}
-                        {c.is_knockout && (
-                          <span className="inline-block mt-1 text-[10px] px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 font-bold border border-rose-200">
-                            🛡️ Knockout Capped
-                          </span>
-                        )}
-                      </td>
-
-                      {/* Experience */}
-                      <td className="px-4 py-3.5">
-                        <div className="font-semibold text-gray-800">
-                          {c.relevant_experience_years.toFixed(1)} / {c.total_experience_years.toFixed(1)} yrs
-                        </div>
-                        <div className="text-[11px] text-gray-400">
-                          domain / total
-                        </div>
-                      </td>
-
-                      {/* Factor Scores breakdown pill */}
-                      <td className="px-4 py-3.5 text-center">
-                        <div className="inline-flex items-center gap-1 text-[10px] font-mono text-gray-600 bg-gray-50 px-2 py-1 rounded border border-gray-100">
-                          <span title="Skill Score">Sk:{Math.round(c.skill_score)}</span>
-                          <span>•</span>
-                          <span title="Semantic Score">Se:{Math.round(c.semantic_score)}</span>
-                          <span>•</span>
-                          <span title="Experience Score">Ex:{Math.round(c.experience_score)}</span>
-                          <span>•</span>
-                          <span title="Qualification Score">Qu:{Math.round(c.qualification_score)}</span>
-                          <span>•</span>
-                          <span title="Title Score">Ti:{Math.round(c.title_score)}</span>
-                        </div>
-                      </td>
-
-                      {/* Final Score */}
-                      <td className="px-4 py-3.5 text-center">
-                        <span
-                          className={`text-base font-extrabold ${getScoreColor(
-                            c.final_score
-                          )}`}
-                        >
-                          {c.final_score.toFixed(1)}%
-                        </span>
-                      </td>
-
-                      {/* Band */}
-                      <td className="px-4 py-3.5 text-center">
-                        <span
-                          className={`inline-block px-2.5 py-1 text-[11px] font-bold rounded-full border ${getBandBadgeClass(
-                            c.band
-                          )}`}
-                        >
-                          {c.band}
-                        </span>
-                      </td>
-
-                      {/* Top Skills */}
-                      <td className="px-4 py-3.5">
-                        <div className="flex flex-wrap gap-1 max-w-xs">
-                          {c.top_skills && c.top_skills.length > 0 ? (
-                            c.top_skills.map((skill, sIdx) => (
-                              <span
-                                key={sIdx}
-                                className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 font-medium border border-indigo-100"
-                              >
-                                {skill}
-                              </span>
-                            ))
-                          ) : (
-                            <span className="text-gray-400 italic text-[11px]">
-                              No direct core matches
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
+      {/* Ranking Table */}
+      <RankingTable
+        results={resultsData.items}
+        runId={runId}
+        loading={loading}
+        sortBy={sortBy}
+        order={order}
+        onSortChange={handleSortChange}
+        onResetFilters={handleResetFilters}
+      />
     </div>
   );
 }
-
-export default Dashboard;

@@ -445,14 +445,66 @@ Verification & Tests:
 | **React Frontend Developer** | 12 resumes | 1730.0 ms | **100.0%** | **+0.972** |
 | **AI/ML Engineer** | 12 resumes | 2128.0 ms | **100.0%** | **+0.832** |
 
-## Phase 5 — Ranking Dashboard
+## Phase 5 — Ranking Dashboard & Candidate Detail UI (Modules 4 & 5)
+**Status:** ✅ DONE
+
+### Checklist
+
+- [x] Part 0: System Audit & Verification:
+  - [x] 0.1 Confirmed Java & Spring Boot strictly kept in required skills list after family collapse
+  - [x] 0.2 Confirmed AI/ML JD cross-domain relevant experience years (Java/DevOps/React candidates get 0.0 relevant years)
+  - [x] 0.3 Audited title similarity scores before/after normalization (seniority modifiers stripped)
+  - [x] 0.4 Documented whole-doc cosine distribution (min=0.1123, median=0.3895, max=0.7838) with calibration bounds [0.15, 0.70]
+  - [x] 0.5 Generated 3 full ranking tables and verified semantic credit (NLP vs BERT/NER = partial, JS vs JavaScript = canonical exact)
+  - [x] 0.6 Performance profiling & speed optimization: LRU cached `_is_real_duty_sentence`, plummeting warm ranking latency from 1,777 ms down to **12.39 ms** (well below 1.0s target)
+- [x] Part A: Backend Gaps & Integrity:
+  - [x] `GET /api/match/runs/{run_id}/results` supporting sorting (`rank|score|experience|name`), ordering (`asc|desc`), filtering (`min_score`, `max_score`, `band`, `min_experience`, `skill`, `search`), pagination, returning original rank and run-wide band counts
+  - [x] `GET /api/match/runs/{run_id}/results/{candidate_id}` returning full MatchResult, complete candidate profile, rank, total, prev/next links, and JD comparison context
+  - [x] Foreign key cascade deletion (`ondelete="CASCADE"`) & repository cascade preventing orphan results
+  - [x] Dynamic staleness evaluation (`"JD edited"`, `"candidate removed"`, `"candidates added"`)
+  - [x] `GET /api/match/runs/latest` convenience endpoint
+- [x] Part B: Dashboard Page UI (`frontend/src/components/dashboard/`):
+  - [x] `DashboardHeader.jsx`: JD title, run timestamp, candidate count, model version, "Run again", CSV export, and stale warning banner
+  - [x] `SummaryCards.jsx`: 4 interactive band cards (clickable to filter), total pool, average score, top candidate
+  - [x] `ControlsBar.jsx`: Debounced search box (300 ms), band dropdown, min score slider (0-100), min experience input, skill filter dropdown, reset button, counter badge
+  - [x] `RankingTable.jsx`: Strict required column order (Candidate, Experience [total & rel], Match %, Matched Skills [up to 5 + chips], Rank, Band, Missing required, Knockout), sortable headers, clickable rows, loading skeleton, responsive mobile view
+  - [x] Full URL query string synchronization (`useSearchParams`) for all filters and sorting
+- [x] Part C: Candidate Detail Page UI (`frontend/src/components/candidate/`):
+  - [x] `CandidateTopBar.jsx`: Back button (retaining dashboard state), rank `#X of Y`, prev/next candidate buttons
+  - [x] `CandidateHeroCard.jsx`: Contact info, links, location, SVG circular score gauge, knockout notice banner
+  - [x] `ScoreBreakdownCard.jsx`: 5 horizontal progress bars with factor score, weight, contribution points, and summation bottom row
+  - [x] `NarrativeExplanationCard.jsx`: Plain-English summary, key strengths, missing requirements/gaps, factor rationale cards
+  - [x] `SkillsSection.jsx`: Required coverage ("X of Y"), core coverage %, matched required, partial/inferred, missing required, missing preferred, extra skills
+  - [x] `ExperienceComparisonCard.jsx`: Visual target range vs tenure bar, relevant verdict, chronological positions with "Relevant to this JD" tags
+  - [x] `QualificationComparisonCard.jsx`: Degree level comparison vs JD requirements with Pass/Exceeds badge, education history
+  - [x] `SemanticEvidenceCard.jsx`: Side-by-side JD duty sentences vs resume snippets with cosine similarity scores
+  - [x] `ExtractedResumeDataCard.jsx`: Collapsible raw resume text and parser diagnostics viewer
+- [x] Part D: One-Click Evaluator Demo:
+  - [x] Backend endpoint `POST /api/demo/seed?jd={java|react|aiml}&reset=true`
+  - [x] "Try with sample data" hero banner on Home page with 1-click buttons for Java Backend, React Frontend, and AI/ML Engineer
+  - [x] Auto-navigation to live dashboard upon seed completion
+- [x] Part E: Tests & Verification:
+  - [x] Integration test suite `backend/tests/test_dashboard_detail_api.py` (11 tests covering filtering, sorting, staleness, cascade deletion, candidate detail, demo seed)
+  - [x] Full automated pytest suite passing: 133 / 133 tests (100% pass rate)
+  - [x] Vite production build passing with 0 errors (122 modules transformed)
+
+### Test Results Summary
+
+| Test Suite | Total Tests | Passed | Result |
+|------------|-------------|--------|--------|
+| `test_dashboard_detail_api.py` (Dashboard & Detail APIs) | 11 | 11 | ✅ 100% Pass |
+| `test_jd_parser.py` (JD Parsing & NLP) | 44 | 44 | ✅ 100% Pass |
+| `test_jd_api.py` (JD REST API) | 12 | 12 | ✅ 100% Pass |
+| `test_resume_parser.py` (Resume Parsing) | 21 | 21 | ✅ 100% Pass |
+| `test_resumes_api.py` (Resumes REST API) | 9 | 9 | ✅ 100% Pass |
+| `test_matching_engine.py` (Matching Engine) | 18 | 18 | ✅ 100% Pass |
+| `test_matching_fixes_phase4.py` (Phase 4 Fixes A1-A7) | 9 | 9 | ✅ 100% Pass |
+| `test_match_api.py` (Matching REST API) | 9 | 9 | ✅ 100% Pass |
+| **Total Automated Pytest Suite** | **133** | **133** | **✅ 100% Pass** |
+| `vite build` (Frontend Production Build) | 122 modules | 122 | **✅ 0 Errors (4.12s)** |
+
+## Phase 6 — Additional Polish, Extended Evaluation & Final Docs
 **Status:** TODO
 
-## Phase 6 — Candidate Detail View
-**Status:** TODO
-
-## Phase 7 — Synthetic Data + Testing + Fixes
-**Status:** TODO
-
-## Phase 8 — README, Algorithm Doc, Demo, Polish
+## Phase 7 — Final Polish, Synthetic Data & Evaluation Reporting
 **Status:** TODO

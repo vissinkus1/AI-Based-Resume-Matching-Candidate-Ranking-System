@@ -22,6 +22,7 @@ Features:
 
 import math
 import re
+import functools
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -590,6 +591,7 @@ BOILERPLATE_DUTY_PREFIXES: tuple[str, ...] = (
 )
 
 
+@functools.lru_cache(maxsize=2048)
 def _is_real_duty_sentence(text: str) -> bool:
     """
     Validate that a sentence is an actionable job duty, not boilerplate introductory prose.

@@ -11,8 +11,13 @@ Provides:
 
 import hashlib
 import logging
+import os
 from typing import Any
 import numpy as np
+
+os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
+os.environ.setdefault("HF_HUB_OFFLINE", "1")
+os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
 
 from app.core.scoring_config import SCORING
 
@@ -62,6 +67,8 @@ class EmbeddingService:
             try:
                 import os
                 os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
+                os.environ.setdefault("HF_HUB_OFFLINE", "1")
+                os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
                 from sentence_transformers import SentenceTransformer
                 logger.info("Loading sentence transformer model '%s'...", self.model_name)
                 try:

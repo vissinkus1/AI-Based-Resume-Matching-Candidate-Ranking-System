@@ -66,6 +66,16 @@ export function getExportCsvUrl(runId) {
 }
 
 /**
+ * Get the latest match run, optionally filtered by jd_id.
+ * GET /api/match/runs/latest
+ */
+export async function getLatestRun(jdId = null) {
+  const params = jdId ? { jd_id: jdId } : {};
+  const res = await API.get("/api/match/runs/latest", { params });
+  return res.data;
+}
+
+/**
  * Delete a match run and its associated ranking results.
  * DELETE /api/match/runs/{run_id}
  */

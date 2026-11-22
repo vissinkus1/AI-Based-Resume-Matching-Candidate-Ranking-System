@@ -5,6 +5,11 @@ Creates the app, registers middleware (CORS), includes routers,
 triggers DB table creation on startup, and warms up the embedding model.
 """
 
+import os
+os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
+os.environ.setdefault("HF_HUB_OFFLINE", "1")
+os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
@@ -16,7 +21,7 @@ from app.models.jd import JobDescription  # noqa: F401 — registers table with 
 from app.models.candidate import Candidate  # noqa: F401 — registers table with Base
 from app.models.match import MatchRun, MatchResultDB  # noqa: F401 — registers table with Base
 from app.services.embedding_service import get_embedding_service
-from app.routers import health, jd, resumes, match
+from app.routers import health, jd, resumes, match, demo
 
 logger = logging.getLogger(__name__)
 
@@ -76,3 +81,4 @@ app.include_router(health.router)
 app.include_router(jd.router)
 app.include_router(resumes.router)
 app.include_router(match.router)
+app.include_router(demo.router)

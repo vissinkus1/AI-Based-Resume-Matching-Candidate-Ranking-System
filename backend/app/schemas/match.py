@@ -32,6 +32,7 @@ class MatchRunResponse(BaseModel):
     candidate_count: int
     duration_ms: float
     is_stale: bool = False
+    stale_reason: str | None = None
     created_at: datetime
 
 
@@ -43,40 +44,53 @@ class MatchRunListItem(BaseModel):
     candidate_count: int
     duration_ms: float
     is_stale: bool = False
+    stale_reason: str | None = None
     created_at: datetime
 
 
-class MatchResultSummary(BaseModel):
-    """Summary of an individual candidate's match result for list/table display."""
+class MatchResultRow(BaseModel):
+    """Row item in the ranking dashboard results table."""
     id: int
+    rank: int                            # Original rank, never renumbered
+    original_rank: int | None = None
     candidate_id: int | None = None
+    name: str = "Unknown Candidate"
     candidate_name: str | None = None
-    candidate_email: str | None = None
-    rank: int
-    final_score: float
-    band: str
-    is_knockout: bool
-    skill_score: float
-    semantic_score: float
-    experience_score: float
-    qualification_score: float
-    title_score: float
-    relevant_experience_years: float
-    total_experience_years: float
-    matched_skills_count: int
-    missing_required_count: int
-    top_skills: list[str] = []
+    email: str | None = None
+    total_experience_years: float = 0.0
+    relevant_years: float = 0.0
+    relevant_experience_years: float = 0.0
+    match_percent: float = 0.0           # final_score
+    final_score: float = 0.0
+    band: str = "Weak match"
+    matched_top: list[str] = Field(default_factory=list)          # Max 6 skills
+    matched_top_skills: list[str] = Field(default_factory=list)
+    missing_required_count: int = 0
+    missing_required_skills: list[str] = Field(default_factory=list)
+    is_knockout: bool = False
+    knockout_reason: str | None = None
+    skill_score: float = 0.0
+    semantic_score: float = 0.0
+    experience_score: float = 0.0
+    qualification_score: float = 0.0
+    title_score: float = 0.0
     summary: str = ""
 
 
+# Backward-compatible alias for MatchResultRow
+MatchResultSummary = MatchResultRow
+
+
 class MatchResultsPage(BaseModel):
-    """Paginated collection of candidate match results."""
+    """Paginated and filtered collection of candidate match results."""
     run_id: int
-    items: list[MatchResultSummary]
-    total: int
-    page: int
-    page_size: int
-    total_pages: int
+    items: list[MatchResultRow]
+    total: int                          # Total in run before filters
+    filtered_count: int                 # Count matching current filters
+    applied_filters: dict[str, Any]     # Active filter parameters
+    band_counts: dict[str, int]         # Total counts per band across whole run
+    limit: int
+    offset: int
 
 
 class MatchRunDetailResponse(BaseModel):
@@ -87,6 +101,7 @@ class MatchRunDetailResponse(BaseModel):
     candidate_count: int
     duration_ms: float
     is_stale: bool = False
+    stale_reason: str | None = None
     created_at: datetime
     config_snapshot: dict[str, Any] | None = None
     band_distribution: dict[str, int]
@@ -99,29 +114,65 @@ class CandidateDetailResultResponse(BaseModel):
     """Exhaustive explainable result for a single candidate within a match run."""
     run_id: int
     candidate_id: int | None = None
-    candidate_name: str | None = None
-    candidate_email: str | None = None
-    candidate_phone: str | None = None
-    candidate_location: str | None = None
     rank: int
+    total_candidates: int
+    prev_candidate_id: int | None = None
+    next_candidate_id: int | None = None
+
+    # Candidate profile
+    name: str = "Unknown Candidate"
+    candidate_name: str | None = None
+    email: str | None = None
+    phone: str | None = None
+    links: dict[str, str | None] = Field(default_factory=dict)
+    location: str | None = None
+    education: list[dict[str, Any]] = Field(default_factory=list)
+    experience_entries: list[dict[str, Any]] = Field(default_factory=list)
+    candidate_skills: list[dict[str, Any]] = Field(default_factory=list)
+    summary: str = ""
+    parse_warnings: list[str] = Field(default_factory=list)
+    raw_resume_text: str | None = None
+
+    # Overall Match Status
     final_score: float
     uncapped_score: float
     band: str
     is_knockout: bool
     knockout_reason: str | None = None
+
+    # Score components & contributions
     scores: dict[str, float]
     contributions: dict[str, float]
     weights: dict[str, float]
-    skills: dict[str, Any]
-    semantic: dict[str, Any]
-    experience: dict[str, Any]
-    qualification: dict[str, Any]
-    title: dict[str, Any]
-    summary: str
-    strengths: list[str]
-    gaps: list[str]
-    reasons: list[dict[str, Any]]
-    raw_resume_text: str | None = None
+
+    # Explainable factor sections
+    skills_breakdown: dict[str, Any] = Field(default_factory=dict)
+    semantic_breakdown: dict[str, Any] = Field(default_factory=dict)
+    experience_breakdown: dict[str, Any] = Field(default_factory=dict)
+    qualification_breakdown: dict[str, Any] = Field(default_factory=dict)
+    title_breakdown: dict[str, Any] = Field(default_factory=dict)
+
+    # Narrative
+    narrative_summary: str = ""
+    strengths: list[str] = Field(default_factory=list)
+    gaps: list[str] = Field(default_factory=list)
+    reasons: list[dict[str, Any]] = Field(default_factory=list)
+
+    # Backward compatibility fields
+    skills: dict[str, Any] = Field(default_factory=dict)
+    semantic: dict[str, Any] = Field(default_factory=dict)
+    experience: dict[str, Any] = Field(default_factory=dict)
+    qualification: dict[str, Any] = Field(default_factory=dict)
+    title: dict[str, Any] = Field(default_factory=dict)
+
+    # JD Comparison Context
+    jd_title: str | None = None
+    jd_min_experience_years: float | None = None
+    jd_max_experience_years: float | None = None
+    jd_min_required_qualification: str | None = None
+    jd_preferred_qualification: str | None = None
+    jd_required_skills: list[str] = Field(default_factory=list)
+    jd_preferred_skills: list[str] = Field(default_factory=list)
 
 
 class ScoringConfigResponse(BaseModel):

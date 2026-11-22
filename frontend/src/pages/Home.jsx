@@ -25,6 +25,7 @@ import {
   clearAllCandidates,
 } from "../api/resumes";
 import { runMatch } from "../api/match";
+import { seedDemo } from "../api/demo";
 import { useJD } from "../context/JDContext";
 import SkillChips from "../components/SkillChips";
 import API from "../api/client";
@@ -39,6 +40,11 @@ function Home() {
   // Matching trigger state
   const [matching, setMatching] = useState(false);
   const [matchError, setMatchError] = useState(null);
+
+  // One-click demo state
+  const [demoLoading, setDemoLoading] = useState(false);
+  const [demoSelectedJd, setDemoSelectedJd] = useState(null);
+  const [demoError, setDemoError] = useState(null);
 
   // ── Step 1: JD input state ──
   const [activeTab, setActiveTab] = useState("paste"); // "paste" | "upload"
@@ -293,6 +299,22 @@ function Home() {
     }
   };
 
+  // ── One-Click Demo Seeder ──
+  const handleSeedDemo = async (jdKey) => {
+    setDemoLoading(true);
+    setDemoSelectedJd(jdKey);
+    setDemoError(null);
+    try {
+      const resp = await seedDemo(jdKey, true);
+      navigate(`/dashboard?run=${resp.run_id}`);
+    } catch (err) {
+      console.error("Demo seed error:", err);
+      setDemoError(err.response?.data?.detail || err.message || "Failed to initialize demo data.");
+      setDemoLoading(false);
+      setDemoSelectedJd(null);
+    }
+  };
+
   return (
     <div className="space-y-8 pb-12">
       {/* ── System Health Bar ── */}
@@ -320,6 +342,70 @@ function Home() {
           </div>
         )}
       </div>
+
+      {/* ── One-Click Instant Demo Experience ── */}
+      <section className="bg-gradient-to-r from-slate-900 via-indigo-950/60 to-slate-900 border border-indigo-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+          <div className="space-y-1.5 max-w-xl">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              <span>⚡</span> ONE-CLICK EVALUATOR DEMO
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+              Test Entire AI System in 1 Click
+            </h2>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Skip uploading files manually. Choose a target role to automatically seed the calibrated JD, ingest all 12 candidate resumes, run explainable ranking, and jump straight to the live dashboard.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-shrink-0">
+            <button
+              onClick={() => handleSeedDemo("java")}
+              disabled={demoLoading}
+              className="px-4 py-3 bg-slate-800/90 hover:bg-slate-700 active:bg-slate-600 text-white font-semibold text-xs rounded-xl border border-slate-700 transition flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+            >
+              <span>☕</span>
+              <span>{demoLoading && demoSelectedJd === "java" ? "Seeding..." : "Java Backend JD"}</span>
+              <span className="text-[10px] text-slate-400 font-mono">(12 Resumes)</span>
+            </button>
+
+            <button
+              onClick={() => handleSeedDemo("react")}
+              disabled={demoLoading}
+              className="px-4 py-3 bg-slate-800/90 hover:bg-slate-700 active:bg-slate-600 text-white font-semibold text-xs rounded-xl border border-slate-700 transition flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+            >
+              <span>⚛️</span>
+              <span>{demoLoading && demoSelectedJd === "react" ? "Seeding..." : "React Frontend JD"}</span>
+              <span className="text-[10px] text-slate-400 font-mono">(12 Resumes)</span>
+            </button>
+
+            <button
+              onClick={() => handleSeedDemo("aiml")}
+              disabled={demoLoading}
+              className="px-4 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 active:from-indigo-700 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25 disabled:opacity-50"
+            >
+              <span>🤖</span>
+              <span>{demoLoading && demoSelectedJd === "aiml" ? "Seeding..." : "AI/ML Engineer JD"}</span>
+              <span className="text-[10px] text-indigo-200 font-mono">(12 Resumes)</span>
+            </button>
+          </div>
+        </div>
+
+        {demoLoading && (
+          <div className="mt-4 pt-4 border-t border-indigo-500/20 flex items-center gap-3 text-xs text-indigo-300">
+            <div className="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+            <span>
+              Ingesting sample JD & 12 candidate resumes, computing 5-factor matching scores and ranking matrix...
+            </span>
+          </div>
+        )}
+
+        {demoError && (
+          <div className="mt-3 p-3 rounded-lg bg-rose-500/20 border border-rose-500/40 text-xs text-rose-300">
+            {demoError}
+          </div>
+        )}
+      </section>
 
       {/* ════════════════════════════════════════════════════════
           STEP 1: JOB DESCRIPTION

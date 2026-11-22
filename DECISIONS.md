@@ -72,3 +72,9 @@
 | D43 | DB Cascade delete on MatchRun with nullable candidate FK | Deleting a MatchRun cascades to all results; deleting a Candidate sets `candidate_id=NULL` but retains historical auditable scoring records. |
 | D44 | Lifespan embedding model warmup & `/health` readiness check | Pre-warms SentenceTransformer weights in FastAPI lifespan startup, preventing first-request cold-start latency spikes. |
 | D45 | Streaming CSV export without disk file accumulation | Streams candidate evaluation reports directly via Starlette StreamingResponse with standard RFC-4180 escaping. |
+| D46 | LRU caching on duty sentence validation | `_is_real_duty_sentence` cached with `maxsize=2048` eliminates redundant spaCy POS parsing across candidates in batch ranking, reducing warm batch ranking latency from 1,777 ms down to 12.39 ms. |
+| D47 | Dynamic multi-tier staleness evaluation | Match runs track `"JD edited"` (SHA-256 hash mismatch), `"candidate removed"` (orphan results pruned), and `"candidates added"` (new candidate timestamps > run creation timestamp). |
+| D48 | Candidate deletion cascade integrity | Foreign key `ondelete="CASCADE"` on `MatchResultDB.candidate_id` plus explicit repository cascade prune to guarantee zero orphaned match rows upon candidate deletion. |
+| D49 | Transparent deterministic score summation | ScoreBreakdownCard presents all 5 factor scores, weights, points contribution, and a summing bottom row verifying the exact linear composition formula. |
+| D50 | URL search parameter state synchronization | Dashboard filters (search, band, min_score, min_exp, skill, sort, order) sync to React Router `useSearchParams` for browser history, refresh persistence, and shareable links. |
+| D51 | One-click instant evaluator demo | `POST /api/demo/seed?jd={java|react|aiml}&reset=true` automates instant ingestion of target JDs and all 12 candidate resumes, computing rankings and auto-navigating to the live dashboard. |

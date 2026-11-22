@@ -18,7 +18,7 @@ from app.schemas.match import (
     MatchRunRequest,
     MatchRunResponse,
     MatchRunListItem,
-    MatchResultSummary,
+    MatchResultRow,
     MatchResultsPage,
     MatchRunDetailResponse,
     CandidateDetailResultResponse,
@@ -58,7 +58,52 @@ def run_match_endpoint(
         candidate_count=run.candidate_count,
         duration_ms=run.duration_ms,
         is_stale=False,
+        stale_reason=None,
         created_at=run.created_at,
+    )
+
+
+# ------------------------------------------------------------------
+# GET /api/match/runs/latest — Retrieve most recent match run (A4)
+# ------------------------------------------------------------------
+
+@router.get("/runs/latest", response_model=MatchRunDetailResponse)
+def get_latest_run_endpoint(
+    jd_id: int | None = Query(None, description="Optional JD filter"),
+    db: Session = Depends(get_db),
+) -> MatchRunDetailResponse:
+    """Convenience endpoint to retrieve the latest run overall or for a specific JD."""
+    repo = MatchRepository(db)
+    run, is_stale, stale_reason = repo.get_latest_run(jd_id=jd_id)
+    if not run:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No matching runs found.",
+        )
+
+    items, filtered_count, total, band_counts = repo.get_run_results_advanced(
+        run_id=run.id, limit=500, offset=0
+    )
+
+    total_score = sum(r.final_score for r in items)
+    top_cand_name = items[0].candidate.name if items and items[0].candidate else "Top Candidate"
+    top_cand_score = items[0].final_score if items else None
+    avg_score = round(total_score / total, 2) if total > 0 else 0.0
+
+    return MatchRunDetailResponse(
+        id=run.id,
+        jd_id=run.jd_id,
+        jd_title=run.jd.title if run.jd else None,
+        candidate_count=run.candidate_count,
+        duration_ms=run.duration_ms,
+        is_stale=is_stale,
+        stale_reason=stale_reason,
+        created_at=run.created_at,
+        config_snapshot=run.config_snapshot,
+        band_distribution=band_counts,
+        average_score=avg_score,
+        top_candidate_name=top_cand_name,
+        top_candidate_score=top_cand_score,
     )
 
 
@@ -83,9 +128,10 @@ def list_runs_endpoint(
             candidate_count=run.candidate_count,
             duration_ms=run.duration_ms,
             is_stale=stale,
+            stale_reason=reason,
             created_at=run.created_at,
         )
-        for run, stale in runs_with_stale
+        for run, stale, reason in runs_with_stale
     ]
 
 
@@ -97,35 +143,23 @@ def list_runs_endpoint(
 def get_run_endpoint(
     run_id: int, db: Session = Depends(get_db)
 ) -> MatchRunDetailResponse:
-    """Retrieve detailed metadata and band distributions for a specific run."""
+    """Retrieve detailed metadata, staleness reasons, and band distributions for a run."""
     repo = MatchRepository(db)
-    run, is_stale = repo.get_run(run_id)
+    run, is_stale, stale_reason = repo.get_run(run_id)
     if not run:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Match run {run_id} not found.",
         )
 
-    # Compute band distribution and average score from results
-    results, total = repo.get_run_results(run_id=run_id, limit=500)
-    band_dist: dict[str, int] = {
-        "Strong match": 0,
-        "Good match": 0,
-        "Partial match": 0,
-        "Weak match": 0,
-    }
-    total_score = 0.0
-    top_cand_name = None
-    top_cand_score = None
+    # Compute band distribution and average score
+    items, filtered_count, total, band_counts = repo.get_run_results_advanced(
+        run_id=run_id, limit=500, offset=0
+    )
 
-    for idx, r in enumerate(results):
-        band_name = r.band if r.band in band_dist else "Partial match"
-        band_dist[band_name] = band_dist.get(band_name, 0) + 1
-        total_score += r.final_score
-        if idx == 0:
-            top_cand_score = r.final_score
-            top_cand_name = r.candidate.name if r.candidate else "Top Candidate"
-
+    total_score = sum(r.final_score for r in items)
+    top_cand_name = items[0].candidate.name if items and items[0].candidate else "Top Candidate"
+    top_cand_score = items[0].final_score if items else None
     avg_score = round(total_score / total, 2) if total > 0 else 0.0
 
     return MatchRunDetailResponse(
@@ -135,9 +169,10 @@ def get_run_endpoint(
         candidate_count=run.candidate_count,
         duration_ms=run.duration_ms,
         is_stale=is_stale,
+        stale_reason=stale_reason,
         created_at=run.created_at,
         config_snapshot=run.config_snapshot,
-        band_distribution=band_dist,
+        band_distribution=band_counts,
         average_score=avg_score,
         top_candidate_name=top_cand_name,
         top_candidate_score=top_cand_score,
@@ -145,42 +180,49 @@ def get_run_endpoint(
 
 
 # ------------------------------------------------------------------
-# GET /api/match/runs/{run_id}/results — Paginated candidate results
+# GET /api/match/runs/{run_id}/results — Filtered & sorted candidate results (A1)
 # ------------------------------------------------------------------
 
 @router.get("/runs/{run_id}/results", response_model=MatchResultsPage)
 def get_run_results_endpoint(
     run_id: int,
-    page: int = Query(1, ge=1, description="Page number"),
-    page_size: int = Query(20, ge=1, le=100, description="Items per page"),
-    sort_by: str = Query("rank", pattern="^(rank|final_score|created_at)$"),
+    sort_by: str = Query("rank", pattern="^(rank|score|final_score|experience|name)$"),
     order: str = Query("asc", pattern="^(asc|desc)$"),
+    min_score: float | None = Query(None, ge=0.0, le=100.0, description="Min final score"),
+    max_score: float | None = Query(None, ge=0.0, le=100.0, description="Max final score"),
     band: str | None = Query(None, description="Filter by band name"),
-    min_score: float | None = Query(None, ge=0.0, le=100.0, description="Filter min final_score"),
+    min_experience: float | None = Query(None, ge=0.0, description="Min experience years"),
+    skill: str | None = Query(None, description="Candidate must have matched this skill"),
+    search: str | None = Query(None, description="Search name or email"),
+    limit: int = Query(25, ge=1, le=200, description="Limit rows returned"),
+    offset: int = Query(0, ge=0, description="Offset for pagination"),
     db: Session = Depends(get_db),
 ) -> MatchResultsPage:
     """Fetch paginated, filtered, and sorted candidate ranking results."""
     repo = MatchRepository(db)
-    run, _ = repo.get_run(run_id)
+    run, _, _ = repo.get_run(run_id)
     if not run:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Match run {run_id} not found.",
         )
 
-    offset = (page - 1) * page_size
-    items_db, total_count = repo.get_run_results(
+    paged_items, filtered_count, total_count, band_counts = repo.get_run_results_advanced(
         run_id=run_id,
         sort_by=sort_by,
         order=order,
-        band=band,
         min_score=min_score,
-        limit=page_size,
+        max_score=max_score,
+        band=band,
+        min_experience=min_experience,
+        skill=skill,
+        search=search,
+        limit=limit,
         offset=offset,
     )
 
-    summaries: list[MatchResultSummary] = []
-    for r in items_db:
+    rows: list[MatchResultRow] = []
+    for r in paged_items:
         r_json = r.result_json or {}
         scores = r_json.get("scores", {})
         exp = r_json.get("experience", {})
@@ -190,49 +232,72 @@ def get_run_results_endpoint(
         top_skills = [
             m.get("candidate_skill") or m.get("jd_skill")
             for m in (skills.get("matched_top") or skills.get("matched", [])[:6])
-        ]
+        ][:6]
 
-        cand_name = r.candidate.name if r.candidate and r.candidate.name else r_json.get("name", "Unknown")
+        cand_name = r.candidate.name if r.candidate and r.candidate.name else r_json.get("name", "Unknown Candidate")
         cand_email = r.candidate.email if r.candidate else None
 
-        summaries.append(
-            MatchResultSummary(
+        missing_req_raw = skills.get("missing_required", [])
+        missing_req_list = [
+            m if isinstance(m, str) else m.get("skill", "")
+            for m in missing_req_raw
+        ]
+
+        rows.append(
+            MatchResultRow(
                 id=r.id,
+                rank=r.rank,  # Original rank, never renumbered
+                original_rank=r.rank,
                 candidate_id=r.candidate_id,
+                name=cand_name,
                 candidate_name=cand_name,
-                candidate_email=cand_email,
-                rank=r.rank,
+                email=cand_email,
+                total_experience_years=exp.get("total_years", r.candidate.total_experience_years if r.candidate else 0.0),
+                relevant_years=exp.get("relevant_years", 0.0),
+                relevant_experience_years=exp.get("relevant_years", 0.0),
+                match_percent=r.final_score,
                 final_score=r.final_score,
                 band=r.band,
+                matched_top=top_skills,
+                matched_top_skills=top_skills,
+                missing_required_count=len(missing_req_raw),
+                missing_required_skills=missing_req_list,
                 is_knockout=r.is_knockout,
+                knockout_reason=r_json.get("knockout_reason"),
                 skill_score=scores.get("skill", 0.0),
                 semantic_score=scores.get("semantic", 0.0),
                 experience_score=scores.get("experience", 0.0),
                 qualification_score=scores.get("qualification", 0.0),
                 title_score=scores.get("title", 0.0),
-                relevant_experience_years=exp.get("relevant_years", 0.0),
-                total_experience_years=exp.get("total_years", 0.0),
-                matched_skills_count=len(skills.get("matched", [])),
-                missing_required_count=len(skills.get("missing_required", [])),
-                top_skills=top_skills,
                 summary=narrative.get("summary") or r_json.get("summary", ""),
             )
         )
 
-    total_pages = math.ceil(total_count / page_size) if total_count > 0 else 0
+    applied_filters = {
+        "sort_by": sort_by,
+        "order": order,
+        "min_score": min_score,
+        "max_score": max_score,
+        "band": band,
+        "min_experience": min_experience,
+        "skill": skill,
+        "search": search,
+    }
 
     return MatchResultsPage(
         run_id=run_id,
-        items=summaries,
+        items=rows,
         total=total_count,
-        page=page,
-        page_size=page_size,
-        total_pages=total_pages,
+        filtered_count=filtered_count,
+        applied_filters=applied_filters,
+        band_counts=band_counts,
+        limit=limit,
+        offset=offset,
     )
 
 
 # ------------------------------------------------------------------
-# GET /api/match/runs/{run_id}/results/{candidate_id} — Single result
+# GET /api/match/runs/{run_id}/results/{candidate_id} — Single result (A2)
 # ------------------------------------------------------------------
 
 @router.get(
@@ -242,45 +307,88 @@ def get_run_results_endpoint(
 def get_candidate_result_endpoint(
     run_id: int, candidate_id: int, db: Session = Depends(get_db)
 ) -> CandidateDetailResultResponse:
-    """Retrieve full explainable breakdown for a specific candidate in a run."""
+    """Retrieve full explainable breakdown, profile info, and navigation context."""
     repo = MatchRepository(db)
-    res = repo.get_candidate_result(run_id=run_id, candidate_id=candidate_id)
-    if not res:
+    ctx = repo.get_candidate_detail_context(run_id=run_id, candidate_id=candidate_id)
+    if not ctx:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Candidate {candidate_id} result not found for run {run_id}.",
         )
 
-    r_json = res.result_json or {}
+    res = ctx["result"]
     cand = res.candidate
+    jd = ctx["jd"]
+    r_json = res.result_json or {}
+    cand_parsed = cand.parsed_json or {} if cand else {}
     narrative = r_json.get("narrative", {})
+
+    # JD context
+    jd_parsed = jd.parsed_json or {} if jd else {}
 
     return CandidateDetailResultResponse(
         run_id=run_id,
         candidate_id=res.candidate_id,
-        candidate_name=cand.name if cand and cand.name else r_json.get("name", "Unknown"),
-        candidate_email=cand.email if cand else None,
-        candidate_phone=cand.phone if cand else None,
-        candidate_location=cand.parsed_json.get("location") if cand and cand.parsed_json else None,
-        rank=res.rank,
+        rank=ctx["rank"],
+        total_candidates=ctx["total_candidates"],
+        prev_candidate_id=ctx["prev_candidate_id"],
+        next_candidate_id=ctx["next_candidate_id"],
+
+        # Candidate profile
+        name=cand.name if cand and cand.name else r_json.get("name", "Unknown Candidate"),
+        candidate_name=cand.name if cand and cand.name else r_json.get("name", "Unknown Candidate"),
+        email=cand.email if cand else None,
+        phone=cand.phone if cand else None,
+        links={
+            "linkedin": cand_parsed.get("linkedin_url"),
+            "github": cand_parsed.get("github_url"),
+        },
+        location=cand_parsed.get("location"),
+        education=cand_parsed.get("education", []),
+        experience_entries=cand_parsed.get("experience_entries", []),
+        candidate_skills=cand_parsed.get("skills", []),
+        summary=cand_parsed.get("summary", ""),
+        parse_warnings=cand_parsed.get("parse_warnings", []),
+        raw_resume_text=cand.raw_text if cand else None,
+
+        # Overall Status
         final_score=res.final_score,
         uncapped_score=r_json.get("uncapped_score", res.final_score),
         band=res.band,
         is_knockout=res.is_knockout,
         knockout_reason=r_json.get("knockout_reason"),
+
+        # Scores & Breakdown
         scores=r_json.get("scores", {}),
         contributions=r_json.get("contributions", {}),
         weights=r_json.get("weights", {}),
+        skills_breakdown=r_json.get("skills", {}),
+        semantic_breakdown=r_json.get("semantic", {}),
+        experience_breakdown=r_json.get("experience", {}),
+        qualification_breakdown=r_json.get("qualification", {}),
+        title_breakdown=r_json.get("title", {}),
+
+        # Backward compatibility
         skills=r_json.get("skills", {}),
         semantic=r_json.get("semantic", {}),
         experience=r_json.get("experience", {}),
         qualification=r_json.get("qualification", {}),
         title=r_json.get("title", {}),
-        summary=narrative.get("summary") or r_json.get("summary", ""),
+
+        # Narrative
+        narrative_summary=narrative.get("summary") or r_json.get("summary", ""),
         strengths=narrative.get("strengths") or r_json.get("strengths", []),
         gaps=narrative.get("gaps") or r_json.get("gaps", []),
         reasons=narrative.get("reasons") or r_json.get("reasons", []),
-        raw_resume_text=cand.raw_text if cand else None,
+
+        # JD Requirements context
+        jd_title=jd.title if jd else None,
+        jd_min_experience_years=jd_parsed.get("min_experience_years"),
+        jd_max_experience_years=jd_parsed.get("max_experience_years"),
+        jd_min_required_qualification=jd_parsed.get("min_required_level"),
+        jd_preferred_qualification=jd_parsed.get("preferred_level"),
+        jd_required_skills=jd_parsed.get("required_skills", []),
+        jd_preferred_skills=jd_parsed.get("preferred_skills", []),
     )
 
 
@@ -294,14 +402,16 @@ def export_results_csv(
 ) -> StreamingResponse:
     """Export complete candidate ranking list as a formatted CSV file."""
     repo = MatchRepository(db)
-    run, _ = repo.get_run(run_id)
+    run, _, _ = repo.get_run(run_id)
     if not run:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Match run {run_id} not found.",
         )
 
-    results, _ = repo.get_run_results(run_id=run_id, sort_by="rank", order="asc", limit=1000)
+    results, _, _, _ = repo.get_run_results_advanced(
+        run_id=run_id, sort_by="rank", order="asc", limit=1000, offset=0
+    )
 
     output = io.StringIO()
     writer = csv.writer(output)
@@ -341,7 +451,7 @@ def export_results_csv(
         )
         missing_req = "; ".join(skills.get("missing_required", []))
 
-        cand_name = r.candidate.name if r.candidate and r.candidate.name else r_json.get("name", "Unknown")
+        cand_name = r.candidate.name if r.candidate and r.candidate.name else r_json.get("name", "Unknown Candidate")
         cand_email = r.candidate.email if r.candidate and r.candidate.email else ""
         summary_text = (narrative.get("summary") or r_json.get("summary", "")).replace("\n", " ")
 
