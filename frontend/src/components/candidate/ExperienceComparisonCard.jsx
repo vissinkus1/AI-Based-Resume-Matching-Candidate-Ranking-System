@@ -1,4 +1,9 @@
 import React from "react";
+import Card from "../ui/Card";
+import SectionHeader from "../ui/SectionHeader";
+import Badge from "../ui/Badge";
+import Chip from "../ui/Chip";
+import Eyebrow from "../ui/Eyebrow";
 
 export default function ExperienceComparisonCard({
   experienceBreakdown = {},
@@ -11,7 +16,7 @@ export default function ExperienceComparisonCard({
   const verdict = experienceBreakdown.verdict || (relevantExp >= (jdMinExp || 0) ? "Meets Requirement" : "Below Minimum");
   const score = experienceBreakdown.score !== undefined ? experienceBreakdown.score : 0;
 
-  // Max scale for visual comparison bar (e.g. 15 yrs or max of all + 2)
+  // Max scale for visual comparison bar
   const maxScale = Math.max(12, totalExp + 2, (jdMaxExp || jdMinExp || 5) + 3);
 
   const jdMinPct = jdMinExp ? (jdMinExp / maxScale) * 100 : 0;
@@ -20,41 +25,40 @@ export default function ExperienceComparisonCard({
   const relPct = Math.min(100, (relevantExp / maxScale) * 100);
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl mb-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-        <div>
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <span>💼</span> Experience Alignment & Work History
-          </h3>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Evaluated by relevant domain duration (70%) and total career tenure (30%).
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-slate-400">Score:</span>
-          <span className="text-base font-black text-indigo-400">
-            {typeof score === "number" ? score.toFixed(1) : score}/100
-          </span>
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-800 text-slate-200 border border-slate-700">
-            {verdict}
-          </span>
-        </div>
-      </div>
+    <Card padding="p-6 sm:p-8" className="bg-brand-paper mb-6">
+      <SectionHeader
+        eyebrow="EXPERIENCE"
+        title="Experience Alignment &amp; Work History"
+        subtitle="Evaluated by relevant domain duration (70%) and total career tenure (30%)."
+        actions={
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-brand-muted">Score:</span>
+            <span className="font-mono text-base font-bold tabular-nums text-brand-forest">
+              {typeof score === "number" ? score.toFixed(1) : score}%
+            </span>
+            <Badge variant="good" size="sm" dot={false}>
+              {verdict}
+            </Badge>
+          </div>
+        }
+      />
 
       {/* Visual Comparison Bar */}
-      <div className="bg-slate-950 p-4 rounded-xl border border-slate-800/80 mb-6 space-y-3">
-        <div className="flex items-center justify-between text-xs text-slate-400">
+      <div className="bg-brand-ivory/60 p-5 rounded-2xl border border-brand-line mb-6 space-y-3">
+        <div className="flex items-center justify-between text-xs font-mono text-brand-muted">
           <span>0 yrs</span>
-          <span>Target Range vs Candidate Tenure</span>
+          <span className="font-sans font-semibold text-[10px] uppercase tracking-wider">
+            Target Range vs Candidate Tenure
+          </span>
           <span>{maxScale.toFixed(0)} yrs</span>
         </div>
 
         {/* Bar container */}
-        <div className="relative h-6 bg-slate-900 rounded-lg overflow-hidden border border-slate-800">
+        <div className="relative h-6 bg-brand-sage-soft/30 rounded-xl overflow-hidden border border-brand-line">
           {/* JD Required Target Range Zone */}
           {jdMinExp && (
             <div
-              className="absolute top-0 bottom-0 bg-indigo-500/20 border-x border-indigo-500/40 z-0"
+              className="absolute top-0 bottom-0 bg-brand-forest/20 border-x border-brand-forest/40 z-0"
               style={{
                 left: `${jdMinPct}%`,
                 width: `${Math.max(5, jdMaxPct - jdMinPct)}%`,
@@ -65,14 +69,14 @@ export default function ExperienceComparisonCard({
 
           {/* Candidate Total Experience */}
           <div
-            className="absolute top-1 bottom-1 bg-slate-700/80 rounded opacity-60 z-10 transition-all duration-700"
+            className="absolute top-1 bottom-1 bg-brand-sage-soft rounded-lg opacity-70 z-10 transition-all duration-700"
             style={{ left: 0, width: `${totalPct}%` }}
             title={`Total Experience: ${totalExp.toFixed(1)} years`}
           />
 
           {/* Candidate Relevant Experience */}
           <div
-            className="absolute top-1 bottom-1 bg-emerald-500 rounded z-20 transition-all duration-700"
+            className="absolute top-1 bottom-1 bg-band-strong rounded-lg z-20 transition-all duration-700"
             style={{ left: 0, width: `${relPct}%` }}
             title={`Relevant Experience: ${relevantExp.toFixed(1)} years`}
           />
@@ -82,102 +86,102 @@ export default function ExperienceComparisonCard({
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs pt-1">
           <div className="flex items-center gap-4 flex-wrap">
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded bg-emerald-500 inline-block" />
-              <strong className="text-white">{relevantExp.toFixed(1)} yrs</strong>{" "}
-              <span className="text-slate-400">Relevant Experience</span>
+              <span className="w-3 h-3 rounded bg-band-strong inline-block" />
+              <strong className="text-brand-ink font-mono tabular-nums">{relevantExp.toFixed(1)} yrs</strong>{" "}
+              <span className="text-brand-muted">Relevant Domain</span>
             </span>
 
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded bg-slate-700 inline-block" />
-              <strong className="text-white">{totalExp.toFixed(1)} yrs</strong>{" "}
-              <span className="text-slate-400">Total Career</span>
+              <span className="w-3 h-3 rounded bg-brand-sage-soft inline-block" />
+              <strong className="text-brand-ink font-mono tabular-nums">{totalExp.toFixed(1)} yrs</strong>{" "}
+              <span className="text-brand-muted">Total Career</span>
             </span>
 
             {jdMinExp && (
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded bg-indigo-500/40 border border-indigo-400 inline-block" />
-                <span className="text-indigo-300 font-medium">
-                  JD Target: {jdMinExp}{jdMaxExp ? `–${jdMaxExp}` : "+"} yrs
+                <span className="w-3 h-3 rounded bg-brand-forest/20 border border-brand-forest inline-block" />
+                <span className="text-brand-forest font-medium">
+                  Target: {jdMinExp}{jdMaxExp ? `–${jdMaxExp}` : "+"} yrs
                 </span>
               </span>
             )}
           </div>
-
-          <div className="text-xs text-slate-400 italic">
-            {experienceBreakdown.rule_used || "Domain core skills & semantic relevance"}
-          </div>
         </div>
       </div>
 
-      {/* Work History Timeline */}
-      <div>
-        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
-          Chronological Work History ({experienceEntries.length} positions)
+      {/* Chronological Work History List */}
+      <div className="space-y-3">
+        <h4 className="font-serif text-sm font-bold text-brand-ink">
+          Extracted Career Timeline ({experienceEntries.length} roles)
         </h4>
 
-        {experienceEntries && experienceEntries.length > 0 ? (
+        {experienceEntries.length === 0 ? (
+          <p className="text-xs text-brand-muted italic bg-brand-ivory/50 p-4 rounded-2xl border border-brand-line">
+            No chronological work experience entries detected.
+          </p>
+        ) : (
           <div className="space-y-3">
-            {experienceEntries.map((job, idx) => {
-              const isRelevant = Boolean(
-                job.is_relevant !== undefined ? job.is_relevant : (job.months && job.months > 0)
-              );
-              const skillsInJob = job.skills_in_entry || [];
-              const durationYrs = job.months ? (job.months / 12).toFixed(1) : null;
+            {experienceEntries.map((exp, idx) => {
+              const isRel = exp.is_relevant;
+              const title = exp.job_title || exp.title || "Position Title Not Specified";
+              const company = exp.company || "Company Not Listed";
+              const dur = exp.duration_years || exp.duration_months ? `${((exp.duration_years || 0) + (exp.duration_months || 0) / 12).toFixed(1)} yrs` : "Duration unverified";
+              const skillsInEntry = exp.skills_in_entry || [];
 
               return (
                 <div
                   key={idx}
-                  className={`p-4 rounded-xl border transition-all ${
-                    isRelevant
-                      ? "bg-slate-950/80 border-slate-700/80"
-                      : "bg-slate-950/40 border-slate-800/60 opacity-80"
+                  className={`p-4 rounded-2xl border transition-all ${
+                    isRel
+                      ? "bg-brand-paper border-band-strong/40"
+                      : "bg-brand-ivory/40 border-brand-line opacity-85"
                   }`}
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h5 className="font-bold text-sm text-white">{job.title || "Position"}</h5>
-                        {job.company && (
-                          <span className="text-xs font-semibold text-slate-400">
-                            at {job.company}
-                          </span>
-                        )}
-                        {isRelevant ? (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                            ✓ Relevant to this JD
-                          </span>
-                        ) : (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-400">
-                            General Background
-                          </span>
-                        )}
+                        <h5 className="font-serif font-bold text-sm text-brand-ink">
+                          {title}
+                        </h5>
+                        <Badge
+                          variant={isRel ? "strong" : "neutral"}
+                          size="sm"
+                          dot={isRel}
+                        >
+                          {isRel ? "Relevant Domain" : "General Experience"}
+                        </Badge>
                       </div>
+                      <p className="text-xs text-brand-muted mt-0.5">
+                        <strong className="text-brand-ink/90 font-medium">{company}</strong>
+                        {exp.start_date && (
+                          <span className="font-mono">
+                            {" "}· {exp.start_date} – {exp.end_date || "Present"}
+                          </span>
+                        )}
+                      </p>
                     </div>
-
-                    <div className="text-xs text-slate-400 whitespace-nowrap">
-                      {durationYrs ? `${durationYrs} yrs` : ""}
-                      {job.start_date ? ` (${job.start_date} – ${job.end_date || "Present"})` : ""}
-                    </div>
+                    <span className="font-mono text-xs font-semibold tabular-nums text-brand-forest shrink-0">
+                      {dur}
+                    </span>
                   </div>
 
-                  {/* Bullet points / description */}
-                  {job.description && (
-                    <p className="text-xs text-slate-300 leading-relaxed mb-2.5 whitespace-pre-line line-clamp-3">
-                      {job.description}
+                  {/* Bullet description if present */}
+                  {exp.description && (
+                    <p className="text-xs text-brand-muted line-clamp-3 mb-2.5 leading-relaxed bg-brand-ivory/60 p-2.5 rounded-xl border border-brand-line/60">
+                      {exp.description}
                     </p>
                   )}
 
-                  {/* Skills detected in this position */}
-                  {skillsInJob.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                      <span className="text-[10px] text-slate-500 uppercase font-bold">Skills:</span>
-                      {skillsInJob.map((sk, sIdx) => (
-                        <span
-                          key={sIdx}
-                          className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-300 border border-slate-700"
-                        >
+                  {/* Skills tagged in this role */}
+                  {skillsInEntry.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-1 pt-1">
+                      <span className="text-[10px] font-sans font-semibold uppercase tracking-wider text-brand-muted mr-1">
+                        Domain Skills:
+                      </span>
+                      {skillsInEntry.map((sk) => (
+                        <Chip key={sk} variant="extra" size="sm">
                           {sk}
-                        </span>
+                        </Chip>
                       ))}
                     </div>
                   )}
@@ -185,10 +189,8 @@ export default function ExperienceComparisonCard({
               );
             })}
           </div>
-        ) : (
-          <p className="text-xs text-slate-500 italic">No structured work entries extracted.</p>
         )}
       </div>
-    </div>
+    </Card>
   );
 }

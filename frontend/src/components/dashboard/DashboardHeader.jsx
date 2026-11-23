@@ -1,6 +1,8 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import { getExportCsvUrl } from "../../api/match";
+import Card from "../ui/Card";
+import Button from "../ui/Button";
+import Eyebrow from "../ui/Eyebrow";
 
 export default function DashboardHeader({
   run,
@@ -25,87 +27,88 @@ export default function DashboardHeader({
     <div className="space-y-4 mb-6">
       {/* Top Banner if Stale */}
       {run.is_stale && (
-        <div className="bg-amber-500/15 border border-amber-500/30 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-amber-200">
-          <div className="flex items-center gap-3">
-            <span className="text-xl">⚠️</span>
-            <div>
-              <p className="font-semibold text-amber-300">
-                Stale Results Warning: {run.stale_reason || "Data has changed"}
+        <div className="bg-band-partial/15 border border-band-partial/40 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-brand-ink">
+          <div className="flex items-start gap-3">
+            <span className="text-xl shrink-0 mt-0.5">⚠️</span>
+            <div className="space-y-0.5">
+              <p className="font-serif font-bold text-sm text-brand-ink">
+                Stale Results Warning: {run.stale_reason || "Specification or candidate pool updated"}
               </p>
-              <p className="text-xs text-amber-300/80">
-                The job description or candidate pool was modified since this run was calculated. Re-run matching to update scores.
+              <p className="text-xs text-brand-muted">
+                The job description or candidate pool was modified since this run was calculated. Re-run matching to synchronize scores.
               </p>
             </div>
           </div>
-          <button
+          <Button
+            variant="outlined"
+            size="sm"
             onClick={onReRun}
             disabled={reRunning}
-            className="px-4 py-2 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-slate-950 font-semibold text-xs rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap shadow-sm disabled:opacity-50"
+            loading={reRunning}
+            className="shrink-0"
           >
-            {reRunning ? "Re-running..." : "⚡ Re-run Now"}
-          </button>
+            ⚡ Re-run Now
+          </Button>
         </div>
       )}
 
       {/* Main Header Card */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-        <div>
-          <div className="flex items-center gap-2.5 flex-wrap mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-              Run #{run.id}
-            </span>
-            <span className="text-xs text-slate-400">
-              Generated: {runDate}
-            </span>
-            <span className="text-xs text-slate-500">•</span>
-            <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800 text-slate-300 border border-slate-700">
-              v1.0 • all-MiniLM-L6-v2
-            </span>
-            {run.duration_ms && (
-              <span className="text-xs text-slate-400 font-mono">
-                ({run.duration_ms} ms)
+      <Card padding="p-6 sm:p-8" className="bg-brand-paper">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <Eyebrow>RUN #{run.id}</Eyebrow>
+              <span className="text-brand-line">•</span>
+              <span className="text-xs text-brand-muted font-mono">{runDate}</span>
+              <span className="text-brand-line">•</span>
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono bg-brand-sage-soft/30 text-brand-ink border border-brand-line">
+                all-MiniLM-L6-v2
               </span>
-            )}
+              {run.duration_ms && (
+                <span className="text-xs text-brand-muted font-mono">
+                  ({run.duration_ms} ms)
+                </span>
+              )}
+            </div>
+
+            <h1 className="font-display uppercase text-4xl sm:text-5xl lg:text-6xl text-brand-sage tracking-tight leading-none">
+              RANKING MATRIX
+            </h1>
+
+            <p className="font-serif text-lg sm:text-xl font-bold text-brand-ink mt-1">
+              {run.jd_title || "Job Description Match"}
+            </p>
+            <p className="text-xs sm:text-sm text-brand-muted">
+              Evaluated {run.candidate_count} {run.candidate_count === 1 ? "candidate" : "candidates"} across 5 explainable matching dimensions.
+            </p>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-            {run.jd_title || "Job Description Match"}
-          </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Evaluated {run.candidate_count} {run.candidate_count === 1 ? "candidate" : "candidates"} across 5 explainable matching dimensions.
-          </p>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <a
-            href={exportUrl}
-            download={`match_run_${run.id}_ranking.csv`}
-            className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-slate-200 text-sm font-medium rounded-xl border border-slate-700 transition flex items-center gap-2 shadow-sm"
-          >
-            <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Export CSV
-          </a>
-
-          <button
-            onClick={onReRun}
-            disabled={reRunning}
-            className="px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white text-sm font-semibold rounded-xl transition shadow-lg shadow-indigo-500/25 flex items-center gap-2 disabled:opacity-50"
-          >
-            <svg
-              className={`w-4 h-4 ${reRunning ? "animate-spin" : ""}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          {/* Action Buttons */}
+          <div className="flex items-center gap-3 shrink-0 flex-wrap">
+            <a
+              href={exportUrl}
+              download={`match_run_${run.id}_ranking.csv`}
+              className="inline-flex items-center justify-center font-sans font-medium transition-all duration-150 select-none min-h-[40px] text-xs px-4 py-2 gap-1.5 rounded-full border border-brand-forest text-brand-forest hover:bg-brand-forest hover:text-brand-ivory active:scale-[0.99]"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            {reRunning ? "Running..." : "Run Again"}
-          </button>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span>Export CSV</span>
+            </a>
+
+            <Button
+              variant="primary"
+              size="md"
+              onClick={onReRun}
+              disabled={reRunning}
+              loading={reRunning}
+            >
+              <span>⚡</span>
+              <span>Re-run Evaluation</span>
+            </Button>
+          </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

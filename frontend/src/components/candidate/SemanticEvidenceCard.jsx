@@ -1,4 +1,7 @@
 import React from "react";
+import Card from "../ui/Card";
+import SectionHeader from "../ui/SectionHeader";
+import Eyebrow from "../ui/Eyebrow";
 
 export default function SemanticEvidenceCard({
   semanticBreakdown = {},
@@ -9,42 +12,33 @@ export default function SemanticEvidenceCard({
   const coverageScore = semanticBreakdown.coverage_score !== undefined ? semanticBreakdown.coverage_score : 0;
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl mb-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-        <div>
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <span>🔬</span> Semantic Relevance & Sentence Alignment
-          </h3>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Embeddings with all-MiniLM-L6-v2 mapping JD duty sentences to candidate resume evidence.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
+    <Card padding="p-6 sm:p-8" className="bg-brand-paper mb-6">
+      <SectionHeader
+        eyebrow="SEMANTIC EMBEDDINGS"
+        title="Semantic Relevance &amp; Sentence Alignment"
+        subtitle="Dense vector embeddings using all-MiniLM-L6-v2 mapping JD duty sentences to candidate resume evidence."
+        actions={
           <div className="text-right">
-            <span className="text-xs text-slate-400 block">Semantic Score:</span>
-            <span className="text-base font-black text-teal-400">
-              {typeof score === "number" ? score.toFixed(1) : score}/100
+            <span className="text-xs text-brand-muted block font-sans">Semantic Score:</span>
+            <span className="font-mono text-base font-bold tabular-nums text-brand-forest">
+              {typeof score === "number" ? score.toFixed(1) : score}%
             </span>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Metric pills */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 mb-5">
-        <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
-          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
-            Requirement Duty Coverage (60% weight)
-          </span>
-          <p className="text-base font-black text-white mt-0.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+        <div className="bg-brand-ivory/60 p-4 rounded-2xl border border-brand-line">
+          <Eyebrow>Requirement Duty Coverage (60% weight)</Eyebrow>
+          <p className="font-mono text-xl font-bold tabular-nums text-brand-forest mt-1">
             {typeof coverageScore === "number" ? coverageScore.toFixed(1) : coverageScore}%
           </p>
         </div>
 
-        <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
-          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
-            Whole-Document Similarity (40% weight)
-          </span>
-          <p className="text-base font-black text-white mt-0.5">
+        <div className="bg-brand-ivory/60 p-4 rounded-2xl border border-brand-line">
+          <Eyebrow>Whole-Document Similarity (40% weight)</Eyebrow>
+          <p className="font-mono text-xl font-bold tabular-nums text-brand-sage mt-1">
             {typeof docSim === "number" ? docSim.toFixed(1) : docSim}%
           </p>
         </div>
@@ -52,7 +46,7 @@ export default function SemanticEvidenceCard({
 
       {/* Paired Evidence Cards */}
       <div className="space-y-3">
-        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+        <h4 className="font-serif text-sm font-bold text-brand-ink">
           Top Aligned Semantic Evidence Pairs ({evidenceList.length})
         </h4>
 
@@ -67,16 +61,16 @@ export default function SemanticEvidenceCard({
               return (
                 <div
                   key={idx}
-                  className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 space-y-3 hover:border-slate-700 transition"
+                  className="bg-brand-ivory/40 border border-brand-line rounded-2xl p-4 sm:p-5 space-y-3 hover:border-brand-forest/40 transition"
                 >
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-slate-400">Evidence Pair #{idx + 1}</span>
+                    <span className="font-serif font-bold text-brand-ink">Evidence Pair #{idx + 1}</span>
                     {simPct && (
                       <span
-                        className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                        className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold ${
                           isHigh
-                            ? "bg-teal-500/15 text-teal-300 border border-teal-500/30"
-                            : "bg-slate-800 text-slate-300 border border-slate-700"
+                            ? "bg-band-strong/15 text-band-strong border border-band-strong/30"
+                            : "bg-brand-sage-soft/30 text-brand-ink border border-brand-line"
                         }`}
                       >
                         Cosine: {simPct}%
@@ -86,19 +80,19 @@ export default function SemanticEvidenceCard({
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                     {/* JD requirement */}
-                    <div className="bg-slate-900/90 p-3 rounded-lg border border-slate-800/80">
-                      <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block mb-1">
-                        🎯 Job Description Duty:
+                    <div className="bg-brand-paper p-3.5 rounded-xl border border-brand-line space-y-1">
+                      <span className="text-[10px] font-sans font-semibold text-brand-forest uppercase tracking-wider block">
+                        🎯 Target Job Duty:
                       </span>
-                      <p className="text-slate-300 italic">"{jdSentence}"</p>
+                      <p className="text-brand-ink/90 italic leading-relaxed">"{jdSentence}"</p>
                     </div>
 
                     {/* Candidate resume evidence */}
-                    <div className="bg-slate-900/90 p-3 rounded-lg border border-slate-800/80">
-                      <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block mb-1">
+                    <div className="bg-brand-paper p-3.5 rounded-xl border border-brand-line space-y-1">
+                      <span className="text-[10px] font-sans font-semibold text-band-strong uppercase tracking-wider block">
                         📄 Candidate Resume Snippet:
                       </span>
-                      <p className="text-slate-300 italic">"{resumeSentence}"</p>
+                      <p className="text-brand-ink/90 italic leading-relaxed">"{resumeSentence}"</p>
                     </div>
                   </div>
                 </div>
@@ -106,11 +100,11 @@ export default function SemanticEvidenceCard({
             })}
           </div>
         ) : (
-          <p className="text-xs text-slate-500 italic">
-            Semantic similarity computed holistically across candidate resume embeddings.
+          <p className="text-xs text-brand-muted italic bg-brand-ivory/50 p-4 rounded-2xl border border-brand-line">
+            No semantic sentence pairs stored for this run.
           </p>
         )}
       </div>
-    </div>
+    </Card>
   );
 }

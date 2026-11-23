@@ -1,9 +1,9 @@
 /*
  * pages/CandidateDetail.jsx — Comprehensive Explainable Candidate Match Detail.
  *
- * Implements Module 5:
+ * Implements Module 5 (Phase 6A Editorial Sage Design):
  * - CandidateTopBar (back link preserving state, rank badge, prev/next buttons)
- * - CandidateHeroCard (identity, contact, circular SVG gauge, knockout banner)
+ * - CandidateHeroCard (identity, contact, circular SVG gauge with Anton font, knockout banner)
  * - ScoreBreakdownCard (5 weighted progress bars, summation line, factor explanations)
  * - NarrativeExplanationCard (plain-English summary, strengths, gaps, factor verdicts)
  * - SkillsSection (matched, partial/child credit, missing required, missing preferred, extra)
@@ -14,7 +14,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams, useSearchParams, Link } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { getCandidateResult, getLatestRun } from "../api/match";
 
 import CandidateTopBar from "../components/candidate/CandidateTopBar";
@@ -26,10 +26,14 @@ import ExperienceComparisonCard from "../components/candidate/ExperienceComparis
 import QualificationComparisonCard from "../components/candidate/QualificationComparisonCard";
 import SemanticEvidenceCard from "../components/candidate/SemanticEvidenceCard";
 import ExtractedResumeDataCard from "../components/candidate/ExtractedResumeDataCard";
+import EmptyState from "../components/ui/EmptyState";
+import Card from "../components/ui/Card";
+import Skeleton from "../components/ui/Skeleton";
 
 export default function CandidateDetail() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const runIdFromUrl = searchParams.get("run");
 
   const [loading, setLoading] = useState(true);
@@ -43,7 +47,6 @@ export default function CandidateDetail() {
     try {
       let rId = runIdFromUrl;
       if (!rId) {
-        // Fallback to latest run if run param was omitted
         const latest = await getLatestRun();
         if (!latest?.id) {
           throw new Error("No active matching runs found to display candidate ranking.");
@@ -71,11 +74,21 @@ export default function CandidateDetail() {
   // Loading skeleton
   if (loading) {
     return (
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        <div className="animate-pulse bg-slate-900 border border-slate-800 rounded-2xl p-6 h-20" />
-        <div className="animate-pulse bg-slate-900 border border-slate-800 rounded-2xl p-8 h-64" />
-        <div className="animate-pulse bg-slate-900 border border-slate-800 rounded-2xl p-6 h-72" />
-        <div className="animate-pulse bg-slate-900 border border-slate-800 rounded-2xl p-6 h-60" />
+      <div className="max-w-5xl mx-auto space-y-6 py-4">
+        <Card padding="p-6" className="h-20 flex items-center justify-between">
+          <Skeleton variant="rectangular" width="160px" height="36px" />
+          <Skeleton variant="rectangular" width="200px" height="36px" />
+        </Card>
+        <Card padding="p-8" className="h-64 flex flex-col justify-between">
+          <div className="space-y-3">
+            <Skeleton variant="text" width="40%" />
+            <Skeleton variant="text" width="60%" />
+          </div>
+          <Skeleton variant="rectangular" width="100%" height="40px" />
+        </Card>
+        <Card padding="p-6" className="h-72">
+          <Skeleton variant="rectangular" width="100%" height="100%" />
+        </Card>
       </div>
     );
   }
@@ -83,28 +96,13 @@ export default function CandidateDetail() {
   // Error state
   if (error || !data) {
     return (
-      <div className="max-w-2xl mx-auto py-16 px-4 text-center">
-        <div className="w-16 h-16 mx-auto rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center text-3xl mb-4">
-          ⚠️
-        </div>
-        <h2 className="text-2xl font-bold text-white mb-2">Could Not Load Candidate Detail</h2>
-        <p className="text-slate-400 text-sm max-w-md mx-auto mb-6">
-          {error || "Candidate evaluation record was not found for this match run."}
-        </p>
-        <div className="flex items-center justify-center gap-3">
-          <Link
-            to={activeRunId ? `/dashboard?run=${activeRunId}` : "/dashboard"}
-            className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition"
-          >
-            ← Back to Dashboard
-          </Link>
-          <button
-            onClick={loadCandidateDetail}
-            className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl transition shadow"
-          >
-            Retry
-          </button>
-        </div>
+      <div className="py-16">
+        <EmptyState
+          title="Could Not Load Candidate Detail"
+          description={error || "Candidate evaluation record was not found for this match run."}
+          actionLabel="← Back to Ranking Dashboard"
+          onAction={() => navigate(activeRunId ? `/dashboard?run=${activeRunId}` : "/dashboard")}
+        />
       </div>
     );
   }
@@ -118,7 +116,7 @@ export default function CandidateDetail() {
   const relExp = expBreakdown.relevant_experience_years !== undefined ? expBreakdown.relevant_experience_years : totalExp;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-5xl mx-auto space-y-6">
       {/* 1. Top Navigation Bar */}
       <CandidateTopBar
         rank={data.rank}

@@ -1,4 +1,8 @@
 import React from "react";
+import Card from "../ui/Card";
+import SectionHeader from "../ui/SectionHeader";
+import Badge from "../ui/Badge";
+import Eyebrow from "../ui/Eyebrow";
 
 export default function QualificationComparisonCard({
   qualificationBreakdown = {},
@@ -12,73 +16,60 @@ export default function QualificationComparisonCard({
 
   const isExceeds = verdict.toLowerCase().includes("exceeds");
   const isPass = verdict.toLowerCase().includes("meets") || verdict.toLowerCase().includes("pass") || score >= 90;
-  const isFail = verdict.toLowerCase().includes("below") || verdict.toLowerCase().includes("fail") || score < 60;
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl mb-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-        <div>
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <span>🎓</span> Education & Degree Qualification
-          </h3>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Compares candidate degree level against minimum required and preferred credentials.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-slate-400">Score:</span>
-          <span className="text-base font-black text-purple-400">
-            {typeof score === "number" ? score.toFixed(1) : score}/100
-          </span>
-          <span
-            className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${isExceeds
-                ? "bg-purple-500/15 text-purple-300 border border-purple-500/30"
-                : isPass
-                  ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                  : "bg-rose-500/15 text-rose-400 border border-rose-500/30"
-              }`}
-          >
-            {isExceeds ? "Exceeds Requirement" : isPass ? "Requirement Met" : "Below Minimum"}
-          </span>
-        </div>
-      </div>
+    <Card padding="p-6 sm:p-8" className="bg-brand-paper mb-6">
+      <SectionHeader
+        eyebrow="QUALIFICATION"
+        title="Education &amp; Degree Qualification"
+        subtitle="Compares candidate degree hierarchy against minimum required and preferred credentials."
+        actions={
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-brand-muted">Score:</span>
+            <span className="font-mono text-base font-bold tabular-nums text-brand-forest">
+              {typeof score === "number" ? score.toFixed(1) : score}%
+            </span>
+            <Badge
+              variant={isExceeds ? "strong" : isPass ? "good" : "weak"}
+              size="sm"
+              dot={false}
+            >
+              {isExceeds ? "Exceeds Requirement" : isPass ? "Requirement Met" : "Below Minimum"}
+            </Badge>
+          </div>
+        }
+      />
 
       {/* Comparison Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
-        <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
-            JD Required Level
-          </span>
-          <p className="text-base font-bold text-white capitalize mt-0.5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+        <div className="bg-brand-ivory/60 p-4 rounded-2xl border border-brand-line">
+          <Eyebrow>JD Required Level</Eyebrow>
+          <p className="font-serif text-base font-bold text-brand-ink capitalize mt-1">
             {jdMinLevel || "Bachelor's (or equivalent)"}
           </p>
           {jdPreferredLevel && (
-            <span className="text-[11px] text-slate-400 mt-1 block">
+            <span className="text-[11px] text-brand-muted mt-1 block">
               Preferred: {jdPreferredLevel}
             </span>
           )}
         </div>
 
-        <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
-            Candidate Highest Degree
-          </span>
-          <p className="text-base font-bold text-emerald-400 capitalize mt-0.5">
+        <div className="bg-brand-ivory/60 p-4 rounded-2xl border border-brand-line">
+          <Eyebrow>Candidate Highest Degree</Eyebrow>
+          <p className="font-serif text-base font-bold text-brand-forest capitalize mt-1">
             {candidateLevel}
           </p>
-          <span className="text-[11px] text-slate-400 mt-1 block">
+          <span className="text-[11px] text-brand-muted mt-1 block">
             Hierarchy verified
           </span>
         </div>
 
-        <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
-            Qualification Status
-          </span>
-          <p className="text-base font-bold text-white mt-0.5">
+        <div className="bg-brand-ivory/60 p-4 rounded-2xl border border-brand-line">
+          <Eyebrow>Qualification Status</Eyebrow>
+          <p className="font-serif text-base font-bold text-brand-ink mt-1">
             {verdict}
           </p>
-          <span className="text-[11px] text-slate-400 mt-1 block">
+          <span className="text-[11px] text-brand-muted mt-1 block">
             {qualificationBreakdown.reason || "Formal credential check"}
           </span>
         </div>
@@ -86,28 +77,32 @@ export default function QualificationComparisonCard({
 
       {/* Listed Education Entries */}
       {educationEntries && educationEntries.length > 0 && (
-        <div className="space-y-2.5">
-          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-            Reported Degrees & Institutions ({educationEntries.length})
+        <div className="space-y-3">
+          <h4 className="font-serif text-sm font-bold text-brand-ink">
+            Reported Degrees &amp; Institutions ({educationEntries.length})
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {educationEntries.map((edu, idx) => (
               <div
                 key={idx}
-                className="bg-slate-950/60 border border-slate-800 rounded-xl p-3 flex items-start justify-between gap-3"
+                className="bg-brand-ivory/40 border border-brand-line rounded-2xl p-4 flex items-start justify-between gap-3"
               >
                 <div>
-                  <h5 className="font-bold text-xs text-white">
-                    {edu.degree || edu.raw_phrase || "Degree"}
-                    {edu.field ? ` in ${edu.field}` : ""}
+                  <h5 className="font-serif font-bold text-xs text-brand-ink">
+                    {edu.degree || edu.degree_raw || "Degree unverified"}
                   </h5>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    {edu.institution || "Accredited University"}
+                  <p className="text-xs text-brand-muted mt-0.5">
+                    {edu.institution || "Institution not listed"}
                   </p>
+                  {edu.field_of_study && (
+                    <span className="text-[11px] text-brand-forest font-medium block mt-1">
+                      Field: {edu.field_of_study}
+                    </span>
+                  )}
                 </div>
-                {edu.year && (
-                  <span className="text-[11px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded">
-                    {edu.year}
+                {edu.graduation_year && (
+                  <span className="font-mono text-xs font-semibold tabular-nums text-brand-muted px-2 py-0.5 bg-brand-paper rounded-full border border-brand-line">
+                    {edu.graduation_year}
                   </span>
                 )}
               </div>
@@ -115,6 +110,6 @@ export default function QualificationComparisonCard({
           </div>
         </div>
       )}
-    </div>
+    </Card>
   );
 }

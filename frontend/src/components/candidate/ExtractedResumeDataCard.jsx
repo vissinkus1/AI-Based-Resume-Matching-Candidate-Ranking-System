@@ -1,4 +1,8 @@
 import React, { useState } from "react";
+import Card from "../ui/Card";
+import Chip from "../ui/Chip";
+import Badge from "../ui/Badge";
+import Eyebrow from "../ui/Eyebrow";
 
 export default function ExtractedResumeDataCard({
   rawResumeText = "",
@@ -9,31 +13,33 @@ export default function ExtractedResumeDataCard({
   const [activeTab, setActiveTab] = useState("raw"); // "raw" | "skills"
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden mb-6">
+    <Card padding="p-0" className="bg-brand-paper overflow-hidden mb-6">
       {/* Header toggle button */}
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full p-5 flex items-center justify-between text-left hover:bg-slate-800/40 transition"
+        className="w-full p-6 sm:p-8 flex items-center justify-between text-left hover:bg-brand-sage-soft/10 transition cursor-pointer"
       >
-        <div className="flex items-center gap-3">
-          <span className="text-xl">🗂️</span>
+        <div className="flex items-center gap-3.5">
+          <span className="text-2xl shrink-0">🗂️</span>
           <div>
-            <h3 className="text-sm font-bold text-white">
-              Raw Extracted Resume Data & Parser Audit
+            <Eyebrow>AUDIT TRAIL</Eyebrow>
+            <h3 className="font-serif text-lg sm:text-xl font-bold text-brand-ink">
+              Raw Extracted Resume Data &amp; Parser Diagnostics
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Inspect the exact plain-text parsed representation and parser warnings.
+            <p className="text-xs text-brand-muted mt-0.5">
+              Inspect the exact plain-text parsed representation, extraction confidence, and warnings.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3 shrink-0">
           {parseWarnings && parseWarnings.length > 0 && (
-            <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+            <Badge variant="partial" size="sm" dot={false}>
               {parseWarnings.length} Warnings
-            </span>
+            </Badge>
           )}
-          <span className="text-slate-400 text-sm font-mono">
+          <span className="text-brand-forest text-xs font-mono font-semibold">
             {isOpen ? "▲ Hide" : "▼ Show"}
           </span>
         </div>
@@ -41,12 +47,12 @@ export default function ExtractedResumeDataCard({
 
       {/* Expanded Content */}
       {isOpen && (
-        <div className="p-6 border-t border-slate-800 space-y-4">
+        <div className="p-6 sm:p-8 border-t border-brand-line space-y-4 bg-brand-ivory/30">
           {/* Parser Warnings Banner if any */}
           {parseWarnings && parseWarnings.length > 0 && (
-            <div className="bg-amber-950/40 border border-amber-800/60 rounded-xl p-4 text-xs text-amber-200 space-y-1">
-              <h4 className="font-bold text-amber-300">Parser Diagnostics:</h4>
-              <ul className="list-disc list-inside space-y-1 text-slate-300">
+            <div className="bg-band-partial/15 border border-band-partial/40 rounded-2xl p-4 text-xs text-brand-ink space-y-1">
+              <h4 className="font-serif font-bold text-sm text-brand-ink">Parser Diagnostics:</h4>
+              <ul className="list-disc list-inside space-y-1 text-brand-muted">
                 {parseWarnings.map((w, idx) => (
                   <li key={idx}>{w}</li>
                 ))}
@@ -55,23 +61,25 @@ export default function ExtractedResumeDataCard({
           )}
 
           {/* Sub-tabs */}
-          <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
+          <div className="flex items-center gap-2 border-b border-brand-line pb-3">
             <button
+              type="button"
               onClick={() => setActiveTab("raw")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition ${
                 activeTab === "raw"
-                  ? "bg-indigo-600 text-white"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-brand-forest text-brand-ivory"
+                  : "bg-brand-sage-soft/30 text-brand-muted hover:text-brand-ink"
               }`}
             >
               Raw Document Text
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab("skills")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition ${
                 activeTab === "skills"
-                  ? "bg-indigo-600 text-white"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-brand-forest text-brand-ivory"
+                  : "bg-brand-sage-soft/30 text-brand-muted hover:text-brand-ink"
               }`}
             >
               Extracted Taxonomy Skills ({extractedSkills.length})
@@ -79,39 +87,39 @@ export default function ExtractedResumeDataCard({
           </div>
 
           {activeTab === "raw" && (
-            <div className="bg-slate-950 rounded-xl p-4 border border-slate-800 max-h-96 overflow-y-auto font-mono text-xs text-slate-300 whitespace-pre-wrap leading-relaxed select-text">
+            <div className="bg-brand-paper rounded-2xl p-5 border border-brand-line max-h-96 overflow-y-auto font-mono text-xs text-brand-ink whitespace-pre-wrap leading-relaxed select-text shadow-inner">
               {rawResumeText || "No raw text available."}
             </div>
           )}
 
           {activeTab === "skills" && (
-            <div className="bg-slate-950 rounded-xl p-4 border border-slate-800 max-h-96 overflow-y-auto space-y-2">
+            <div className="bg-brand-paper rounded-2xl p-5 border border-brand-line max-h-96 overflow-y-auto space-y-2">
               {extractedSkills && extractedSkills.length > 0 ? (
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-2">
                   {extractedSkills.map((sk, idx) => {
                     const name = typeof sk === "string" ? sk : sk.name || sk.skill;
                     const tier = typeof sk === "object" ? sk.tier : null;
                     const conf = typeof sk === "object" ? sk.confidence : null;
 
                     return (
-                      <span
-                        key={idx}
-                        className="px-2.5 py-1 rounded-lg text-xs bg-slate-900 text-slate-300 border border-slate-700 flex items-center gap-1.5"
-                      >
-                        <strong className="text-white">{name}</strong>
-                        {tier && <span className="text-[10px] text-slate-500">[{tier}]</span>}
-                        {conf && <span className="text-[10px] text-indigo-400">{conf}</span>}
-                      </span>
+                      <Chip key={idx} variant="extra">
+                        <span>{name}</span>
+                        {(tier || conf) && (
+                          <span className="text-[10px] font-mono text-brand-muted">
+                            ({tier ? tier : ""}{tier && conf ? " · " : ""}{conf ? conf : ""})
+                          </span>
+                        )}
+                      </Chip>
                     );
                   })}
                 </div>
               ) : (
-                <p className="text-xs text-slate-500 italic">No extracted skills.</p>
+                <p className="text-xs text-brand-muted italic">No taxonomy skills extracted.</p>
               )}
             </div>
           )}
         </div>
       )}
-    </div>
+    </Card>
   );
 }

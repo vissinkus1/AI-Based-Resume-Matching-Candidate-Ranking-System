@@ -78,3 +78,14 @@
 | D49 | Transparent deterministic score summation | ScoreBreakdownCard presents all 5 factor scores, weights, points contribution, and a summing bottom row verifying the exact linear composition formula. |
 | D50 | URL search parameter state synchronization | Dashboard filters (search, band, min_score, min_exp, skill, sort, order) sync to React Router `useSearchParams` for browser history, refresh persistence, and shareable links. |
 | D51 | One-click instant evaluator demo | `POST /api/demo/seed?jd={java|react|aiml}&reset=true` automates instant ingestion of target JDs and all 12 candidate resumes, computing rankings and auto-navigating to the live dashboard. |
+
+## Phase 6A
+
+| # | Decision | Rationale |
+|---|----------|-----------|
+| D52 | Dual-layer design tokens in CSS variables (`:root` in `index.css`) and Tailwind (`tailwind.config.js`) | Establishes single source of truth for editorial sage palette (`#E5E8CE` ivory, `#F3F5E6` paper, `#789575` sage, `#2F4A33` forest, `#1E2A20` ink, `#556456` muted) with zero hardcoded hex strings in JSX. |
+| D53 | Calibrated muted text token (`#556456`) for guaranteed WCAG AA compliance | Raw `#5E6B5F` on ivory `#E5E8CE` yielded 4.48:1 (just under the 4.5:1 AA threshold). Slightly deepening to `#556456` guarantees 5.01:1 on ivory and 5.69:1 on paper surfaces. |
+| D54 | Tri-tier typography system with robust offline fallbacks | Uses Google Fonts Anton (hero display/scores), Fraunces (editorial serif headings), and Inter (body/tables with tabular-nums) while falling back cleanly to Impact, Georgia, and system-ui offline without layout shift. |
+| D55 | Shared accessible UI primitives suite (`components/ui/`) | Centralizes buttons, cards, section headers, chips, stat tiles, score bars, eyebrows, dividers, empty states, and skeletons; enforces minimum 40px touch targets and visible focus rings. |
+| D56 | Score band dual-encoding requirement (visual tint + text label) | Accessibility rule ensuring score bands never rely on color alone; every band renders an explicit textual indicator (`Strong Match`, `Good Match`, `Partial Match`, `Weak Match`, `Knockout`). |
+| D57 | Frontend-only visual restyle with zero backend or API drift | Preserved 100% backend isolation; no Python code, database models, or REST API contracts were altered during UI modernization. |

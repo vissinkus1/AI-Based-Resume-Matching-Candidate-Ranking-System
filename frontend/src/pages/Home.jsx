@@ -1,21 +1,16 @@
 /*
- * pages/Home.jsx — Upload & Intake Page (JD + Resumes).
+ * pages/Home.jsx — Editorial Intake & Evaluation Page (JD + Resumes).
  *
- * Step 1: Job Description input
- *   - Tabs: "Paste Text" / "Upload File"
- *   - Analyze JD button → calls POST /api/jd/parse
- *   - Results panel: title, skills (editable chips), experience,
- *     qualifications, responsibilities, keywords
- *   - Save Changes → PUT /api/jd/{id}
- *
- * Step 2: Batch Resume Upload & Parsed Candidates Table
- *   - Multi-file drag-and-drop (PDF/DOCX, up to 50 files)
- *   - Batch upload progress bar & per-file status badges
- *   - Parsed candidates table: Name, Email, Experience, Top Skills, Warnings, Delete
- *   - "Run AI Matching" callout (ready for Phase 3)
+ * Implements Phase 6A Editorial Sage Design:
+ * - Huge Anton display headline, Fraunces serif headings, Inter tabular-nums body.
+ * - Paper surfaces, sage & forest green accents, hairline dividers.
+ * - Live preview card, 3-pillar feature list, 1-click evaluator demo.
+ * - Step 1: Job Description extraction & editing.
+ * - Step 2: Batch Resume upload & parsed candidate repository.
+ * - Deterministic matching execution callout.
  */
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { parseJDText, parseJDFile, updateJD } from "../api/jd";
 import {
@@ -27,10 +22,21 @@ import {
 import { runMatch } from "../api/match";
 import { seedDemo } from "../api/demo";
 import { useJD } from "../context/JDContext";
-import SkillChips from "../components/SkillChips";
 import API from "../api/client";
 
-function Home() {
+// Shared Editorial UI Primitives
+import Button from "../components/ui/Button";
+import Card from "../components/ui/Card";
+import SectionHeader from "../components/ui/SectionHeader";
+import Eyebrow from "../components/ui/Eyebrow";
+import Chip from "../components/ui/Chip";
+import Badge from "../components/ui/Badge";
+import ScoreBar from "../components/ui/ScoreBar";
+import Divider from "../components/ui/Divider";
+import EmptyState from "../components/ui/EmptyState";
+import SkillChips from "../components/SkillChips";
+
+export default function Home() {
   const navigate = useNavigate();
 
   // Backend health status
@@ -253,7 +259,7 @@ function Home() {
         setUploadProgress(pct);
       });
       setBatchResults(response);
-      setResumeFiles([]); // Clear selection upon batch complete
+      setResumeFiles([]);
       await loadCandidates();
     } catch (err) {
       setBatchResults({
@@ -316,814 +322,909 @@ function Home() {
   };
 
   return (
-    <div className="space-y-8 pb-12">
-      {/* ── System Health Bar ── */}
-      <div className="flex items-center justify-between bg-white px-4 py-2.5 rounded-lg shadow-sm text-xs text-gray-500">
-        <div className="flex items-center space-x-2">
-          <span className="font-semibold text-gray-700">System Status:</span>
+    <div className="space-y-12 pb-16">
+      {/* ── Editorial Top System Status Bar ── */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-brand-paper border border-brand-line px-5 py-2.5 rounded-full shadow-soft text-xs text-brand-muted">
+        <div className="flex items-center gap-2">
+          <span className="font-semibold text-brand-ink uppercase tracking-wider text-[11px]">System Status:</span>
           {healthLoading ? (
-            <span className="text-gray-400">checking backend...</span>
+            <span className="text-brand-muted">verifying runtime...</span>
           ) : healthStatus?.api && healthStatus?.database ? (
-            <span className="inline-flex items-center text-emerald-600 font-medium">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
-              Backend &amp; DB Connected
+            <span className="inline-flex items-center text-band-strong font-medium">
+              <span className="h-2 w-2 rounded-full bg-band-strong mr-1.5 animate-pulse" />
+              Backend &amp; SQLite Online
             </span>
           ) : (
-            <span className="inline-flex items-center text-rose-600 font-medium">
-              <span className="h-2 w-2 rounded-full bg-rose-500 mr-1.5" />
+            <span className="inline-flex items-center text-band-weak font-medium">
+              <span className="h-2 w-2 rounded-full bg-band-weak mr-1.5" />
               Backend Offline
             </span>
           )}
         </div>
         {activeJD && (
-          <div className="inline-flex items-center bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md font-medium">
-            <span className="mr-1.5">🎯</span> Active JD:{" "}
-            <span className="font-bold ml-1">{activeJD.title || "Untitled Role"}</span>
+          <div className="inline-flex items-center bg-brand-sage-soft/30 text-brand-ink px-3 py-1 rounded-full text-xs font-medium border border-brand-line">
+            <span className="mr-1.5 text-brand-forest">🎯</span> Active Role:{" "}
+            <span className="font-bold ml-1 text-brand-forest">{activeJD.title || "Untitled Role"}</span>
           </div>
         )}
       </div>
 
-      {/* ── One-Click Instant Demo Experience ── */}
-      <section className="bg-gradient-to-r from-slate-900 via-indigo-950/60 to-slate-900 border border-indigo-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
-          <div className="space-y-1.5 max-w-xl">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-              <span>⚡</span> ONE-CLICK EVALUATOR DEMO
-            </div>
-            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-              Test Entire AI System in 1 Click
-            </h2>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Skip uploading files manually. Choose a target role to automatically seed the calibrated JD, ingest all 12 candidate resumes, run explainable ranking, and jump straight to the live dashboard.
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-shrink-0">
-            <button
-              onClick={() => handleSeedDemo("java")}
-              disabled={demoLoading}
-              className="px-4 py-3 bg-slate-800/90 hover:bg-slate-700 active:bg-slate-600 text-white font-semibold text-xs rounded-xl border border-slate-700 transition flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
-            >
-              <span>☕</span>
-              <span>{demoLoading && demoSelectedJd === "java" ? "Seeding..." : "Java Backend JD"}</span>
-              <span className="text-[10px] text-slate-400 font-mono">(12 Resumes)</span>
-            </button>
-
-            <button
-              onClick={() => handleSeedDemo("react")}
-              disabled={demoLoading}
-              className="px-4 py-3 bg-slate-800/90 hover:bg-slate-700 active:bg-slate-600 text-white font-semibold text-xs rounded-xl border border-slate-700 transition flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
-            >
-              <span>⚛️</span>
-              <span>{demoLoading && demoSelectedJd === "react" ? "Seeding..." : "React Frontend JD"}</span>
-              <span className="text-[10px] text-slate-400 font-mono">(12 Resumes)</span>
-            </button>
-
-            <button
-              onClick={() => handleSeedDemo("aiml")}
-              disabled={demoLoading}
-              className="px-4 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 active:from-indigo-700 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25 disabled:opacity-50"
-            >
-              <span>🤖</span>
-              <span>{demoLoading && demoSelectedJd === "aiml" ? "Seeding..." : "AI/ML Engineer JD"}</span>
-              <span className="text-[10px] text-indigo-200 font-mono">(12 Resumes)</span>
-            </button>
-          </div>
+      {/* ── Editorial Hero Section ── */}
+      <section className="space-y-8">
+        <div className="space-y-3">
+          <Eyebrow>AI RESUME MATCHING</Eyebrow>
+          <p className="font-serif italic text-xl sm:text-2xl text-brand-muted">
+            Smarter shortlists, explained.
+          </p>
+          <h1 className="font-display uppercase text-5xl sm:text-7xl lg:text-8xl tracking-tight leading-[0.92] text-brand-sage max-w-4xl">
+            BETTER HIRING, RANKED
+          </h1>
+          <p className="text-base sm:text-lg text-brand-muted max-w-2xl font-sans pt-2 leading-relaxed">
+            Ingest unstructured resumes, extract core competencies, and evaluate candidates with calibrated semantic embeddings and transparent multi-factor scoring.
+          </p>
         </div>
 
-        {demoLoading && (
-          <div className="mt-4 pt-4 border-t border-indigo-500/20 flex items-center gap-3 text-xs text-indigo-300">
-            <div className="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
-            <span>
-              Ingesting sample JD & 12 candidate resumes, computing 5-factor matching scores and ranking matrix...
-            </span>
-          </div>
-        )}
+        {/* Hero CTAs */}
+        <div className="flex flex-wrap items-center gap-4 pt-2">
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={() => {
+              const demoSec = document.getElementById("demo-evaluator-section");
+              if (demoSec) demoSec.scrollIntoView({ behavior: "smooth" });
+            }}
+          >
+            Try with sample data
+          </Button>
+          <Button
+            variant="outlined"
+            size="lg"
+            onClick={() => {
+              const step1Sec = document.getElementById("step-1-jd-section");
+              if (step1Sec) step1Sec.scrollIntoView({ behavior: "smooth" });
+            }}
+          >
+            Upload your own
+          </Button>
+        </div>
 
-        {demoError && (
-          <div className="mt-3 p-3 rounded-lg bg-rose-500/20 border border-rose-500/40 text-xs text-rose-300">
-            {demoError}
+        {/* Live Preview Card (Static Synthetic Sample) */}
+        <div className="pt-4">
+          <Card padding="p-6 sm:p-8" className="bg-brand-paper border-brand-line">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-brand-line gap-2">
+              <div>
+                <Eyebrow>LIVE RANKING PREVIEW</Eyebrow>
+                <h3 className="font-serif text-lg sm:text-xl font-bold text-brand-ink">
+                  Deterministic Multi-Factor Scoring in Action
+                </h3>
+              </div>
+              <span className="text-[11px] font-sans font-semibold uppercase tracking-wider text-brand-muted bg-brand-sage-soft/30 px-3 py-1 rounded-full self-start sm:self-auto border border-brand-line">
+                Calibrated Benchmark
+              </span>
+            </div>
+
+            <div className="mt-4 divide-y divide-brand-line">
+              {/* Row 1 */}
+              <div className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1 md:w-1/3">
+                  <div className="flex items-center gap-2">
+                    <span className="font-display text-xl text-brand-forest">#1</span>
+                    <span className="font-serif font-bold text-base text-brand-ink">Elena Rostova</span>
+                    <Badge band="strong">Strong Match</Badge>
+                  </div>
+                  <p className="text-xs text-brand-muted">Senior AI/ML Research Engineer · 6.5 yrs</p>
+                </div>
+                <div className="md:w-1/3">
+                  <ScoreBar value={94.2} label="Composite Score" />
+                </div>
+                <div className="flex flex-wrap gap-1.5 md:w-1/3 justify-start md:justify-end">
+                  <Chip variant="matched">PyTorch</Chip>
+                  <Chip variant="matched">Transformers</Chip>
+                  <Chip variant="matched">NLP</Chip>
+                  <Chip variant="preferred">+4 more</Chip>
+                </div>
+              </div>
+
+              {/* Row 2 */}
+              <div className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1 md:w-1/3">
+                  <div className="flex items-center gap-2">
+                    <span className="font-display text-xl text-brand-sage">#2</span>
+                    <span className="font-serif font-bold text-base text-brand-ink">Marcus Vance</span>
+                    <Badge band="good">Good Match</Badge>
+                  </div>
+                  <p className="text-xs text-brand-muted">Lead Systems Architect · 8.0 yrs</p>
+                </div>
+                <div className="md:w-1/3">
+                  <ScoreBar value={78.5} label="Composite Score" />
+                </div>
+                <div className="flex flex-wrap gap-1.5 md:w-1/3 justify-start md:justify-end">
+                  <Chip variant="matched">FastAPI</Chip>
+                  <Chip variant="matched">Docker</Chip>
+                  <Chip variant="partial">Python</Chip>
+                  <Chip variant="extra">+3 more</Chip>
+                </div>
+              </div>
+
+              {/* Row 3 */}
+              <div className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1 md:w-1/3">
+                  <div className="flex items-center gap-2">
+                    <span className="font-display text-xl text-band-partial">#3</span>
+                    <span className="font-serif font-bold text-base text-brand-ink">Sofia Chen</span>
+                    <Badge band="partial">Partial Match</Badge>
+                  </div>
+                  <p className="text-xs text-brand-muted">Frontend Developer · 2.5 yrs</p>
+                </div>
+                <div className="md:w-1/3">
+                  <ScoreBar value={52.0} label="Composite Score" />
+                </div>
+                <div className="flex flex-wrap gap-1.5 md:w-1/3 justify-start md:justify-end">
+                  <Chip variant="matched">TypeScript</Chip>
+                  <Chip variant="partial">React</Chip>
+                  <Chip variant="missing">PyTorch</Chip>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* 3-Pillar Feature List */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+          <Card padding="p-6" className="space-y-3">
+            <div className="w-10 h-10 rounded-full bg-brand-forest/10 border border-brand-line flex items-center justify-center text-brand-forest">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h3 className="font-serif text-base font-bold text-brand-ink">Parse Any Resume</h3>
+            <p className="text-xs sm:text-sm text-brand-muted leading-relaxed">
+              Standardize PDF and DOCX files automatically into structured contact, experience, skills, and degree entries.
+            </p>
+          </Card>
+
+          <Card padding="p-6" className="space-y-3">
+            <div className="w-10 h-10 rounded-full bg-brand-forest/10 border border-brand-line flex items-center justify-center text-brand-forest">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <h3 className="font-serif text-base font-bold text-brand-ink">Match by Meaning, Not Keywords</h3>
+            <p className="text-xs sm:text-sm text-brand-muted leading-relaxed">
+              Sentence transformers and taxonomy graph aliases prevent keyword spoofing and reward genuine domain depth.
+            </p>
+          </Card>
+
+          <Card padding="p-6" className="space-y-3">
+            <div className="w-10 h-10 rounded-full bg-brand-forest/10 border border-brand-line flex items-center justify-center text-brand-forest">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <h3 className="font-serif text-base font-bold text-brand-ink">Explain Every Score</h3>
+            <p className="text-xs sm:text-sm text-brand-muted leading-relaxed">
+              Transparent 5-factor breakdown with full text evidence, qualification checks, and knockout protection.
+            </p>
+          </Card>
+        </div>
+      </section>
+
+      {/* ── One-Click Instant Evaluator Demo ── */}
+      <section id="demo-evaluator-section">
+        <Card padding="p-6 sm:p-8" className="bg-brand-paper border-brand-forest/40 relative overflow-hidden">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+            <div className="space-y-2 max-w-xl">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-brand-forest text-brand-ivory uppercase tracking-wider">
+                <span>⚡</span> ONE-CLICK EVALUATOR DEMO
+              </div>
+              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-brand-ink tracking-tight">
+                Benchmark the AI System in One Click
+              </h2>
+              <p className="text-xs sm:text-sm text-brand-muted leading-relaxed">
+                Skip manual file preparation. Select a calibrated target role to ingest 12 synthetic candidate resumes, compute 5-factor scores, and view the live ranking dashboard.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0" id="try-demo-btn">
+              <Button
+                variant="secondary"
+                size="md"
+                disabled={demoLoading}
+                onClick={() => handleSeedDemo("java")}
+                className="justify-center"
+              >
+                <span>☕</span>
+                <span>{demoLoading && demoSelectedJd === "java" ? "Seeding..." : "Java Backend JD"}</span>
+                <span className="text-[10px] font-mono opacity-60">(12 Resumes)</span>
+              </Button>
+
+              <Button
+                variant="secondary"
+                size="md"
+                disabled={demoLoading}
+                onClick={() => handleSeedDemo("react")}
+                className="justify-center"
+              >
+                <span>⚛️</span>
+                <span>{demoLoading && demoSelectedJd === "react" ? "Seeding..." : "React Frontend JD"}</span>
+                <span className="text-[10px] font-mono opacity-60">(12 Resumes)</span>
+              </Button>
+
+              <Button
+                variant="primary"
+                size="md"
+                disabled={demoLoading}
+                onClick={() => handleSeedDemo("aiml")}
+                className="justify-center"
+              >
+                <span>🤖</span>
+                <span>{demoLoading && demoSelectedJd === "aiml" ? "Seeding..." : "AI/ML Engineer JD"}</span>
+                <span className="text-[10px] font-mono text-brand-ivory/80">(12 Resumes)</span>
+              </Button>
+            </div>
           </div>
-        )}
+
+          {demoLoading && (
+            <div className="mt-6 pt-6 border-t border-brand-line flex items-center gap-3 text-xs sm:text-sm text-brand-forest">
+              <div className="w-4 h-4 border-2 border-brand-forest border-t-transparent rounded-full animate-spin shrink-0" />
+              <span>
+                Ingesting calibrated specifications and 12 candidate resumes, computing 5-factor matching matrix...
+              </span>
+            </div>
+          )}
+
+          {demoError && (
+            <div className="mt-4 p-3.5 rounded-2xl bg-band-weak/10 border border-band-weak/30 text-xs text-band-weak">
+              {demoError}
+            </div>
+          )}
+        </Card>
       </section>
 
       {/* ════════════════════════════════════════════════════════
           STEP 1: JOB DESCRIPTION
          ════════════════════════════════════════════════════════ */}
-      <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
-              Module 1
-            </span>
-            <h2 className="text-xl font-bold text-gray-900 mt-0.5">
-              Step 1: Job Description
-            </h2>
-          </div>
-          {parsedResult && (
-            <span className="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-full font-semibold">
-              ✓ JD Parsed &amp; Active
-            </span>
-          )}
-        </div>
-
-        {/* Tabs */}
-        <div className="flex border-b border-gray-200 mb-5">
-          <TabButton
-            active={activeTab === "paste"}
-            onClick={() => setActiveTab("paste")}
-            label="📝 Paste Text"
+      <section id="step-1-jd-section">
+        <Card padding="p-6 sm:p-8" className="space-y-6">
+          <SectionHeader
+            eyebrow="MODULE 01"
+            title="Step 1: Job Description"
+            subtitle="Input target role requirements to extract competencies, experience requirements, and education criteria."
+            actions={
+              parsedResult && (
+                <Badge variant="strong" size="sm">
+                  ✓ JD Active
+                </Badge>
+              )
+            }
           />
-          <TabButton
-            active={activeTab === "upload"}
-            onClick={() => setActiveTab("upload")}
-            label="📁 Upload File (PDF / DOCX / TXT)"
-          />
-        </div>
 
-        {/* Tab 1: Paste Text */}
-        {activeTab === "paste" && (
-          <div>
-            <textarea
-              value={jdText}
-              onChange={(e) => setJdText(e.target.value)}
-              placeholder="Paste the full job description here (title, requirements, nice-to-haves, qualifications, responsibilities)..."
-              rows={8}
-              className="w-full p-3.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-mono text-gray-800 leading-relaxed"
-            />
-            <div className="flex justify-between items-center text-xs text-gray-400 mt-1.5">
-              <span>Supports any formatted or unformatted JD text</span>
-              <span>{jdText.length} characters</span>
-            </div>
-          </div>
-        )}
-
-        {/* Tab 2: Upload File */}
-        {activeTab === "upload" && (
-          <div>
-            <div
-              onDragEnter={handleDrag}
-              onDragLeave={handleDrag}
-              onDragOver={handleDrag}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-              className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
-                dragActive
-                  ? "border-indigo-500 bg-indigo-50"
-                  : selectedFile
-                  ? "border-emerald-400 bg-emerald-50/40"
-                  : "border-gray-300 hover:border-gray-400 bg-gray-50/50"
+          {/* Tabs */}
+          <div className="flex items-center gap-2 border-b border-brand-line pb-3">
+            <button
+              type="button"
+              onClick={() => setActiveTab("paste")}
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all ${
+                activeTab === "paste"
+                  ? "bg-brand-forest text-brand-ivory"
+                  : "bg-brand-sage-soft/30 text-brand-muted hover:text-brand-ink"
               }`}
             >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,.docx,.txt"
-                onChange={(e) => {
-                  if (e.target.files?.[0]) setSelectedFile(e.target.files[0]);
-                }}
-                className="hidden"
+              📝 Paste Text
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("upload")}
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all ${
+                activeTab === "upload"
+                  ? "bg-brand-forest text-brand-ivory"
+                  : "bg-brand-sage-soft/30 text-brand-muted hover:text-brand-ink"
+              }`}
+            >
+              📁 Upload File (PDF / DOCX / TXT)
+            </button>
+          </div>
+
+          {/* Tab 1: Paste Text */}
+          {activeTab === "paste" && (
+            <div className="space-y-2">
+              <textarea
+                value={jdText}
+                onChange={(e) => setJdText(e.target.value)}
+                placeholder="Paste the job description text here (role title, requirements, preferred skills, qualifications, responsibilities)..."
+                rows={8}
+                className="w-full p-4 border border-brand-line rounded-2xl bg-brand-ivory/50 focus:bg-brand-paper focus:ring-2 focus:ring-brand-forest/20 focus:border-brand-forest text-sm font-mono text-brand-ink placeholder:text-brand-muted/70 transition-all outline-none leading-relaxed"
               />
-              {selectedFile ? (
-                <div>
-                  <div className="text-3xl mb-2">📄</div>
-                  <p className="font-semibold text-gray-800">{selectedFile.name}</p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {(selectedFile.size / 1024).toFixed(1)} KB — Click or drag to replace
-                  </p>
-                </div>
-              ) : (
-                <div>
-                  <div className="text-3xl text-gray-400 mb-2">📥</div>
-                  <p className="text-sm font-medium text-gray-700">
-                    Drop your Job Description file here, or{" "}
-                    <span className="text-indigo-600 font-semibold underline">browse</span>
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Accepts PDF, DOCX, or TXT (Max 5 MB)
-                  </p>
-                </div>
-              )}
+              <div className="flex justify-between items-center text-xs text-brand-muted px-1">
+                <span>Supports unformatted or formatted job description text</span>
+                <span className="font-mono tabular-nums">{jdText.length} characters</span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Parse Error Alert */}
-        {parseError && (
-          <div className="mt-4 p-3.5 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-lg flex items-start space-x-2">
-            <span className="text-rose-500 font-bold">⚠️</span>
-            <span>{parseError}</span>
-          </div>
-        )}
+          {/* Tab 2: Upload File */}
+          {activeTab === "upload" && (
+            <div>
+              <div
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+                className={`border-2 border-dashed rounded-3xl p-8 sm:p-12 text-center cursor-pointer transition-all ${
+                  dragActive
+                    ? "border-brand-forest bg-brand-sage-soft/40"
+                    : selectedFile
+                    ? "border-brand-forest bg-brand-paper"
+                    : "border-brand-line hover:border-brand-forest/60 bg-brand-ivory/30"
+                }`}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.docx,.txt"
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) setSelectedFile(e.target.files[0]);
+                  }}
+                  className="hidden"
+                />
+                {selectedFile ? (
+                  <div className="space-y-2">
+                    <div className="text-3xl">📄</div>
+                    <p className="font-serif font-bold text-brand-ink">{selectedFile.name}</p>
+                    <p className="text-xs text-brand-muted">
+                      {(selectedFile.size / 1024).toFixed(1)} KB — Click or drag to replace
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="text-3xl text-brand-muted">📥</div>
+                    <p className="text-sm font-medium text-brand-ink">
+                      Drop your Job Description file here, or{" "}
+                      <span className="text-brand-forest font-semibold underline">browse</span>
+                    </p>
+                    <p className="text-xs text-brand-muted">
+                      Accepts PDF, DOCX, or TXT (Max 5 MB)
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
-        {/* Action Button */}
-        <div className="mt-5 flex items-center space-x-4">
-          <button
-            onClick={handleAnalyze}
-            disabled={parsing}
-            className={`px-5 py-2.5 rounded-lg text-white font-medium text-sm flex items-center space-x-2 transition-all ${
-              parsing
-                ? "bg-indigo-400 cursor-not-allowed"
-                : "bg-indigo-600 hover:bg-indigo-700 shadow-sm hover:shadow"
-            }`}
-          >
-            {parsing ? (
-              <>
-                <Spinner />
-                <span>Analyzing JD via NLP...</span>
-              </>
-            ) : (
-              <>
-                <span>✨ Analyze Job Description</span>
-              </>
-            )}
-          </button>
-        </div>
+          {/* Parse Error Alert */}
+          {parseError && (
+            <div className="p-4 bg-band-weak/10 border border-band-weak/30 text-band-weak text-xs rounded-2xl flex items-start gap-2">
+              <span className="font-bold">⚠️</span>
+              <span>{parseError}</span>
+            </div>
+          )}
+
+          {/* Action Button */}
+          <div className="flex items-center gap-3">
+            <Button
+              variant="primary"
+              size="md"
+              onClick={handleAnalyze}
+              disabled={parsing}
+              loading={parsing}
+            >
+              <span>✨</span>
+              <span>{parsing ? "Extracting Competencies..." : "Analyze Job Description"}</span>
+            </Button>
+          </div>
+        </Card>
       </section>
 
       {/* ── Parsed JD Results Card ── */}
       {parsedResult && (
-        <section className="bg-white rounded-xl shadow-sm border border-emerald-100 p-6 space-y-6">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-4">
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
-                Extraction Results
-              </span>
-              <h3 className="text-xl font-bold text-gray-900 mt-0.5">
-                {parsedResult.title || "Job Title Not Specified"}
-              </h3>
-            </div>
-            <div className="flex items-center space-x-3">
-              <button
+        <section>
+          <Card padding="p-6 sm:p-8" className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-brand-line gap-3">
+              <div>
+                <Eyebrow>SPECIFICATION EXTRACTION</Eyebrow>
+                <h3 className="font-serif text-xl sm:text-2xl font-bold text-brand-ink mt-0.5">
+                  {parsedResult.title || "Job Title Not Specified"}
+                </h3>
+              </div>
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={handleSave}
                 disabled={saving}
-                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                  saving
-                    ? "bg-gray-200 text-gray-500"
-                    : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
-                }`}
+                loading={saving}
               >
-                {saving ? "Saving..." : "💾 Save Changes"}
-              </button>
+                💾 Save Skill Changes
+              </Button>
             </div>
-          </div>
 
-          {saveMessage && (
-            <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm rounded-lg">
-              {saveMessage}
-            </div>
-          )}
+            {saveMessage && (
+              <div className="p-3.5 bg-band-strong/15 border border-band-strong/30 text-band-strong text-xs rounded-2xl">
+                {saveMessage}
+              </div>
+            )}
 
-          {/* Quick Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
-              <div className="text-xs text-gray-500 uppercase font-semibold">Experience Required</div>
-              <div className="text-lg font-bold text-slate-800 mt-1">
-                {parsedResult.min_experience_years !== null
-                  ? `${parsedResult.min_experience_years}${
-                      parsedResult.max_experience_years
-                        ? ` – ${parsedResult.max_experience_years}`
-                        : "+"
-                    } years`
-                  : "Not specified"}
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-brand-ivory/50 p-4 rounded-2xl border border-brand-line">
+                <Eyebrow>Experience Required</Eyebrow>
+                <div className="font-serif text-lg font-bold text-brand-ink mt-1">
+                  {parsedResult.min_experience_years !== null
+                    ? `${parsedResult.min_experience_years}${
+                        parsedResult.max_experience_years
+                          ? ` – ${parsedResult.max_experience_years}`
+                          : "+"
+                      } years`
+                    : "Not specified"}
+                </div>
+              </div>
+
+              <div className="bg-brand-ivory/50 p-4 rounded-2xl border border-brand-line">
+                <Eyebrow>Degree Requirement</Eyebrow>
+                <div className="font-serif text-lg font-bold text-brand-ink mt-1 capitalize">
+                  {parsedResult.min_required_level
+                    ? `${parsedResult.min_required_level} degree`
+                    : "Any degree"}
+                  {parsedResult.preferred_level && (
+                    <span className="text-xs text-brand-muted font-normal block mt-0.5">
+                      Preferred: {parsedResult.preferred_level}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-brand-ivory/50 p-4 rounded-2xl border border-brand-line">
+                <Eyebrow>Skill Breakdown</Eyebrow>
+                <div className="font-serif text-lg font-bold text-brand-ink mt-1">
+                  <span className="text-brand-forest">{editRequired.length}</span> required ·{" "}
+                  <span className="text-brand-sage">{editPreferred.length}</span> preferred
+                </div>
               </div>
             </div>
 
-            <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
-              <div className="text-xs text-gray-500 uppercase font-semibold">Degree Requirement</div>
-              <div className="text-lg font-bold text-slate-800 mt-1 capitalize">
-                {parsedResult.min_required_level
-                  ? `${parsedResult.min_required_level} degree`
-                  : "Any degree"}
-                {parsedResult.preferred_level && (
-                  <span className="text-xs text-gray-500 font-normal block">
-                    Preferred: {parsedResult.preferred_level}
+            {/* Skills Management */}
+            <div className="space-y-6 pt-2">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-serif text-sm font-bold text-brand-ink">
+                    Required Skills{" "}
+                    <span className="font-sans text-xs font-normal text-brand-muted">
+                      (⇄ moves to preferred, × removes)
+                    </span>
+                  </h4>
+                  <span className="font-mono text-xs font-semibold text-brand-forest">
+                    {editRequired.length} skills
                   </span>
-                )}
-              </div>
-            </div>
-
-            <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
-              <div className="text-xs text-gray-500 uppercase font-semibold">Skill Breakdown</div>
-              <div className="text-lg font-bold text-slate-800 mt-1">
-                <span className="text-indigo-600">{editRequired.length}</span> required ·{" "}
-                <span className="text-purple-600">{editPreferred.length}</span> preferred
-              </div>
-            </div>
-          </div>
-
-          {/* Skills Management */}
-          <div className="space-y-4 pt-2">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-bold text-gray-800">
-                  Required Skills{" "}
-                  <span className="text-xs font-normal text-gray-500">
-                    (Click to move to preferred, × to remove)
-                  </span>
-                </h4>
-                <span className="text-xs text-indigo-600 font-medium">
-                  {editRequired.length} skills
-                </span>
-              </div>
-              <SkillChips
-                skills={editRequired}
-                badgeColor="indigo"
-                onRemove={(skill) =>
-                  setEditRequired((prev) => prev.filter((s) => s !== skill))
-                }
-                onToggleCategory={(skill) => {
-                  setEditRequired((prev) => prev.filter((s) => s !== skill));
-                  setEditPreferred((prev) => [...prev, skill]);
-                }}
-                onAdd={(skill) => {
-                  if (!editRequired.includes(skill)) {
-                    setEditRequired((prev) => [...prev, skill]);
+                </div>
+                <SkillChips
+                  skills={editRequired}
+                  label="Required"
+                  color="green"
+                  onRemove={(skill) =>
+                    setEditRequired((prev) => prev.filter((s) => s !== skill))
                   }
-                }}
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-bold text-gray-800">
-                  Preferred / Nice-to-Have Skills{" "}
-                  <span className="text-xs font-normal text-gray-500">
-                    (Click to move to required, × to remove)
-                  </span>
-                </h4>
-                <span className="text-xs text-purple-600 font-medium">
-                  {editPreferred.length} skills
-                </span>
-              </div>
-              <SkillChips
-                skills={editPreferred}
-                badgeColor="purple"
-                onRemove={(skill) =>
-                  setEditPreferred((prev) => prev.filter((s) => s !== skill))
-                }
-                onToggleCategory={(skill) => {
-                  setEditPreferred((prev) => prev.filter((s) => s !== skill));
-                  setEditRequired((prev) => [...prev, skill]);
-                }}
-                onAdd={(skill) => {
-                  if (!editPreferred.includes(skill)) {
+                  onToggleCategory={(skill) => {
+                    setEditRequired((prev) => prev.filter((s) => s !== skill));
                     setEditPreferred((prev) => [...prev, skill]);
-                  }
-                }}
-              />
-            </div>
-          </div>
+                  }}
+                  onAdd={(skill) => {
+                    if (!editRequired.includes(skill)) {
+                      setEditRequired((prev) => [...prev, skill]);
+                    }
+                  }}
+                />
+              </div>
 
-          {/* Responsibilities */}
-          {parsedResult.responsibilities?.length > 0 && (
-            <div className="pt-2">
-              <h4 className="text-sm font-bold text-gray-800 mb-2">
-                Key Responsibilities ({parsedResult.responsibilities.length})
-              </h4>
-              <ul className="list-disc list-inside space-y-1 text-sm text-gray-700 bg-gray-50 p-3.5 rounded-lg border border-gray-100">
-                {parsedResult.responsibilities.slice(0, 5).map((resp, i) => (
-                  <li key={i} className="line-clamp-2">
-                    {resp}
-                  </li>
-                ))}
-                {parsedResult.responsibilities.length > 5 && (
-                  <li className="text-xs text-gray-500 font-semibold list-none mt-1">
-                    + {parsedResult.responsibilities.length - 5} more responsibilities
-                  </li>
-                )}
-              </ul>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-serif text-sm font-bold text-brand-ink">
+                    Preferred / Nice-to-Have Skills{" "}
+                    <span className="font-sans text-xs font-normal text-brand-muted">
+                      (⇄ moves to required, × removes)
+                    </span>
+                  </h4>
+                  <span className="font-mono text-xs font-semibold text-brand-sage">
+                    {editPreferred.length} skills
+                  </span>
+                </div>
+                <SkillChips
+                  skills={editPreferred}
+                  label="Preferred"
+                  color="yellow"
+                  onRemove={(skill) =>
+                    setEditPreferred((prev) => prev.filter((s) => s !== skill))
+                  }
+                  onToggleCategory={(skill) => {
+                    setEditPreferred((prev) => prev.filter((s) => s !== skill));
+                    setEditRequired((prev) => [...prev, skill]);
+                  }}
+                  onAdd={(skill) => {
+                    if (!editPreferred.includes(skill)) {
+                      setEditPreferred((prev) => [...prev, skill]);
+                    }
+                  }}
+                />
+              </div>
             </div>
-          )}
+
+            {/* Responsibilities */}
+            {parsedResult.responsibilities?.length > 0 && (
+              <div className="pt-2 space-y-2">
+                <h4 className="font-serif text-sm font-bold text-brand-ink">
+                  Key Responsibilities ({parsedResult.responsibilities.length})
+                </h4>
+                <ul className="list-disc list-inside space-y-1.5 text-xs text-brand-muted bg-brand-ivory/50 p-4 rounded-2xl border border-brand-line">
+                  {parsedResult.responsibilities.slice(0, 5).map((resp, i) => (
+                    <li key={i} className="line-clamp-2">
+                      {resp}
+                    </li>
+                  ))}
+                  {parsedResult.responsibilities.length > 5 && (
+                    <li className="text-[11px] text-brand-muted font-semibold list-none mt-1">
+                      + {parsedResult.responsibilities.length - 5} more responsibilities
+                    </li>
+                  )}
+                </ul>
+              </div>
+            )}
+          </Card>
         </section>
       )}
 
       {/* ════════════════════════════════════════════════════════
           STEP 2: BATCH RESUME UPLOAD & CANDIDATE INTAKE
          ════════════════════════════════════════════════════════ */}
-      <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
-              Module 2
-            </span>
-            <h2 className="text-xl font-bold text-gray-900 mt-0.5">
-              Step 2: Upload Resumes (Batch Intake)
-            </h2>
-            <p className="text-xs text-gray-500 mt-1">
-              Upload batches of candidate resumes (PDF or DOCX). Extract contact info,
-              experience, skills, and education history.
+      <section>
+        <Card padding="p-6 sm:p-8" className="space-y-6">
+          <SectionHeader
+            eyebrow="MODULE 02"
+            title="Step 2: Upload Resumes (Batch Intake)"
+            subtitle="Ingest batches of candidate resumes (PDF or DOCX) to extract contact details, experience, skills, and education."
+            actions={
+              candidates.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <Badge variant="neutral" size="sm">
+                    {candidates.length} in database
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleClearAllCandidates}
+                    className="text-band-weak hover:text-band-weak"
+                  >
+                    Clear All
+                  </Button>
+                </div>
+              )
+            }
+          />
+
+          {/* Multi-file Dropzone */}
+          <div
+            onDragEnter={handleResumeDrag}
+            onDragLeave={handleResumeDrag}
+            onDragOver={handleResumeDrag}
+            onDrop={handleResumeDrop}
+            onClick={() => resumeInputRef.current?.click()}
+            className={`border-2 border-dashed rounded-3xl p-8 sm:p-12 text-center cursor-pointer transition-all ${
+              resumeDragActive
+                ? "border-brand-forest bg-brand-sage-soft/40"
+                : resumeFiles.length > 0
+                ? "border-brand-forest bg-brand-paper"
+                : "border-brand-line hover:border-brand-forest/60 bg-brand-ivory/30"
+            }`}
+          >
+            <input
+              ref={resumeInputRef}
+              type="file"
+              multiple
+              accept=".pdf,.docx"
+              onChange={handleResumeFileSelect}
+              className="hidden"
+            />
+            <div className="text-3xl text-brand-sage mb-2">📁</div>
+            <p className="font-serif text-sm font-bold text-brand-ink">
+              Drag &amp; drop multiple resumes here, or{" "}
+              <span className="text-brand-forest underline">browse files</span>
+            </p>
+            <p className="text-xs text-brand-muted mt-1">
+              Accepts PDF and DOCX · Batch of 10+ recommended · Up to 50 files (max 5 MB each)
             </p>
           </div>
-          {candidates.length > 0 && (
-            <div className="flex items-center space-x-2">
-              <span className="bg-blue-100 text-blue-800 text-xs px-2.5 py-1 rounded-full font-semibold">
-                {candidates.length} candidates in database
-              </span>
-              <button
-                onClick={handleClearAllCandidates}
-                className="text-xs text-rose-600 hover:text-rose-800 font-medium px-2 py-1 rounded hover:bg-rose-50 transition-colors"
-                title="Delete all parsed candidates"
-              >
-                Clear All
-              </button>
-            </div>
-          )}
-        </div>
 
-        {/* Multi-file Dropzone */}
-        <div
-          onDragEnter={handleResumeDrag}
-          onDragLeave={handleResumeDrag}
-          onDragOver={handleResumeDrag}
-          onDrop={handleResumeDrop}
-          onClick={() => resumeInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
-            resumeDragActive
-              ? "border-indigo-500 bg-indigo-50"
-              : resumeFiles.length > 0
-              ? "border-blue-400 bg-blue-50/30"
-              : "border-gray-300 hover:border-gray-400 bg-gray-50/50"
-          }`}
-        >
-          <input
-            ref={resumeInputRef}
-            type="file"
-            multiple
-            accept=".pdf,.docx"
-            onChange={handleResumeFileSelect}
-            className="hidden"
-          />
-          <div className="text-3xl text-indigo-500 mb-2">📁</div>
-          <p className="text-sm font-semibold text-gray-800">
-            Drag &amp; drop multiple resumes here, or{" "}
-            <span className="text-indigo-600 underline">browse files</span>
-          </p>
-          <p className="text-xs text-gray-400 mt-1">
-            Accepts PDF and DOCX · Batch of 10+ recommended · Up to 50 files (max 5 MB each)
-          </p>
-        </div>
-
-        {/* Selected Files Staging List */}
-        {resumeFiles.length > 0 && (
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-semibold text-gray-800">
-                Selected Files ({resumeFiles.length})
-                {resumeFiles.length < 10 && (
-                  <span className="text-amber-600 font-normal text-xs ml-2">
-                    (Tip: 10+ resumes recommended for comprehensive ranking)
-                  </span>
-                )}
-              </span>
-              <button
-                onClick={() => setResumeFiles([])}
-                className="text-xs text-gray-500 hover:text-gray-700"
-              >
-                Clear selection
-              </button>
-            </div>
-
-            <div className="max-h-40 overflow-y-auto space-y-1.5 pr-2">
-              {resumeFiles.map((f, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-between bg-white px-3 py-1.5 rounded border border-gray-200 text-xs"
+          {/* Selected Files Staging List */}
+          {resumeFiles.length > 0 && (
+            <div className="bg-brand-ivory/60 border border-brand-line rounded-2xl p-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="font-serif text-sm font-bold text-brand-ink">
+                  Selected Files ({resumeFiles.length})
+                  {resumeFiles.length < 10 && (
+                    <span className="text-band-partial font-normal text-xs ml-2">
+                      (10+ resumes recommended for diverse shortlists)
+                    </span>
+                  )}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setResumeFiles([])}
+                  className="text-xs text-brand-muted hover:text-brand-ink"
                 >
-                  <div className="flex items-center space-x-2 truncate">
-                    <span>📄</span>
-                    <span className="font-medium text-gray-800 truncate">{f.name}</span>
-                    <span className="text-gray-400">({(f.size / 1024).toFixed(0)} KB)</span>
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeSelectedFile(idx);
-                    }}
-                    className="text-gray-400 hover:text-rose-500 text-sm font-bold ml-2 px-1"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
+                  Clear selection
+                </button>
+              </div>
 
-            {/* Upload Progress Bar */}
-            {uploading && (
-              <div className="mt-4 space-y-1.5">
-                <div className="flex justify-between text-xs text-indigo-700 font-medium">
-                  <span>Uploading &amp; Parsing Resumes...</span>
-                  <span>{uploadProgress}%</span>
-                </div>
-                <div className="w-full bg-indigo-100 rounded-full h-2.5 overflow-hidden">
+              <div className="max-h-44 overflow-y-auto space-y-1.5 pr-2">
+                {resumeFiles.map((f, idx) => (
                   <div
-                    className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
+                    key={idx}
+                    className="flex items-center justify-between bg-brand-paper px-3.5 py-2 rounded-xl border border-brand-line text-xs"
+                  >
+                    <div className="flex items-center gap-2 truncate">
+                      <span>📄</span>
+                      <span className="font-medium text-brand-ink truncate">{f.name}</span>
+                      <span className="text-brand-muted font-mono">({(f.size / 1024).toFixed(0)} KB)</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeSelectedFile(idx);
+                      }}
+                      className="text-brand-muted hover:text-band-weak font-bold text-sm ml-2 px-1"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Upload Progress Bar */}
+              {uploading && (
+                <div className="pt-2">
+                  <ScoreBar
+                    value={uploadProgress}
+                    label="Uploading &amp; Parsing Resumes..."
+                    height="h-2.5"
                   />
                 </div>
+              )}
+
+              {/* Upload Button */}
+              <div className="pt-2 flex justify-end">
+                <Button
+                  variant="primary"
+                  size="md"
+                  onClick={handleUploadResumes}
+                  disabled={uploading}
+                  loading={uploading}
+                >
+                  🚀 Parse &amp; Ingest {resumeFiles.length} Resumes
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Batch Upload Summary Results */}
+          {batchResults && (
+            <div className="p-5 bg-brand-ivory/70 border border-brand-line rounded-2xl space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="font-serif text-sm font-bold text-brand-ink">
+                  Batch Upload Summary:{" "}
+                  <span className="text-band-strong">{batchResults.successful} succeeded</span>
+                  {batchResults.failed > 0 && (
+                    <span className="text-band-weak ml-2">
+                      ({batchResults.failed} failed)
+                    </span>
+                  )}
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => setBatchResults(null)}
+                  className="text-xs text-brand-muted hover:text-brand-ink"
+                >
+                  Dismiss
+                </button>
+              </div>
+              <div className="max-h-48 overflow-y-auto space-y-1.5 pr-2">
+                {batchResults.results.map((res, i) => (
+                  <div
+                    key={i}
+                    className={`flex items-center justify-between px-3.5 py-2 rounded-xl text-xs border ${
+                      res.status === "parsed"
+                        ? "bg-brand-paper border-band-strong/30 text-brand-ink"
+                        : "bg-band-weak/10 border-band-weak/30 text-band-weak"
+                    }`}
+                  >
+                    <span className="font-medium truncate max-w-xs">{res.filename}</span>
+                    <div className="flex items-center gap-2">
+                      {res.name && <span className="text-brand-muted font-medium">({res.name})</span>}
+                      <Badge
+                        variant={res.status === "parsed" ? "strong" : "weak"}
+                        size="sm"
+                      >
+                        {res.status}
+                      </Badge>
+                      {res.error && (
+                        <span className="text-band-weak italic truncate max-w-sm" title={res.error}>
+                          {res.error}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── Parsed Candidates Table ── */}
+          <div className="pt-2 space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="font-serif text-base font-bold text-brand-ink">
+                Parsed Candidates Repository ({candidates.length})
+              </h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={loadCandidates}
+              >
+                🔄 Refresh List
+              </Button>
+            </div>
+
+            {candidatesError && (
+              <div className="p-3.5 bg-band-weak/10 text-band-weak border border-band-weak/30 text-xs rounded-2xl">
+                {candidatesError}
               </div>
             )}
 
-            {/* Upload Button */}
-            <div className="mt-4 flex items-center justify-end space-x-3">
-              <button
-                onClick={handleUploadResumes}
-                disabled={uploading}
-                className={`px-5 py-2 rounded-lg text-white font-medium text-sm flex items-center space-x-2 transition-all ${
-                  uploading
-                    ? "bg-indigo-400 cursor-not-allowed"
-                    : "bg-indigo-600 hover:bg-indigo-700 shadow-sm"
-                }`}
-              >
-                {uploading ? (
-                  <>
-                    <Spinner />
-                    <span>Processing Batch...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>🚀 Parse &amp; Ingest {resumeFiles.length} Resumes</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Batch Upload Summary Results */}
-        {batchResults && (
-          <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-bold text-gray-800">
-                Batch Upload Summary:{" "}
-                <span className="text-emerald-600">{batchResults.successful} succeeded</span>
-                {batchResults.failed > 0 && (
-                  <span className="text-rose-600 ml-2">
-                    ({batchResults.failed} failed)
-                  </span>
-                )}
-              </h4>
-              <button
-                onClick={() => setBatchResults(null)}
-                className="text-xs text-gray-400 hover:text-gray-600"
-              >
-                Dismiss
-              </button>
-            </div>
-            <div className="max-h-48 overflow-y-auto space-y-1.5 pr-2">
-              {batchResults.results.map((res, i) => (
-                <div
-                  key={i}
-                  className={`flex items-center justify-between px-3 py-1.5 rounded text-xs border ${
-                    res.status === "parsed"
-                      ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-                      : "bg-rose-50 border-rose-200 text-rose-800"
-                  }`}
-                >
-                  <span className="font-medium truncate max-w-xs">{res.filename}</span>
-                  <div className="flex items-center space-x-2">
-                    {res.name && <span className="text-gray-600">({res.name})</span>}
-                    <span
-                      className={`font-semibold uppercase text-[10px] px-1.5 py-0.5 rounded ${
-                        res.status === "parsed"
-                          ? "bg-emerald-200 text-emerald-900"
-                          : "bg-rose-200 text-rose-900"
-                      }`}
-                    >
-                      {res.status}
-                    </span>
-                    {res.error && (
-                      <span className="text-rose-600 italic truncate max-w-sm" title={res.error}>
-                        {res.error}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ── Parsed Candidates Table ── */}
-        <div className="pt-2">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-bold text-gray-800">
-              Parsed Candidates ({candidates.length})
-            </h3>
-            <button
-              onClick={loadCandidates}
-              className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
-            >
-              🔄 Refresh List
-            </button>
-          </div>
-
-          {candidatesError && (
-            <div className="p-3 bg-rose-50 text-rose-700 text-xs rounded-lg mb-3">
-              {candidatesError}
-            </div>
-          )}
-
-          {candidatesLoading ? (
-            <div className="p-8 text-center text-sm text-gray-500">
-              <Spinner />
-              <span className="ml-2">Loading candidate database...</span>
-            </div>
-          ) : candidates.length === 0 ? (
-            <div className="p-8 text-center border-2 border-dashed border-gray-200 rounded-xl">
-              <div className="text-2xl text-gray-300 mb-1">👥</div>
-              <p className="text-sm font-medium text-gray-600">No resumes parsed yet</p>
-              <p className="text-xs text-gray-400 mt-1">
-                Upload resumes above or use sample resumes to begin.
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto border border-gray-200 rounded-xl shadow-sm">
-              <table className="w-full text-left text-xs text-gray-600">
-                <thead className="bg-gray-50 text-gray-700 uppercase font-semibold text-[11px] border-b border-gray-200">
-                  <tr>
-                    <th className="py-3 px-4">Candidate</th>
-                    <th className="py-3 px-4">Contact</th>
-                    <th className="py-3 px-4">Experience</th>
-                    <th className="py-3 px-4">Skills Extracted</th>
-                    <th className="py-3 px-4">Warnings</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 bg-white">
-                  {candidates.map((c) => (
-                    <tr key={c.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="py-3 px-4 font-medium text-gray-900">
-                        <div className="font-semibold text-gray-900">
-                          {c.name || "Unknown Candidate"}
-                        </div>
-                        <div className="text-[11px] text-gray-400 truncate max-w-xs">
-                          {c.filename}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div>{c.email || <span className="text-gray-400">—</span>}</div>
-                        <div className="text-[11px] text-gray-400">{c.phone || ""}</div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full font-medium bg-blue-50 text-blue-700">
-                          {c.total_experience_years > 0
-                            ? `${c.total_experience_years.toFixed(1)} yrs`
-                            : "Fresher / 0 yrs"}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex flex-wrap gap-1 max-w-md">
-                          {c.top_skills && c.top_skills.length > 0 ? (
-                            <>
-                              {c.top_skills.map((skill, si) => (
-                                <span
-                                  key={si}
-                                  className="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded text-[10px]"
-                                >
-                                  {skill}
-                                </span>
-                              ))}
-                              {c.skills_count > c.top_skills.length && (
-                                <span className="bg-indigo-50 text-indigo-700 font-medium px-1.5 py-0.5 rounded text-[10px]">
-                                  +{c.skills_count - c.top_skills.length}
-                                </span>
-                              )}
-                            </>
-                          ) : (
-                            <span className="text-gray-400 italic">None detected</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        {c.warnings_count > 0 ? (
-                          <span
-                            className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800"
-                            title={`${c.warnings_count} parsing warning(s)`}
-                          >
-                            ⚠️ {c.warnings_count}
-                          </span>
-                        ) : (
-                          <span className="text-emerald-600 font-semibold text-[11px]">✓ Clean</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <button
-                          onClick={() => handleDeleteCandidate(c.id)}
-                          disabled={deletingId === c.id}
-                          className="text-rose-500 hover:text-rose-700 font-medium p-1 hover:bg-rose-50 rounded transition-colors"
-                          title="Delete candidate"
-                        >
-                          {deletingId === c.id ? "..." : "🗑️"}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
-        {/* ── Callout for AI Matching Execution ── */}
-        <div className="mt-6 p-4 rounded-xl bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h4 className="text-sm font-bold text-gray-900">
-              Ready for AI Matching &amp; Candidate Ranking?
-            </h4>
-            <p className="text-xs text-gray-600 mt-0.5">
-              {!(jdId || activeJD?.id)
-                ? "Step 1: Please analyze or select an active Job Description above."
-                : candidates.length === 0
-                ? "Step 2: Please upload at least one candidate resume."
-                : `Ready to evaluate ${candidates.length} candidate${candidates.length > 1 ? "s" : ""} against the active JD.`}
-            </p>
-            {matchError && (
-              <p className="text-xs text-red-600 font-medium mt-1">
-                ⚠️ {matchError}
-              </p>
-            )}
-          </div>
-          <button
-            onClick={async () => {
-              const targetJdId = jdId || activeJD?.id;
-              if (!targetJdId) {
-                setMatchError("Please select or parse a Job Description first.");
-                return;
-              }
-              if (candidates.length === 0) {
-                setMatchError("Please upload at least one candidate resume.");
-                return;
-              }
-              setMatching(true);
-              setMatchError(null);
-              try {
-                const runRes = await runMatch(targetJdId);
-                navigate(`/dashboard?run=${runRes.id}`);
-              } catch (err) {
-                const msg = err.response?.data?.detail || "Failed to execute AI matching.";
-                setMatchError(msg);
-              } finally {
-                setMatching(false);
-              }
-            }}
-            disabled={!(jdId || activeJD?.id) || candidates.length === 0 || matching}
-            className={`px-5 py-2.5 rounded-lg font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-sm ${
-              !(jdId || activeJD?.id) || candidates.length === 0 || matching
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed shadow-none"
-                : "bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer shadow-indigo-200"
-            }`}
-          >
-            {matching ? (
-              <>
-                <Spinner />
-                <span>Running Multi-Factor Ranking...</span>
-              </>
+            {candidatesLoading ? (
+              <div className="p-12 text-center text-sm text-brand-muted">
+                <div className="w-6 h-6 border-2 border-brand-forest border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                <span>Loading parsed candidate repository...</span>
+              </div>
+            ) : candidates.length === 0 ? (
+              <EmptyState
+                title="No resumes parsed yet"
+                description="Upload resumes using the dropzone above or seed the benchmark dataset with the 1-click demo."
+              />
             ) : (
-              <span>Run AI Matching &amp; Ranking 🚀</span>
+              <div className="overflow-x-auto border border-brand-line rounded-2xl bg-brand-paper shadow-soft">
+                <table className="w-full text-left text-xs text-brand-ink">
+                  <thead className="bg-brand-ivory/60 text-brand-muted uppercase font-sans font-semibold text-[11px] tracking-wider border-b border-brand-line">
+                    <tr>
+                      <th className="py-3.5 px-4">Candidate</th>
+                      <th className="py-3.5 px-4">Contact</th>
+                      <th className="py-3.5 px-4">Experience</th>
+                      <th className="py-3.5 px-4">Top Skills Detected</th>
+                      <th className="py-3.5 px-4">Integrity</th>
+                      <th className="py-3.5 px-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-brand-line">
+                    {candidates.map((c) => (
+                      <tr key={c.id} className="hover:bg-brand-sage-soft/15 transition-colors">
+                        <td className="py-3.5 px-4">
+                          <div className="font-serif font-bold text-brand-ink">
+                            {c.name || "Unknown Candidate"}
+                          </div>
+                          <div className="text-[11px] text-brand-muted truncate max-w-xs font-mono">
+                            {c.filename}
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="font-mono text-brand-ink/90">{c.email || <span className="text-brand-muted">—</span>}</div>
+                          <div className="text-[11px] text-brand-muted font-mono">{c.phone || ""}</div>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono tabular-nums font-medium bg-brand-ivory border border-brand-line text-brand-ink">
+                            {c.total_experience_years > 0
+                              ? `${c.total_experience_years.toFixed(1)} yrs`
+                              : "Fresher / 0 yrs"}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="flex flex-wrap gap-1 max-w-md">
+                            {c.top_skills && c.top_skills.length > 0 ? (
+                              <>
+                                {c.top_skills.map((skill, si) => (
+                                  <Chip key={si} variant="extra" size="sm">
+                                    {skill}
+                                  </Chip>
+                                ))}
+                                {c.skills_count > c.top_skills.length && (
+                                  <span className="text-[10px] font-mono text-brand-muted py-0.5 px-1 font-semibold">
+                                    +{c.skills_count - c.top_skills.length}
+                                  </span>
+                                )}
+                              </>
+                            ) : (
+                              <span className="text-brand-muted italic text-[11px]">None detected</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          {c.warnings_count > 0 ? (
+                            <Badge variant="partial" size="sm" dot={false}>
+                              ⚠️ {c.warnings_count} warn
+                            </Badge>
+                          ) : (
+                            <span className="text-band-strong font-semibold text-[11px] uppercase tracking-wide">
+                              ✓ Clean
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteCandidate(c.id)}
+                            disabled={deletingId === c.id}
+                            className="text-brand-muted hover:text-band-weak p-1.5 rounded-lg hover:bg-brand-sage-soft/30 transition-colors"
+                            title="Delete candidate"
+                            aria-label={`Delete ${c.name || 'candidate'}`}
+                          >
+                            {deletingId === c.id ? "..." : "🗑️"}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
-          </button>
-        </div>
+          </div>
+
+          {/* ── Callout for Deterministic AI Matching Execution ── */}
+          <div className="mt-8 p-6 rounded-3xl bg-brand-paper border-2 border-brand-forest/30 shadow-soft flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <h4 className="font-serif text-lg font-bold text-brand-ink">
+                Ready for Multi-Factor Ranking?
+              </h4>
+              <p className="text-xs text-brand-muted">
+                {!(jdId || activeJD?.id)
+                  ? "Step 1: Please analyze or select an active Job Description above."
+                  : candidates.length === 0
+                  ? "Step 2: Please upload at least one candidate resume."
+                  : `Evaluate ${candidates.length} candidate${candidates.length > 1 ? "s" : ""} with skills (40%), semantics (25%), experience (20%), degrees (10%), and titles (5%).`}
+              </p>
+              {matchError && (
+                <p className="text-xs text-band-weak font-medium mt-1">
+                  ⚠️ {matchError}
+                </p>
+              )}
+            </div>
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={async () => {
+                const targetJdId = jdId || activeJD?.id;
+                if (!targetJdId) {
+                  setMatchError("Please select or parse a Job Description first.");
+                  return;
+                }
+                if (candidates.length === 0) {
+                  setMatchError("Please upload at least one candidate resume.");
+                  return;
+                }
+                setMatching(true);
+                setMatchError(null);
+                try {
+                  const runRes = await runMatch(targetJdId);
+                  navigate(`/dashboard?run=${runRes.id}`);
+                } catch (err) {
+                  const msg = err.response?.data?.detail || "Failed to execute AI matching.";
+                  setMatchError(msg);
+                } finally {
+                  setMatching(false);
+                }
+              }}
+              disabled={!(jdId || activeJD?.id) || candidates.length === 0 || matching}
+              loading={matching}
+            >
+              🚀 Run Multi-Factor Match
+            </Button>
+          </div>
+        </Card>
       </section>
     </div>
   );
 }
-
-/* ── Helper components ── */
-
-function TabButton({ active, onClick, label }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-        active
-          ? "border-indigo-600 text-indigo-600"
-          : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-      }`}
-    >
-      {label}
-    </button>
-  );
-}
-
-function Spinner() {
-  return (
-    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-      />
-    </svg>
-  );
-}
-
-export default Home;

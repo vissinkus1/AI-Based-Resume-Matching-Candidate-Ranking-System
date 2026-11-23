@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import Card from "../ui/Card";
+import Button from "../ui/Button";
 
 export default function ControlsBar({
   search = "",
@@ -35,31 +37,32 @@ export default function ControlsBar({
   }, [searchInput, search, onSearchChange]);
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg mb-6">
+    <Card padding="p-4 sm:p-5" className="bg-brand-paper mb-6">
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
         {/* Top / Left: Search & Filters */}
         <div className="flex flex-wrap items-center gap-3 flex-1">
           {/* Search Box */}
           <div className="relative min-w-[220px] flex-1 sm:flex-initial">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+            <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-brand-muted">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </span>
             <input
               type="text"
-              placeholder="Search candidate name or email..."
+              placeholder="Search candidate or email..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full pl-9 pr-8 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+              className="w-full pl-9 pr-8 py-2 bg-brand-ivory/60 border border-brand-line rounded-full text-xs text-brand-ink placeholder:text-brand-muted/70 focus:outline-none focus:border-brand-forest focus:ring-1 focus:ring-brand-forest transition"
             />
             {searchInput && (
               <button
+                type="button"
                 onClick={() => {
                   setSearchInput("");
                   onSearchChange("");
                 }}
-                className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-white"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-brand-muted hover:text-brand-ink"
               >
                 ✕
               </button>
@@ -68,11 +71,13 @@ export default function ControlsBar({
 
           {/* Band Dropdown */}
           <div className="flex items-center gap-1.5">
-            <label className="text-xs text-slate-400 whitespace-nowrap">Band:</label>
+            <label className="text-xs text-brand-muted uppercase font-sans font-semibold tracking-wider text-[10px]">
+              Band:
+            </label>
             <select
               value={band}
               onChange={(e) => onBandChange(e.target.value)}
-              className="py-2 px-3 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500 transition"
+              className="py-1.5 px-3 bg-brand-ivory/60 border border-brand-line rounded-full text-xs text-brand-ink focus:outline-none focus:border-brand-forest transition"
             >
               <option value="">All Bands</option>
               <option value="strong">Strong (≥ 80%)</option>
@@ -85,11 +90,13 @@ export default function ControlsBar({
           {/* Skill Filter Dropdown */}
           {availableSkills && availableSkills.length > 0 && (
             <div className="flex items-center gap-1.5">
-              <label className="text-xs text-slate-400 whitespace-nowrap">Skill:</label>
+              <label className="text-xs text-brand-muted uppercase font-sans font-semibold tracking-wider text-[10px]">
+                Skill:
+              </label>
               <select
                 value={skill}
                 onChange={(e) => onSkillChange(e.target.value)}
-                className="py-2 px-3 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500 transition max-w-[170px] truncate"
+                className="py-1.5 px-3 bg-brand-ivory/60 border border-brand-line rounded-full text-xs text-brand-ink focus:outline-none focus:border-brand-forest transition max-w-[170px] truncate"
               >
                 <option value="">All Skills</option>
                 {availableSkills.map((sk) => (
@@ -101,58 +108,63 @@ export default function ControlsBar({
             </div>
           )}
 
-          {/* Min Experience Input */}
+          {/* Min Experience Dropdown */}
           <div className="flex items-center gap-1.5">
-            <label className="text-xs text-slate-400 whitespace-nowrap">Min Exp:</label>
-            <input
-              type="number"
-              min="0"
-              max="30"
-              step="0.5"
-              value={minExperience > 0 ? minExperience : ""}
-              placeholder="0 yrs"
-              onChange={(e) => onMinExperienceChange(parseFloat(e.target.value) || 0)}
-              className="w-20 py-2 px-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500 transition"
-            />
+            <label className="text-xs text-brand-muted uppercase font-sans font-semibold tracking-wider text-[10px]">
+              Min Exp:
+            </label>
+            <select
+              value={minExperience}
+              onChange={(e) => onMinExperienceChange(parseFloat(e.target.value))}
+              className="py-1.5 px-3 bg-brand-ivory/60 border border-brand-line rounded-full text-xs text-brand-ink focus:outline-none focus:border-brand-forest transition"
+            >
+              <option value={0}>Any Experience</option>
+              <option value={1}>1+ years</option>
+              <option value={3}>3+ years</option>
+              <option value={5}>5+ years</option>
+              <option value={8}>8+ years</option>
+            </select>
           </div>
 
           {/* Min Score Slider */}
-          <div className="flex items-center gap-2 bg-slate-950/70 border border-slate-800 px-3 py-1.5 rounded-xl">
-            <label className="text-xs text-slate-400 whitespace-nowrap">Min Score:</label>
+          <div className="flex items-center gap-2 px-3 py-1 bg-brand-ivory/60 border border-brand-line rounded-full">
+            <label className="text-xs text-brand-muted uppercase font-sans font-semibold tracking-wider text-[10px] whitespace-nowrap">
+              Min Score:
+            </label>
             <input
               type="range"
               min="0"
-              max="95"
+              max="90"
               step="5"
               value={minScore}
               onChange={(e) => onMinScoreChange(parseInt(e.target.value, 10))}
-              className="w-20 sm:w-24 accent-indigo-500 cursor-pointer"
+              className="w-20 accent-brand-forest cursor-pointer"
             />
-            <span className="text-xs font-mono font-bold text-indigo-400 min-w-[32px]">
+            <span className="text-xs font-mono tabular-nums text-brand-ink font-semibold w-7 text-right">
               {minScore}%
             </span>
           </div>
+        </div>
 
-          {/* Reset Filters Button */}
+        {/* Right: Results Count & Reset Button */}
+        <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-brand-line">
+          <span className="text-xs text-brand-muted font-sans font-medium">
+            Showing <strong className="text-brand-ink font-mono tabular-nums">{filteredCount}</strong> of{" "}
+            <span className="font-mono tabular-nums">{totalCount}</span>
+          </span>
+
           {hasActiveFilters && (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={onResetFilters}
-              className="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-medium rounded-xl transition flex items-center gap-1"
+              className="text-xs text-brand-forest hover:text-brand-forest/80 underline p-0 h-auto min-h-0"
             >
-              <span>✕</span> Reset
-            </button>
+              Reset Filters
+            </Button>
           )}
         </div>
-
-        {/* Right: Showing Counter */}
-        <div className="flex items-center justify-end gap-2 text-xs text-slate-400 border-t lg:border-t-0 pt-2 lg:pt-0">
-          <span>Showing</span>
-          <span className="font-bold text-white bg-slate-800 px-2.5 py-0.5 rounded-md border border-slate-700">
-            {filteredCount} of {totalCount}
-          </span>
-          <span>candidates</span>
-        </div>
       </div>
-    </div>
+    </Card>
   );
 }

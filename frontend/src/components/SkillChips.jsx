@@ -1,45 +1,34 @@
-/*
- * components/SkillChips.jsx — Editable skill chip list.
- *
- * Shows skills as coloured chips. Each chip has a remove button.
- * An input field lets the recruiter add new skills.
- * A toggle button lets the recruiter flip required ↔ preferred.
- */
+import React, { useState } from "react";
+import Chip from "./ui/Chip";
+import Button from "./ui/Button";
 
-import { useState } from "react";
-
-/**
- * @param {Object} props
- * @param {string[]} props.skills        — List of skill names.
- * @param {function} props.onRemove      — Called with the skill name to remove.
- * @param {function} props.onAdd         — Called with a new skill name string.
- * @param {function} [props.onToggle]    — Called with the skill name to toggle category.
- * @param {string}   props.color         — Tailwind colour: "green" or "yellow".
- * @param {string}   props.label         — Section label: "Required" or "Preferred".
- * @param {string}   [props.toggleLabel] — Label for toggle button: "→ Preferred" etc.
- */
 export default function SkillChips({
-  skills,
+  skills = [],
   onRemove,
   onAdd,
   onToggle,
-  color = "green",
+  onToggleCategory,
+  color,
+  badgeColor,
   label = "Skills",
-  toggleLabel = "",
+  toggleLabel = "Move category",
 }) {
   const [newSkill, setNewSkill] = useState("");
+  const handleToggle = onToggle || onToggleCategory;
 
-  const bgMap = {
-    green: "bg-green-100 text-green-800 border-green-300",
-    yellow: "bg-yellow-100 text-yellow-800 border-yellow-300",
-    blue: "bg-blue-100 text-blue-800 border-blue-300",
-  };
-  const chipClass = bgMap[color] || bgMap.green;
+  // Determine Chip variant
+  const c = color || badgeColor;
+  let variant = "neutral";
+  if (c === "indigo" || c === "green" || label?.toLowerCase().includes("required")) {
+    variant = "matched";
+  } else if (c === "purple" || c === "yellow" || label?.toLowerCase().includes("preferred")) {
+    variant = "preferred";
+  }
 
   const handleAdd = () => {
     const trimmed = newSkill.trim();
     if (trimmed && !skills.includes(trimmed)) {
-      onAdd(trimmed);
+      if (onAdd) onAdd(trimmed);
       setNewSkill("");
     }
   };
@@ -52,61 +41,57 @@ export default function SkillChips({
   };
 
   return (
-    <div className="mb-4">
-      <h4 className="text-sm font-semibold text-gray-600 mb-2">
-        {label} ({skills.length})
-      </h4>
-      <div className="flex flex-wrap gap-2 mb-2">
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-2">
         {skills.map((skill) => (
-          <span
-            key={skill}
-            className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm border ${chipClass}`}
-          >
-            {skill}
-            {/* Toggle button (move to other category) */}
-            {onToggle && (
+          <div key={skill} className="inline-flex items-center gap-1 group">
+            <Chip
+              variant={variant}
+              onRemove={onRemove ? () => onRemove(skill) : undefined}
+            >
+              {skill}
+            </Chip>
+            {handleToggle && (
               <button
-                onClick={() => onToggle(skill)}
+                type="button"
+                onClick={() => handleToggle(skill)}
                 title={toggleLabel}
-                className="ml-1 text-xs opacity-60 hover:opacity-100"
+                aria-label={`Toggle category for ${skill}`}
+                className="text-brand-muted hover:text-brand-forest hover:bg-brand-sage-soft/30 p-1 rounded-full text-xs transition-colors"
               >
                 ⇄
               </button>
             )}
-            {/* Remove button */}
-            <button
-              onClick={() => onRemove(skill)}
-              className="ml-1 text-xs font-bold opacity-60 hover:opacity-100"
-              title="Remove skill"
-            >
-              ×
-            </button>
-          </span>
+          </div>
         ))}
         {skills.length === 0 && (
-          <span className="text-gray-400 text-sm italic">None detected</span>
+          <span className="text-brand-muted text-xs italic py-1">
+            No skills specified
+          </span>
         )}
       </div>
+
       {/* Add new skill input */}
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={newSkill}
-          onChange={(e) => setNewSkill(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={`Add a ${label.toLowerCase()} skill…`}
-          className="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm
-                     focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 outline-none"
-        />
-        <button
-          onClick={handleAdd}
-          disabled={!newSkill.trim()}
-          className="px-3 py-1.5 bg-indigo-500 text-white text-sm rounded-md
-                     hover:bg-indigo-600 disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          Add
-        </button>
-      </div>
+      {onAdd && (
+        <div className="flex items-center gap-2 max-w-sm pt-1">
+          <input
+            type="text"
+            value={newSkill}
+            onChange={(e) => setNewSkill(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={`Add a skill...`}
+            className="flex-1 px-3.5 py-1.5 text-xs bg-brand-paper border border-brand-line rounded-full text-brand-ink placeholder:text-brand-muted/70 focus:outline-none focus:ring-2 focus:ring-brand-forest/20 focus:border-brand-forest transition-all"
+          />
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleAdd}
+            disabled={!newSkill.trim()}
+          >
+            Add
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

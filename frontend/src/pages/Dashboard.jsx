@@ -1,7 +1,7 @@
 /*
  * pages/Dashboard.jsx — AI Matching & Candidate Ranking Dashboard.
  *
- * Implements Module 4:
+ * Implements Module 4 (Phase 6A Editorial Sage UI):
  * - DashboardHeader with stale notification, re-run, CSV export.
  * - SummaryCards with 4 clickable match band cards, pool size, avg score.
  * - ControlsBar with debounced search, band, min score slider, experience, skill, reset.
@@ -11,11 +11,13 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import { getRun, getResults, listRuns, runMatch, getLatestRun } from "../api/match";
+import { getRun, getResults, listRuns, runMatch } from "../api/match";
 import DashboardHeader from "../components/dashboard/DashboardHeader";
 import SummaryCards from "../components/dashboard/SummaryCards";
 import ControlsBar from "../components/dashboard/ControlsBar";
 import RankingTable from "../components/dashboard/RankingTable";
+import EmptyState from "../components/ui/EmptyState";
+import Button from "../components/ui/Button";
 
 export default function Dashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -206,43 +208,36 @@ export default function Dashboard() {
 
   const topCandidate = useMemo(() => {
     if (!resultsData.items || resultsData.items.length === 0) return null;
-    // Top candidate by score
     return [...resultsData.items].sort((a, b) => b.final_score - a.final_score)[0];
   }, [resultsData.items]);
 
   // If no run selected and no past runs found
   if (!runId && !pastRunsLoading && pastRuns.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto py-16 px-4 text-center">
-        <div className="w-16 h-16 mx-auto rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-3xl mb-4">
-          📊
-        </div>
-        <h2 className="text-2xl font-black text-white mb-2">No Matching Runs Found</h2>
-        <p className="text-slate-400 text-sm max-w-md mx-auto mb-6">
-          You haven't run any candidate evaluations yet. Start by parsing a Job Description and matching candidate resumes, or try the instant sample data demo.
-        </p>
-        <Link
-          to="/"
-          className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl transition shadow-lg shadow-indigo-500/25 inline-flex items-center gap-2"
-        >
-          <span>🚀</span> Go to Home & Match Resumes
-        </Link>
+      <div className="py-16">
+        <EmptyState
+          title="No Matching Runs Found"
+          description="You haven't run any candidate evaluations yet. Start by parsing a Job Description and matching candidate resumes, or test the benchmark with the one-click demo."
+          actionLabel="🚀 Go to Home & Match Resumes"
+          onAction={() => navigate("/")}
+        />
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="space-y-6">
       {/* Error Message */}
       {error && (
-        <div className="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-band-weak/10 border border-band-weak/30 text-band-weak text-xs flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span>⚠️</span>
             <span>{error}</span>
           </div>
           <button
+            type="button"
             onClick={() => loadRun(runId)}
-            className="text-xs font-bold underline hover:text-white"
+            className="text-xs font-bold underline hover:text-band-weak/80 cursor-pointer"
           >
             Retry
           </button>

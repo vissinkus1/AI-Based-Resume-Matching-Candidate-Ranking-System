@@ -503,7 +503,51 @@ Verification & Tests:
 | **Total Automated Pytest Suite** | **133** | **133** | **✅ 100% Pass** |
 | `vite build` (Frontend Production Build) | 122 modules | 122 | **✅ 0 Errors (4.12s)** |
 
-## Phase 6 — Additional Polish, Extended Evaluation & Final Docs
+## Phase 6A — Editorial Sage UI Restyle (Frontend Only)
+**Status:** ✅ DONE
+
+### Checklist
+
+- [x] Design Tokens & CSS Variables:
+  - [x] Implemented tokens in both `tailwind.config.js` and `:root` in `frontend/src/index.css`
+  - [x] Palette: Ivory `#E5E8CE`, Paper `#F3F5E6`, Sage `#789575`, Sage Soft `#CBD5B4`, Forest `#2F4A33`, Ink `#1E2A20`, Calibrated Muted `#556456`, Line `#C9D0AE`
+  - [x] Bands: Strong `#3F7A4D`, Good `#789575`, Partial `#C79A3B`, Weak `#B5654A`
+  - [x] Verified contrast ratios meeting WCAG AA ($\ge 4.5:1$): Ink on Ivory 11.91:1, Ink on Paper 13.51:1, Ivory on Forest 7.80:1, White on Forest 9.78:1, Muted on Ivory 5.01:1, Muted on Paper 5.69:1
+- [x] Typography System:
+  - [x] Display font: "Anton" for hero headlines, page title, and large candidate score numeral
+  - [x] Serif font: "Fraunces" for headings, subheadings, and section titles
+  - [x] Sans font: "Inter" for UI controls, body copy, and tables with `tabular-nums`
+  - [x] Eyebrow styling: uppercase, 11px, letter-spacing 0.14em, muted text
+  - [x] Offline fallbacks configured (Impact, Georgia, system-ui) preventing layout shift
+- [x] Shared UI Primitives Suite (`frontend/src/components/ui/`):
+  - [x] `Button.jsx`: Primary forest pill, secondary outlined, ghost, danger, minimum 40px touch targets, focus rings
+  - [x] `Card.jsx`: Paper background (`bg-brand-paper`), hairline border (`border-brand-line`), `rounded-3xl`, soft shadows
+  - [x] `SectionHeader.jsx`: Eyebrow, serif title, subtitle, hairline divider, and action slot
+  - [x] `Chip.jsx`: Pill badge with variants (`matched`, `partial`, `missing`, `preferred`, `extra`, `neutral`, `forest`)
+  - [x] `StatTile.jsx`: Serif title, hairline divider, display numeral in Anton, letter-spaced caption, active indicator
+  - [x] `ScoreBar.jsx`: Thin rounded progress bar with band color and tabular-nums numeral
+  - [x] `Eyebrow.jsx`: Standardized letter-spaced uppercase label
+  - [x] `Divider.jsx`: Hairline border rule with horizontal and vertical support
+  - [x] `Badge.jsx`: Band badges with dual encoding (tint + explicit text label)
+  - [x] `EmptyState.jsx`: Calm empty state card with icon, serif title, and action button
+  - [x] `Skeleton.jsx`: Subtle sage shimmer placeholder
+- [x] Views Modernization:
+  - [x] `Navbar.jsx`: Sticky minimal top nav on ivory, logo glyph left, centered links, outlined pill CTA right, mobile drawer
+  - [x] `Layout.jsx`: Page background in ivory, subtle editorial footer with hairline divider
+  - [x] `Home.jsx`: Editorial hero with Anton headline `BETTER HIRING, RANKED`, live preview card with static candidates, 3-pillar feature list, restyled 1-click evaluator demo, Step 1 (JD panel), and Step 2 (batch intake)
+  - [x] `Dashboard.jsx`: Modernized header, 7-card responsive summary grid with `StatTile` primitives, pill controls bar with slider, ranking table with hairline dividers, Anton rank numerals, and mobile card view
+  - [x] `CandidateDetail.jsx`: Modernized top bar, hero card with circular SVG gauge and Anton score numeral, 5-factor breakdown card, executive narrative card, skills taxonomy section, experience timeline card, degree qualification card, semantic evidence card, and raw parser audit card
+- [x] Verification & Documentation:
+  - [x] Vite production build passing with 0 errors (`dist` generated cleanly)
+  - [x] Automated backend pytest suite passing untouched: 133 / 133 tests (100% pass rate)
+  - [x] All 4 responsive screenshots captured to `docs/screenshots/`:
+    - `docs/screenshots/home_desktop.png` (1280x950)
+    - `docs/screenshots/dashboard_desktop.png` (1280x950)
+    - `docs/screenshots/dashboard_mobile_375px.png` (375x812)
+    - `docs/screenshots/candidate_detail_desktop.png` (1280x1050)
+  - [x] Documented decisions D52–D57 in `DECISIONS.md`
+
+## Phase 6B — Additional Polish & Extended Evaluation
 **Status:** TODO
 
 ## Phase 7 — Final Polish, Synthetic Data & Evaluation Reporting
