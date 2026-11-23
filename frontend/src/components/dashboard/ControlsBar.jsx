@@ -80,10 +80,10 @@ export default function ControlsBar({
               className="py-1.5 px-3 bg-brand-ivory/60 border border-brand-line rounded-full text-xs text-brand-ink focus:outline-none focus:border-brand-forest transition"
             >
               <option value="">All Bands</option>
-              <option value="strong">Strong (≥ 80%)</option>
-              <option value="good">Good (65–79%)</option>
-              <option value="partial">Partial (50–64%)</option>
-              <option value="weak">Weak (&lt; 50%)</option>
+              <option value="strong">Strong (≥ 75%)</option>
+              <option value="good">Good (60–74%)</option>
+              <option value="partial">Partial (40–59%)</option>
+              <option value="weak">Weak (&lt; 40%)</option>
             </select>
           </div>
 

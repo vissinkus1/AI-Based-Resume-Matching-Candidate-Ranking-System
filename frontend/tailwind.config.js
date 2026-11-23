@@ -11,6 +11,7 @@ export default {
           ivory: "var(--color-ivory)",
           paper: "var(--color-paper)",
           sage: "var(--color-sage)",
+          "sage-deep": "var(--color-sage-deep)",
           "sage-soft": "var(--color-sage-soft)",
           forest: "var(--color-forest)",
           ink: "var(--color-ink)",

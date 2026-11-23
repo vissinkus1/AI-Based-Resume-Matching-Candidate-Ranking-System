@@ -547,6 +547,28 @@ Verification & Tests:
     - `docs/screenshots/candidate_detail_desktop.png` (1280x1050)
   - [x] Documented decisions D52–D57 in `DECISIONS.md`
 
+### Phase 6A-FIX: Band Consistency, Contrast & Visual Verification
+**Status:** ✅ DONE
+
+- [x] **Band Source of Truth:**
+  - [x] Decoupled score-to-band calculation from UI (`ScoreBar.jsx`, `Badge.jsx`, `RankingTable.jsx`, `SummaryCards.jsx`, `CandidateHeroCard.jsx`); UI consumes authoritative `band` string from API.
+  - [x] Corrected band thresholds in `SummaryCards.jsx` and `ControlsBar.jsx` to match backend source of truth: Strong $\ge 75\%$, Good $60-74\%$, Partial $40-59\%$, Weak $< 40\%$.
+  - [x] Verified that summary card counts match API `band_counts`, and candidates scoring 75-79% (e.g., Aravind Sharma at 76.7%) render "Strong Match".
+- [x] **Hardcode Audit & Discrepancy Resolution:**
+  - [x] Audited frontend for static data: resolved "94.2%" report origin (was described from static hero benchmark in `Home.jsx`, not candidate detail API).
+  - [x] Visibly tagged static home preview with `EXAMPLE BENCHMARK` and `EXAMPLE` badges on all synthetic candidates (Elena Rostova, Marcus Vance, Sofia Chen).
+- [x] **Contrast Calibration:**
+  - [x] Added `sage-deep` (`#6B8A68`) token to `tailwind.config.js` and `index.css`; applied to large Anton display headlines (`BETTER HIRING, RANKED`, `RANKING MATRIX`) for guaranteed $\ge 3:1$ WCAG AA compliance (3.07:1 on ivory).
+  - [x] Updated score numerals in `CandidateHeroCard` and `ScoreBreakdownCard` to `ink` (`#1E2A20`, $>11:1$ AAA) with band-colored ring and progress track.
+  - [x] Updated tinted band `Badge` label text to `ink` ($>10:1$ AAA) across all band tints.
+  - [x] Documented contrast ratio matrix in `DECISIONS.md` (D58, D59).
+- [x] **Proper Visual Verification:**
+  - [x] Seeded Java JD demo (`POST /api/demo/seed?jd_key=java&reset=true`) with 12 candidates.
+  - [x] Automated full-page screenshot capture via Headless Chrome CDP across 1280px, 768px, and 375px viewports (overwriting `docs/screenshots/`).
+  - [x] Confirmed zero console errors or warnings across all 9 pages and viewports.
+  - [x] Automated pytest suite passing: 133 / 133 tests passed in 27.82s.
+  - [x] Vite production build passing with 0 errors (133 modules transformed).
+
 ## Phase 6B — Additional Polish & Extended Evaluation
 **Status:** TODO
 

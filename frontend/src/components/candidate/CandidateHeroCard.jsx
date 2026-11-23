@@ -192,7 +192,7 @@ export default function CandidateHeroCard({
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-              <span className="font-display text-4xl font-normal text-brand-sage tracking-tight">
+              <span className="font-display text-4xl font-normal text-brand-ink tracking-tight">
                 {finalScore.toFixed(1)}%
               </span>
               <span className="text-[10px] font-sans font-semibold uppercase tracking-wider text-brand-muted -mt-1">

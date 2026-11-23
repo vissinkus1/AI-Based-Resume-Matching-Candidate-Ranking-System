@@ -1,15 +1,19 @@
 import React from "react";
 
-function getBandColor(score) {
-  if (score >= 75) return "bg-band-strong";
-  if (score >= 60) return "bg-band-good";
-  if (score >= 45) return "bg-band-partial";
-  return "bg-band-weak";
+function getBandFillColor(band) {
+  if (!band) return "bg-brand-forest";
+  const b = String(band).toLowerCase();
+  if (b.includes("strong")) return "bg-band-strong";
+  if (b.includes("good")) return "bg-band-good";
+  if (b.includes("partial")) return "bg-band-partial";
+  if (b.includes("weak")) return "bg-band-weak";
+  return "bg-brand-forest";
 }
 
 export default function ScoreBar({
   value = 0,
   max = 100,
+  band,
   label,
   showValue = true,
   variant,
@@ -17,7 +21,7 @@ export default function ScoreBar({
   className = "",
 }) {
   const percentage = Math.min(100, Math.max(0, Math.round((value / max) * 100)));
-  const fillColor = variant || getBandColor(percentage);
+  const fillColor = variant || getBandFillColor(band);
 
   return (
     <div className={`w-full ${className}`}>

@@ -12,9 +12,10 @@ export default function ExperienceComparisonCard({
   jdMaxExp = null,
   totalExp = 0,
   relevantExp = 0,
+  score: propScore = null,
 }) {
   const verdict = experienceBreakdown.verdict || (relevantExp >= (jdMinExp || 0) ? "Meets Requirement" : "Below Minimum");
-  const score = experienceBreakdown.score !== undefined ? experienceBreakdown.score : 0;
+  const score = propScore !== null && propScore !== undefined ? propScore : (experienceBreakdown.score !== undefined ? experienceBreakdown.score : 0);
 
   // Max scale for visual comparison bar
   const maxScale = Math.max(12, totalExp + 2, (jdMaxExp || jdMinExp || 5) + 3);

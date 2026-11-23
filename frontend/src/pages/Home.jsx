@@ -356,7 +356,7 @@ export default function Home() {
           <p className="font-serif italic text-xl sm:text-2xl text-brand-muted">
             Smarter shortlists, explained.
           </p>
-          <h1 className="font-display uppercase text-5xl sm:text-7xl lg:text-8xl tracking-tight leading-[0.92] text-brand-sage max-w-4xl">
+          <h1 className="font-display uppercase text-5xl sm:text-7xl lg:text-8xl tracking-tight leading-[0.92] text-brand-sage-deep max-w-4xl">
             BETTER HIRING, RANKED
           </h1>
           <p className="text-base sm:text-lg text-brand-muted max-w-2xl font-sans pt-2 leading-relaxed">
@@ -388,18 +388,18 @@ export default function Home() {
           </Button>
         </div>
 
-        {/* Live Preview Card (Static Synthetic Sample) */}
+        {/* Live Preview Card (Static Synthetic Sample - Example Only) */}
         <div className="pt-4">
           <Card padding="p-6 sm:p-8" className="bg-brand-paper border-brand-line">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-brand-line gap-2">
               <div>
-                <Eyebrow>LIVE RANKING PREVIEW</Eyebrow>
+                <Eyebrow>EXAMPLE PREVIEW · STATIC DEMO</Eyebrow>
                 <h3 className="font-serif text-lg sm:text-xl font-bold text-brand-ink">
                   Deterministic Multi-Factor Scoring in Action
                 </h3>
               </div>
-              <span className="text-[11px] font-sans font-semibold uppercase tracking-wider text-brand-muted bg-brand-sage-soft/30 px-3 py-1 rounded-full self-start sm:self-auto border border-brand-line">
-                Calibrated Benchmark
+              <span className="text-[11px] font-sans font-bold uppercase tracking-wider text-brand-forest bg-brand-sage-soft/50 px-3 py-1 rounded-full self-start sm:self-auto border border-brand-line">
+                Example Benchmark
               </span>
             </div>
 
@@ -410,12 +410,13 @@ export default function Home() {
                   <div className="flex items-center gap-2">
                     <span className="font-display text-xl text-brand-forest">#1</span>
                     <span className="font-serif font-bold text-base text-brand-ink">Elena Rostova</span>
+                    <span className="text-[10px] font-mono uppercase text-brand-muted bg-brand-ivory px-1.5 py-0.5 rounded border border-brand-line">Example</span>
                     <Badge band="strong">Strong Match</Badge>
                   </div>
                   <p className="text-xs text-brand-muted">Senior AI/ML Research Engineer · 6.5 yrs</p>
                 </div>
                 <div className="md:w-1/3">
-                  <ScoreBar value={94.2} label="Composite Score" />
+                  <ScoreBar value={94.2} band="strong" label="Composite Score" />
                 </div>
                 <div className="flex flex-wrap gap-1.5 md:w-1/3 justify-start md:justify-end">
                   <Chip variant="matched">PyTorch</Chip>
@@ -429,14 +430,15 @@ export default function Home() {
               <div className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="space-y-1 md:w-1/3">
                   <div className="flex items-center gap-2">
-                    <span className="font-display text-xl text-brand-sage">#2</span>
+                    <span className="font-display text-xl text-brand-sage-deep">#2</span>
                     <span className="font-serif font-bold text-base text-brand-ink">Marcus Vance</span>
+                    <span className="text-[10px] font-mono uppercase text-brand-muted bg-brand-ivory px-1.5 py-0.5 rounded border border-brand-line">Example</span>
                     <Badge band="good">Good Match</Badge>
                   </div>
                   <p className="text-xs text-brand-muted">Lead Systems Architect · 8.0 yrs</p>
                 </div>
                 <div className="md:w-1/3">
-                  <ScoreBar value={78.5} label="Composite Score" />
+                  <ScoreBar value={68.5} band="good" label="Composite Score" />
                 </div>
                 <div className="flex flex-wrap gap-1.5 md:w-1/3 justify-start md:justify-end">
                   <Chip variant="matched">FastAPI</Chip>
@@ -452,12 +454,13 @@ export default function Home() {
                   <div className="flex items-center gap-2">
                     <span className="font-display text-xl text-band-partial">#3</span>
                     <span className="font-serif font-bold text-base text-brand-ink">Sofia Chen</span>
+                    <span className="text-[10px] font-mono uppercase text-brand-muted bg-brand-ivory px-1.5 py-0.5 rounded border border-brand-line">Example</span>
                     <Badge band="partial">Partial Match</Badge>
                   </div>
                   <p className="text-xs text-brand-muted">Frontend Developer · 2.5 yrs</p>
                 </div>
                 <div className="md:w-1/3">
-                  <ScoreBar value={52.0} label="Composite Score" />
+                  <ScoreBar value={52.0} band="partial" label="Composite Score" />
                 </div>
                 <div className="flex flex-wrap gap-1.5 md:w-1/3 justify-start md:justify-end">
                   <Chip variant="matched">TypeScript</Chip>

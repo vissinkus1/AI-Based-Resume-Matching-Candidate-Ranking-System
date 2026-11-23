@@ -71,7 +71,7 @@ export default function DashboardHeader({
               )}
             </div>
 
-            <h1 className="font-display uppercase text-4xl sm:text-5xl lg:text-6xl text-brand-sage tracking-tight leading-none">
+            <h1 className="font-display uppercase text-4xl sm:text-5xl lg:text-6xl text-brand-sage-deep tracking-tight leading-none">
               RANKING MATRIX
             </h1>
 

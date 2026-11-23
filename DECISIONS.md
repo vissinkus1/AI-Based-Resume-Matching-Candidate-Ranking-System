@@ -89,3 +89,28 @@
 | D55 | Shared accessible UI primitives suite (`components/ui/`) | Centralizes buttons, cards, section headers, chips, stat tiles, score bars, eyebrows, dividers, empty states, and skeletons; enforces minimum 40px touch targets and visible focus rings. |
 | D56 | Score band dual-encoding requirement (visual tint + text label) | Accessibility rule ensuring score bands never rely on color alone; every band renders an explicit textual indicator (`Strong Match`, `Good Match`, `Partial Match`, `Weak Match`, `Knockout`). |
 | D57 | Frontend-only visual restyle with zero backend or API drift | Preserved 100% backend isolation; no Python code, database models, or REST API contracts were altered during UI modernization. |
+| D58 | Band source of truth strictly decoupled from score thresholds in UI | UI never derives recommendation bands from numeric scores; components consume the authoritative `band` string directly from API match results mapped to semantic tokens (`strong`, `good`, `partial`, `weak`), eliminating client-side threshold drift. |
+| D59 | Sage-deep (#6B8A68) display token & ink score numeral contrast calibration | Added `sage-deep` (#6B8A68, 3.07:1 on ivory) for large display headlines (Anton) to meet WCAG AA large-text standard (>=3:1); shifted candidate score numerals to `ink` (#1E2A20, >11:1 AAA) while preserving band-colored circular progress rings and bars; set tinted badge text to `ink` for guaranteed AAA readability across all band tints. |
+
+### Calibrated Color Palette & WCAG Contrast Matrix
+
+| Foreground | Background | Context / Usage | Contrast Ratio | WCAG Compliance |
+|------------|------------|-----------------|----------------|-----------------|
+| `sage-deep` (`#6B8A68`) | `ivory` (`#E5E8CE`) | Large display headlines (Anton $\ge$ 36px) | **3.07:1** | ✅ WCAG AA Large ($\ge 3:1$) |
+| `sage` (`#789575`) | `ivory` (`#E5E8CE`) | Deprecated for text; borders & rings only | 2.64:1 | ⚠️ Decorative graphics only |
+| `ink` (`#1E2A20`) | `ivory` (`#E5E8CE`) | Body text & display scores on ivory | **11.91:1** | ✅ WCAG AAA ($\ge 7:1$) |
+| `ink` (`#1E2A20`) | `paper` (`#F3F5E6`) | Table rows, card body, scores on paper | **13.51:1** | ✅ WCAG AAA ($\ge 7:1$) |
+| `ivory` (`#E5E8CE`) | `forest` (`#2F4A33`) | Primary button label text | **7.80:1** | ✅ WCAG AAA ($\ge 7:1$) |
+| `white` (`#FFFFFF`) | `forest` (`#2F4A33`) | Contrast highlight on forest | **9.78:1** | ✅ WCAG AAA ($\ge 7:1$) |
+| `muted` (`#556456`) | `ivory` (`#E5E8CE`) | Secondary text, timestamps on ivory | **5.01:1** | ✅ WCAG AA Normal ($\ge 4.5:1$) |
+| `muted` (`#556456`) | `paper` (`#F3F5E6`) | Secondary text, captions on paper | **5.69:1** | ✅ WCAG AA Normal ($\ge 4.5:1$) |
+| `band-good` (`#789575`) | `paper` (`#F3F5E6`) | Decorative indicators & progress track | **2.99:1** | ✅ Decorative graphics |
+| `band-partial` (`#C79A3B`) | `paper` (`#F3F5E6`) | Decorative indicators & progress track | **2.34:1** | ✅ Decorative graphics |
+| `ink` (`#1E2A20`) | `strong` tint on paper (`#D8E3CF`) | Strong Match badge text | **11.23:1** | ✅ WCAG AAA ($\ge 7:1$) |
+| `ink` (`#1E2A20`) | `strong` tint on ivory (`#CCD8BB`) | Strong Match badge text | **10.02:1** | ✅ WCAG AAA ($\ge 7:1$) |
+| `ink` (`#1E2A20`) | `good` tint on paper (`#E1E7D5`) | Good Match badge text | **11.79:1** | ✅ WCAG AAA ($\ge 7:1$) |
+| `ink` (`#1E2A20`) | `good` tint on ivory (`#D5DCC1`) | Good Match badge text | **10.54:1** | ✅ WCAG AAA ($\ge 7:1$) |
+| `ink` (`#1E2A20`) | `partial` tint on paper (`#ECE7CC`) | Partial Match badge text | **11.99:1** | ✅ WCAG AAA ($\ge 7:1$) |
+| `ink` (`#1E2A20`) | `partial` tint on ivory (`#E0DCB8`) | Partial Match badge text | **10.73:1** | ✅ WCAG AAA ($\ge 7:1$) |
+| `ink` (`#1E2A20`) | `weak` tint on paper (`#EADFCF`) | Weak Match badge text | **11.34:1** | ✅ WCAG AAA ($\ge 7:1$) |
+| `ink` (`#1E2A20`) | `weak` tint on ivory (`#DED4BA`) | Weak Match badge text | **10.11:1** | ✅ WCAG AAA ($\ge 7:1$) |

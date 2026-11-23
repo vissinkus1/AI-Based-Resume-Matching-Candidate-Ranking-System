@@ -185,6 +185,7 @@ export default function RankingTable({
                     <td className="py-3.5 px-4 whitespace-nowrap min-w-[170px]">
                       <ScoreBar
                         value={row.final_score}
+                        band={row.band}
                         showValue={true}
                         height="h-2"
                       />
@@ -214,7 +215,7 @@ export default function RankingTable({
 
                     {/* 5. Rank */}
                     <td className="py-3.5 px-3 text-center whitespace-nowrap">
-                      <span className="font-display text-lg text-brand-sage">
+                      <span className="font-display text-lg text-brand-sage-deep">
                         #{row.original_rank || row.rank}
                       </span>
                     </td>
@@ -278,7 +279,7 @@ export default function RankingTable({
               {/* Header: Rank + Name + Band */}
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2.5">
-                  <span className="font-display text-xl text-brand-sage">
+                  <span className="font-display text-xl text-brand-sage-deep">
                     #{row.original_rank || row.rank}
                   </span>
                   <div>
@@ -295,6 +296,7 @@ export default function RankingTable({
               <div className="bg-brand-ivory/50 p-3.5 rounded-2xl border border-brand-line space-y-2">
                 <ScoreBar
                   value={row.final_score}
+                  band={row.band}
                   label="Composite Score:"
                   showValue={true}
                 />

@@ -37,23 +37,23 @@ export default function Badge({
 
   const variantStyles = {
     strong: {
-      wrap: "bg-band-strong/15 text-band-strong border border-band-strong/30",
+      wrap: "bg-band-strong/15 text-brand-ink border border-band-strong/30",
       dot: "bg-band-strong",
     },
     good: {
-      wrap: "bg-band-good/15 text-band-good border border-band-good/30",
+      wrap: "bg-band-good/15 text-brand-ink border border-band-good/30",
       dot: "bg-band-good",
     },
     partial: {
-      wrap: "bg-band-partial/15 text-band-partial border border-band-partial/30",
+      wrap: "bg-band-partial/15 text-brand-ink border border-band-partial/30",
       dot: "bg-band-partial",
     },
     weak: {
-      wrap: "bg-band-weak/15 text-band-weak border border-band-weak/30",
+      wrap: "bg-band-weak/15 text-brand-ink border border-band-weak/30",
       dot: "bg-band-weak",
     },
     knockout: {
-      wrap: "bg-band-weak/20 text-band-weak border border-band-weak/40 font-semibold",
+      wrap: "bg-band-weak/20 text-brand-ink border border-band-weak/40 font-semibold",
       dot: "bg-band-weak",
     },
     neutral: {

@@ -5,11 +5,27 @@ import Eyebrow from "../ui/Eyebrow";
 
 export default function SemanticEvidenceCard({
   semanticBreakdown = {},
+  score: propScore = null,
 }) {
   const evidenceList = semanticBreakdown.evidence || semanticBreakdown.top_evidence || [];
-  const score = semanticBreakdown.score !== undefined ? semanticBreakdown.score : 0;
-  const docSim = semanticBreakdown.doc_similarity !== undefined ? semanticBreakdown.doc_similarity : 0;
-  const coverageScore = semanticBreakdown.coverage_score !== undefined ? semanticBreakdown.coverage_score : 0;
+  const coverageScore =
+    semanticBreakdown.requirement_coverage_score !== undefined
+      ? semanticBreakdown.requirement_coverage_score
+      : semanticBreakdown.coverage_score !== undefined
+      ? semanticBreakdown.coverage_score
+      : 0;
+  const docSim =
+    semanticBreakdown.whole_doc_similarity_score !== undefined
+      ? semanticBreakdown.whole_doc_similarity_score
+      : semanticBreakdown.doc_similarity !== undefined
+      ? semanticBreakdown.doc_similarity
+      : 0;
+  const score =
+    propScore !== null && propScore !== undefined
+      ? propScore
+      : semanticBreakdown.score !== undefined
+      ? semanticBreakdown.score
+      : Math.round((coverageScore * 0.6 + docSim * 0.4) * 10) / 10;
 
   return (
     <Card padding="p-6 sm:p-8" className="bg-brand-paper mb-6">

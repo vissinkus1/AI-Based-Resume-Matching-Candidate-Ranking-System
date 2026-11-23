@@ -148,7 +148,7 @@ export default function ScoreBreakdownCard({
           <span className="text-xs font-sans font-semibold uppercase tracking-wider text-brand-muted">
             Final Match Score:
           </span>
-          <p className="font-display text-3xl text-brand-sage">
+          <p className="font-display text-3xl text-brand-ink">
             {finalScore.toFixed(1)}%
           </p>
         </div>

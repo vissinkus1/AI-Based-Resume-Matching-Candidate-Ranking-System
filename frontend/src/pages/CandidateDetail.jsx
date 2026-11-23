@@ -112,8 +112,16 @@ export default function CandidateDetail() {
   const skillsBreakdown = data.skills_breakdown || data.skills || {};
   const semanticBreakdown = data.semantic_breakdown || data.semantic || {};
 
-  const totalExp = expBreakdown.total_experience_years || 0;
-  const relExp = expBreakdown.relevant_experience_years !== undefined ? expBreakdown.relevant_experience_years : totalExp;
+  const totalExp =
+    expBreakdown.total_years !== undefined
+      ? expBreakdown.total_years
+      : expBreakdown.total_experience_years || 0;
+  const relExp =
+    expBreakdown.relevant_years !== undefined
+      ? expBreakdown.relevant_years
+      : expBreakdown.relevant_experience_years !== undefined
+      ? expBreakdown.relevant_experience_years
+      : totalExp;
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -167,6 +175,7 @@ export default function CandidateDetail() {
         jdMaxExp={data.jd_max_experience_years}
         totalExp={totalExp}
         relevantExp={relExp}
+        score={data.scores?.experience}
       />
 
       {/* 7. Degree & Qualification Check */}
@@ -180,6 +189,7 @@ export default function CandidateDetail() {
       {/* 8. Sentence-Level Semantic Alignment */}
       <SemanticEvidenceCard
         semanticBreakdown={semanticBreakdown}
+        score={data.scores?.semantic}
       />
 
       {/* 9. Parser Audit & Diagnostics */}
