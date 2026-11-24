@@ -180,3 +180,41 @@ class TestResumesAPI:
         assert clear_res.json()["deleted_count"] >= 1
 
         assert len(client.get("/api/resumes").json()) == 0
+
+    def test_fifteen_file_upload_resilience(self):
+        """Part B1: Upload 15 mixed files (valid, wild, scanned, corrupt) in ONE batch."""
+        wild_dir = Path(__file__).resolve().parent.parent.parent / "sample_data" / "resumes_wild"
+        valid_resumes = sorted([f for f in SAMPLE_RESUMES_DIR.glob("*.*") if f.suffix.lower() in [".pdf", ".docx"]])[:10]
+        wild_resumes = [
+            wild_dir / "wild_01_no_headings.txt",
+            wild_dir / "wild_02_table_skills.docx",
+            wild_dir / "wild_04_twocolumn_sidebar.pdf",
+        ]
+        scanned_resume = wild_dir / "wild_09_scanned_image.pdf"
+        corrupt_bytes = b"PK\x03\x04CORRUPTED_ZIP_STREAM_NOT_A_VALID_DOCX_HEADER_0000000000"
+
+        files_payload = []
+        for f in valid_resumes:
+            files_payload.append(("files", (f.name, f.read_bytes(), "application/octet-stream")))
+        for f in wild_resumes:
+            files_payload.append(("files", (f.name, f.read_bytes(), "application/octet-stream")))
+        files_payload.append(("files", (scanned_resume.name, scanned_resume.read_bytes(), "application/pdf")))
+        files_payload.append(("files", ("corrupted_candidate.docx", corrupt_bytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")))
+
+        assert len(files_payload) == 15
+
+        response = client.post("/api/resumes/upload", files=files_payload)
+        assert response.status_code == 200
+        data = response.json()
+
+        assert data["total_files"] == 15
+        assert data["successful"] == 13
+        assert data["failed"] == 2
+
+        res_map = {r["filename"]: r for r in data["results"]}
+        assert res_map["wild_09_scanned_image.pdf"]["status"] == "failed"
+        assert "scanned" in res_map["wild_09_scanned_image.pdf"]["error"].lower()
+        assert res_map["corrupted_candidate.docx"]["status"] == "failed"
+        assert res_map["wild_01_no_headings.txt"]["status"] == "parsed"
+        assert res_map["wild_02_table_skills.docx"]["status"] == "parsed"
+        assert res_map["wild_04_twocolumn_sidebar.pdf"]["status"] == "parsed"

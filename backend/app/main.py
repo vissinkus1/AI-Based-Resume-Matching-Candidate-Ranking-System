@@ -39,13 +39,14 @@ async def lifespan(application: FastAPI):
     logger.info("Initializing database tables...")
     Base.metadata.create_all(bind=engine)
 
-    logger.info("Pre-warming embedding model...")
-    try:
-        emb_service = get_embedding_service()
-        emb_service.warmup()
-        logger.info("Embedding model warmed up successfully.")
-    except Exception as e:
-        logger.warning("Embedding model warmup failed (will lazy load on demand): %s", e)
+    if "PYTEST_CURRENT_TEST" not in os.environ and os.environ.get("TESTING") != "1":
+        logger.info("Pre-warming embedding model...")
+        try:
+            emb_service = get_embedding_service()
+            emb_service.warmup()
+            logger.info("Embedding model warmed up successfully.")
+        except Exception as e:
+            logger.warning("Embedding model warmup failed (will lazy load on demand): %s", e)
 
     yield
 

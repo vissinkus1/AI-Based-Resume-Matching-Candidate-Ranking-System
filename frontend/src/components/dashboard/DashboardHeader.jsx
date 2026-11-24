@@ -35,7 +35,7 @@ export default function DashboardHeader({
                 Stale Results Warning: {run.stale_reason || "Specification or candidate pool updated"}
               </p>
               <p className="text-xs text-brand-muted">
-                The job description or candidate pool was modified since this run was calculated. Re-run matching to synchronize scores.
+                Job description has been modified since these scores were calculated. Re-run matching to update rankings.
               </p>
             </div>
           </div>

@@ -1,0 +1,188 @@
+{
+  "wild_01_no_headings.txt": {
+    "name": "Alex Taylor",
+    "email": "alex.taylor.dev@example.com",
+    "phone": "+1-555-019-2834",
+    "degree_level": "bachelor",
+    "experience_years": 4.5,
+    "skills": [
+      "Python",
+      "FastAPI",
+      "Docker",
+      "PostgreSQL",
+      "REST API",
+      "Git",
+      "Redis",
+      "Linux",
+      "CI/CD"
+    ]
+  },
+  "wild_02_table_skills.docx": {
+    "name": "Priyesh Sen",
+    "email": "priyesh.sen@example.com",
+    "phone": "+91-9876543210",
+    "degree_level": "bachelor",
+    "experience_years": 3.4,
+    "skills": [
+      "Java",
+      "Spring Boot",
+      "PostgreSQL",
+      "AWS",
+      "Docker",
+      "Git",
+      "CI/CD",
+      "Linux",
+      "MySQL",
+      "Redis",
+      "Python"
+    ]
+  },
+  "wild_03_header_contact.docx": {
+    "name": "Natasha Romanoff",
+    "email": "natasha.code@example.com",
+    "phone": "+1-555-014-9988",
+    "degree_level": "bachelor",
+    "experience_years": 3.8,
+    "skills": [
+      "JavaScript",
+      "TypeScript",
+      "React",
+      "Node.js",
+      "Express",
+      "MongoDB",
+      "Docker",
+      "Git",
+      "REST API"
+    ]
+  },
+  "wild_04_twocolumn_sidebar.pdf": {
+    "name": "Carlos Mendez",
+    "email": "carlos.mendez@example.com",
+    "phone": "+1-555-012-7744",
+    "degree_level": "bachelor",
+    "experience_years": 4.25,
+    "skills": [
+      "React",
+      "Next.js",
+      "JavaScript",
+      "TypeScript",
+      "HTML",
+      "CSS",
+      "Tailwind CSS",
+      "Redux",
+      "Git",
+      "REST API"
+    ]
+  },
+  "wild_05_varied_dates.pdf": {
+    "name": "Haruto Takahashi",
+    "email": "haruto.t@example.com",
+    "phone": "+81-90-1234-5678",
+    "degree_level": "bachelor",
+    "experience_years": 6.0,
+    "skills": [
+      "Go",
+      "Python",
+      "AWS",
+      "Docker",
+      "Kubernetes",
+      "Terraform",
+      "PostgreSQL",
+      "Redis",
+      "Linux",
+      "CI/CD",
+      "Git"
+    ]
+  },
+  "wild_06_experience_stated_only.txt": {
+    "name": "Samuel O'Connor",
+    "email": "samuel.oconnor@example.com",
+    "phone": "+44-7700-900123",
+    "degree_level": "bachelor",
+    "experience_years": 5.0,
+    "skills": [
+      "Java",
+      "Spring Boot",
+      "Microservices",
+      "PostgreSQL",
+      "Kafka",
+      "Docker",
+      "Kubernetes",
+      "AWS",
+      "Git",
+      "JUnit",
+      "Agile",
+      "Linux"
+    ]
+  },
+  "wild_07_indian_education.pdf": {
+    "name": "Dr. R. K. Mehta",
+    "email": "dr.rkmehta@example.com",
+    "phone": "+91-9123456789",
+    "degree_level": "phd",
+    "experience_years": 6.25,
+    "skills": [
+      "Python",
+      "PyTorch",
+      "TensorFlow",
+      "NLP",
+      "Transformers",
+      "Scikit-Learn",
+      "FastAPI",
+      "Docker",
+      "AWS",
+      "Git"
+    ]
+  },
+  "wild_08_senior_4page.pdf": {
+    "name": "Elizabeth Montgomery",
+    "email": "elizabeth.montgomery@example.com",
+    "phone": "+1-555-019-8877",
+    "degree_level": "phd",
+    "experience_years": 19.9,
+    "skills": [
+      "Java",
+      "Spring Boot",
+      "Kafka",
+      "PostgreSQL",
+      "Docker",
+      "Kubernetes",
+      "AWS",
+      "Azure",
+      "Git",
+      "Jenkins",
+      "Ansible",
+      "JUnit",
+      "OAuth",
+      "Microservices"
+    ]
+  },
+  "wild_09_scanned_image.pdf": {
+    "name": null,
+    "email": null,
+    "phone": null,
+    "degree_level": null,
+    "experience_years": 0.0,
+    "skills": [],
+    "is_scanned": true
+  },
+  "wild_10_duplicate.pdf": {
+    "name": "Alex Taylor",
+    "email": "alex.taylor.dev@example.com",
+    "phone": "+1-555-019-2834",
+    "degree_level": "bachelor",
+    "experience_years": 4.5,
+    "skills": [
+      "Python",
+      "FastAPI",
+      "Docker",
+      "PostgreSQL",
+      "REST API",
+      "Git",
+      "Redis",
+      "Linux",
+      "CI/CD"
+    ],
+    "is_duplicate_of": "alex.taylor.dev@example.com"
+  }
+}

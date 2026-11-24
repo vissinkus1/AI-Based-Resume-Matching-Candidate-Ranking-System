@@ -134,8 +134,8 @@ class ScoringWeights:
             "associate", "trainee", "intern", "head", "director", "vp",
         })
     )
-    title_raw_cos_low: float = 0.15
-    title_raw_cos_high: float = 0.70
+    title_raw_cos_low: float = 0.30
+    title_raw_cos_high: float = 0.75
 
     # ------------------------------------------------------------------
     # 7. Knockout & Safeguards

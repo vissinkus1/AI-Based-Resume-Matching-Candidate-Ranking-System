@@ -69,7 +69,7 @@
 | D40 | Boilerplate duty sentence filtering & calibration bounds update | Excludes company/role intro boilerplate (< 6 words or lacking a verb) from semantic duty matching; adjusted upper cosine calibration bounds to 0.70 to prevent 100% saturation. |
 | D41 | Deterministic SHA-256 snapshot hashing for Job Description staleness detection | Hashing the canonical JSON serialized JD on execution enables $O(1)$ stale checks on `GET /api/match/runs/{id}` without re-evaluating embeddings. |
 | D42 | Composite index on `(run_id, rank)` in `match_results` | Guarantees instant sub-millisecond retrieval of paginated ranking leaderboards and deterministic tie-breaking. |
-| D43 | DB Cascade delete on MatchRun with nullable candidate FK | Deleting a MatchRun cascades to all results; deleting a Candidate sets `candidate_id=NULL` but retains historical auditable scoring records. |
+| D43 | DB Cascade delete on MatchRun with nullable candidate FK *(Note: D48 supersedes D43)* | Initial design preserved historical runs; superseded by D48 where Candidate deletion explicitly cascades to prune associated match results to prevent orphan rows. |
 | D44 | Lifespan embedding model warmup & `/health` readiness check | Pre-warms SentenceTransformer weights in FastAPI lifespan startup, preventing first-request cold-start latency spikes. |
 | D45 | Streaming CSV export without disk file accumulation | Streams candidate evaluation reports directly via Starlette StreamingResponse with standard RFC-4180 escaping. |
 | D46 | LRU caching on duty sentence validation | `_is_real_duty_sentence` cached with `maxsize=2048` eliminates redundant spaCy POS parsing across candidates in batch ranking, reducing warm batch ranking latency from 1,777 ms down to 12.39 ms. |
@@ -114,3 +114,14 @@
 | `ink` (`#1E2A20`) | `partial` tint on ivory (`#E0DCB8`) | Partial Match badge text | **10.73:1** | ✅ WCAG AAA ($\ge 7:1$) |
 | `ink` (`#1E2A20`) | `weak` tint on paper (`#EADFCF`) | Weak Match badge text | **11.34:1** | ✅ WCAG AAA ($\ge 7:1$) |
 | `ink` (`#1E2A20`) | `weak` tint on ivory (`#DED4BA`) | Weak Match badge text | **10.11:1** | ✅ WCAG AAA ($\ge 7:1$) |
+
+## Phase 6
+
+| # | Decision | Rationale |
+|---|----------|-----------|
+| D60 | Calibrate Job Title Cosine Bounds to `[0.30, 0.75]` (Supersedes D43) | Elevates lower bound from 0.15 to 0.30 so cross-domain titles (e.g. Frontend developer applying to Java backend) drop from 50.4% to 28.3%, and unrelated marketing roles score strictly 0.0%, preserving domain hierarchy. |
+| D61 | Generic Parser Normalization & Multi-Column Detection | Standardizes layout-aware block sorting in PyMuPDF for 2-column resumes, normalizes en-dash encoding artifacts (`?` to `-`), extracts stated experience in prose, and introduces second-chance spaCy PERSON NER, reaching 100% accuracy on wild synthetic resumes. |
+| D62 | Isolated Batch Ingestion Architecture | Per-file try/except encapsulation in `upload_resumes` ensures individual invalid or scanned files report error payloads without aborting or invalidating the remaining valid files in the batch. |
+| D63 | Root-Level React Error Boundary (`ErrorBoundary.jsx`) | Intercepts unhandled UI exceptions, logs error stack traces to console, and presents a graceful fallback screen with a "Try refreshing" CTA and collapsible diagnostics. |
+| D64 | Clean-Clone Offline-First Model Resolution | Configures `embedding_service.py` to attempt local cache loading first with graceful Hugging Face Hub fallback, and enables automatic spaCy `en_core_web_sm` installation on missing model errors. |
+

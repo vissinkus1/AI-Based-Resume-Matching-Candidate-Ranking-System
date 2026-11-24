@@ -237,8 +237,28 @@ def _clean_text(text: str) -> str:
     # 1. Unicode normalize
     text = unicodedata.normalize("NFC", text)
 
+    # 1b. Normalize ligatures
+    text = (
+        text.replace("ﬁ", "fi")
+        .replace("ﬂ", "fl")
+        .replace("ﬀ", "ff")
+        .replace("ﬃ", "ffi")
+        .replace("ﬄ", "ffl")
+    )
+
     # 2. Standardise bullets:  •, ●, ○, ◦, ▪, ▸, ▹, ►, ➤, ★, ✓, ✔, ➢, ■ → "- "
     text = re.sub(r"[•●○◦▪▸▹►➤★✓✔➢■]", "- ", text)
+
+    # 2b. Standardise PDF question-mark bullet artifacts at line starts
+    text = re.sub(r"(?m)^\s*\?\s+", "- ", text)
+
+    # 2c. Fix PDF font en-dash extraction artifacts in date ranges: e.g. "2020 ? Present" or "Jan 2020 ? Mar 2022"
+    text = re.sub(
+        r"(\b(?:19|20)\d{2}|\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*)\s*[\?\ufffd]\s*(\b(?:19|20)\d{2}|present|current)",
+        r"\1 - \2",
+        text,
+        flags=re.IGNORECASE,
+    )
 
     # 3. Re-join soft-hyphenated words (e.g. "pro-\ngramming" → "programming")
     text = re.sub(r"(\w)-\n(\w)", r"\1\2", text)

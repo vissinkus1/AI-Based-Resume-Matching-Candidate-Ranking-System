@@ -1,0 +1,8 @@
+Samuel O'Connor
+samuel.oconnor@example.com | +44-7700-900123 | London, UK
+
+Professional Summary:
+I have over 5 years of professional experience in enterprise Java and microservices architecture. Throughout my career as a Senior Software Engineer, I have architected distributed systems using Spring Boot, Hibernate, and Apache Kafka. I possess deep expertise in PostgreSQL database tuning, Docker container orchestration, and continuous integration with Git and Jenkins. I hold a Bachelor of Science (Honours) degree in Computer Systems Engineering from the University of Manchester.
+
+Core Skills:
+Java, Spring Boot, Microservices, PostgreSQL, Kafka, Docker, Kubernetes, AWS, Git, JUnit, Agile, Linux.

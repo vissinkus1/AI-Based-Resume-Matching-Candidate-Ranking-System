@@ -32,7 +32,7 @@ router = APIRouter(prefix="/api/resumes", tags=["Resumes & Candidates"])
 
 MAX_FILES_PER_BATCH = 50
 MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024  # 5 MB
-ALLOWED_EXTENSIONS = {".pdf", ".docx"}
+ALLOWED_EXTENSIONS = {".pdf", ".docx", ".txt"}
 
 
 @router.post(
@@ -79,7 +79,7 @@ async def upload_resumes(
                 SingleUploadResult(
                     filename=filename,
                     status="failed",
-                    error=f"Unsupported file type '{ext}'. Only PDF and DOCX files are supported.",
+                    error=f"Unsupported file type '{ext}'. Only PDF, DOCX, and TXT files are supported.",
                 )
             )
             continue

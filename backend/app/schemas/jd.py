@@ -29,6 +29,7 @@ class ParsedJDData(BaseModel):
     responsibilities: list[str] = []
     keywords: list[str] = []
     skill_evidence: dict[str, dict[str, str]] = {}
+    warnings: list[str] = []
 
 
 # ------------------------------------------------------------------

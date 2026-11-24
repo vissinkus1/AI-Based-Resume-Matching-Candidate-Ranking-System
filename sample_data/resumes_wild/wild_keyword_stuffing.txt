@@ -1,0 +1,5 @@
+Jordan Miller
+jordan.stuffing@example.com | +1-555-010-4433
+
+TECHNICAL SKILLS:
+Java, Spring Boot, Microservices, PostgreSQL, MySQL, Docker, Kubernetes, AWS, REST API, Git, JUnit, CI/CD, Redis, Linux, Apache Kafka, Elasticsearch, Hibernate, React, TypeScript, JavaScript, HTML, CSS, Tailwind CSS, Python, PyTorch, TensorFlow, Machine Learning, Deep Learning, NLP, Scikit-Learn, SQL, MongoDB, GraphQL, Node.js, Next.js, Redux, C++, Go, Terraform, Agile.

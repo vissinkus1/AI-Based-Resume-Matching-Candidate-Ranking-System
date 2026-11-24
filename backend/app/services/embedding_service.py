@@ -62,25 +62,46 @@ class EmbeddingService:
         logger.info("EmbeddingService warmup complete.")
 
     def _get_model(self):
-        """Lazy load the sentence transformer model."""
+        """Lazy load the sentence transformer model with local-first strategy and clean fallback."""
         if self._model is None:
             try:
-                import os
-                os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
-                os.environ.setdefault("HF_HUB_OFFLINE", "1")
-                os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
                 from sentence_transformers import SentenceTransformer
-                logger.info("Loading sentence transformer model '%s'...", self.model_name)
-                try:
-                    self._model = SentenceTransformer(self.model_name, local_files_only=True)
-                except Exception:
-                    self._model = SentenceTransformer(self.model_name)
-            except Exception as e:
+            except ImportError as e:
                 raise RuntimeError(
-                    f"SentenceTransformer model '{self.model_name}' could not be loaded. "
-                    f"Ensure sentence-transformers is installed and model files are accessible. "
-                    f"Underlying error: {str(e)}"
+                    "sentence-transformers is not installed. Please run: pip install sentence-transformers"
                 ) from e
+
+            # Step 1: Try local cache first
+            logger.info("Attempting to load sentence transformer model '%s' from local cache...", self.model_name)
+            try:
+                self._model = SentenceTransformer(self.model_name, local_files_only=True)
+                logger.info("Successfully loaded model '%s' from local cache.", self.model_name)
+            except Exception as local_err:
+                logger.info(
+                    "Local cache miss for '%s' (%s). Falling back to Hugging Face Hub download...",
+                    self.model_name,
+                    local_err,
+                )
+                # Ensure offline flags do not block download
+                old_hf_offline = os.environ.pop("HF_HUB_OFFLINE", None)
+                old_tr_offline = os.environ.pop("TRANSFORMERS_OFFLINE", None)
+                try:
+                    self._model = SentenceTransformer(self.model_name)
+                    logger.info("Successfully downloaded and initialized model '%s'.", self.model_name)
+                except Exception as dl_err:
+                    raise RuntimeError(
+                        f"SentenceTransformer model '{self.model_name}' could not be loaded from local cache "
+                        f"or downloaded from Hugging Face Hub.\n"
+                        f"Local cache error: {local_err}\n"
+                        f"Download error: {dl_err}\n"
+                        f"Troubleshooting: Please check your internet connection or pre-download the model using:\n"
+                        f"  python -c \"from sentence_transformers import SentenceTransformer; SentenceTransformer('{self.model_name}')\""
+                    ) from dl_err
+                finally:
+                    if old_hf_offline is not None:
+                        os.environ["HF_HUB_OFFLINE"] = old_hf_offline
+                    if old_tr_offline is not None:
+                        os.environ["TRANSFORMERS_OFFLINE"] = old_tr_offline
         return self._model
 
     def embed(self, texts: list[str]) -> np.ndarray:

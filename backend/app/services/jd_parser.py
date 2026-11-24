@@ -50,6 +50,7 @@ class ParsedJD:
     responsibilities: list[str] = field(default_factory=list)
     keywords: list[str] = field(default_factory=list)
     skill_evidence: dict[str, dict[str, str]] = field(default_factory=dict)
+    warnings: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         """Serialise to a plain dict (for JSON / Pydantic)."""
@@ -68,6 +69,7 @@ class ParsedJD:
             "responsibilities": self.responsibilities,
             "keywords": self.keywords,
             "skill_evidence": self.skill_evidence,
+            "warnings": self.warnings,
         }
 
 
@@ -79,10 +81,17 @@ _nlp = None
 
 
 def _get_nlp():
-    """Load en_core_web_sm once and cache it."""
+    """Load en_core_web_sm once and cache it. Auto-downloads if missing."""
     global _nlp
     if _nlp is None:
-        _nlp = spacy.load("en_core_web_sm")
+        try:
+            _nlp = spacy.load("en_core_web_sm")
+        except OSError:
+            import subprocess
+            import sys
+            logger.info("spaCy model 'en_core_web_sm' not found. Auto-downloading...")
+            subprocess.run([sys.executable, "-m", "spacy", "download", "en_core_web_sm"], check=True)
+            _nlp = spacy.load("en_core_web_sm")
     return _nlp
 
 
@@ -816,6 +825,13 @@ def parse_jd(text: str) -> ParsedJD:
     all_skills = set(required_skills) | set(preferred_skills)
     keywords = _extract_keywords(text, nlp, all_skills)
 
+    warnings = []
+    word_count = len(text.split())
+    if word_count < 30:
+        warnings.append(
+            "Job description appears unusually brief. Matching accuracy improves with detailed requirements, duties, and skills."
+        )
+
     return ParsedJD(
         title=title,
         required_skills=required_skills,
@@ -828,4 +844,5 @@ def parse_jd(text: str) -> ParsedJD:
         responsibilities=responsibilities,
         keywords=keywords,
         skill_evidence=skill_evidence,
+        warnings=warnings,
     )

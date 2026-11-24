@@ -132,6 +132,7 @@ class ParsedResume:
                 for ed in self.education
             ],
             "summary": self.summary,
+            "sections": self.sections,
             "parse_warnings": self.parse_warnings,
         }
 
@@ -174,7 +175,7 @@ _RESUME_SECTION_PATTERNS = {
         re.IGNORECASE,
     ),
     "experience": re.compile(
-        r"^(?:(?:research\s+&?\s*)?(?:work|professional)?\s*experience|employment\s+history|work\s+history|career\s+history|work\s+experience|professional\s+background|research\s+experience)\s*[:\-–—]?$",
+        r"^(?:(?:research\s+&?\s*)?(?:work|professional)?\s*experience|employment\s+history|work\s+history|career\s+history|chronological\s+(?:career\s+)?history|work\s+experience|professional\s+background|research\s+experience)\s*[:\-–—]?$",
         re.IGNORECASE,
     ),
     "education": re.compile(
@@ -211,17 +212,17 @@ _PRESENT_WORDS = {"present", "current", "till date", "now", "ongoing", "date"}
 _DATE_RANGE_REGEXES = [
     # "Jan 2020 - Mar 2022", "January 2020 – Present", "Jun'19 - Aug'20", "06/2020 - 08/2023"
     re.compile(
-        r"([a-zA-Z]{3,}|0?[1-9]|1[0-2])[\s'/\.]+(\d{2,4})\s*[-–—to]+\s*([a-zA-Z]{3,}|0?[1-9]|1[0-2])[\s'/\.]+(\d{2,4}|present|current|till\s*date|now)",
+        r"([a-zA-Z]{3,}|0?[1-9]|1[0-2])[\s'/\.]+(\d{2,4})\s*(?:[-–—~?to\s]+)\s*([a-zA-Z]{3,}|0?[1-9]|1[0-2])[\s'/\.]+(\d{2,4}|present|current|till\s*date|now)",
         re.IGNORECASE,
     ),
     # "Jan 2020 - Present", "Jun'19 - Present"
     re.compile(
-        r"([a-zA-Z]{3,}|0?[1-9]|1[0-2])[\s'/\.]+(\d{2,4})\s*[-–—to]+\s*(present|current|till\s*date|now)",
+        r"([a-zA-Z]{3,}|0?[1-9]|1[0-2])[\s'/\.]+(\d{2,4})\s*(?:[-–—~?to\s]+)\s*(present|current|till\s*date|now)",
         re.IGNORECASE,
     ),
     # "2019 - 2022", "2020 - Present"
     re.compile(
-        r"\b(19\d{2}|20\d{2})\s*[-–—to]+\s*(19\d{2}|20\d{2}|present|current|till\s*date|now)\b",
+        r"\b(19\d{2}|20\d{2})\s*(?:[-–—~?to\s]+)\s*(19\d{2}|20\d{2}|present|current|till\s*date|now)\b",
         re.IGNORECASE,
     ),
     # "Since Jan 2021", "Since 2021"
@@ -240,9 +241,17 @@ _nlp_cache = None
 
 
 def _get_nlp():
+    """Load en_core_web_sm once and cache it. Auto-downloads if missing."""
     global _nlp_cache
     if _nlp_cache is None:
-        _nlp_cache = spacy.load("en_core_web_sm")
+        try:
+            _nlp_cache = spacy.load("en_core_web_sm")
+        except OSError:
+            import subprocess
+            import sys
+            logger.info("spaCy model 'en_core_web_sm' not found. Auto-downloading...")
+            subprocess.run([sys.executable, "-m", "spacy", "download", "en_core_web_sm"], check=True)
+            _nlp_cache = spacy.load("en_core_web_sm")
     return _nlp_cache
 
 
@@ -303,6 +312,15 @@ def _extract_name(text: str, filename: str, nlp) -> tuple[str, list[str]]:
 
         if (has_person or (is_title_case and all_alpha)) and len(words) >= 2:
             return line_clean, warnings
+
+    # Second-chance fallback: Check spaCy PERSON entities in the first 500 characters
+    doc_intro = nlp(text[:500])
+    for ent in doc_intro.ents:
+        if ent.label_ == "PERSON":
+            ent_words = ent.text.strip().split()
+            if 2 <= len(ent_words) <= 4:
+                if not any(w.lower() in _NON_NAME_WORDS for w in ent_words):
+                    return ent.text.strip(), warnings
 
     # Fallback to cleaned filename
     clean_stem = Path(filename).stem
@@ -775,7 +793,7 @@ def _parse_experience_section(
         source = "date_ranges"
     else:
         stated_match = re.search(
-            r"(\d+\.?\d*)\+?\s*years?\s*(?:of\s+)?(?:experience|exp)",
+            r"(?:over|more than|approx\.?|nearly)?\s*(\d+\.?\d*)\+?\s*years?\s*(?:of\s+)?(?:professional\s+)?(?:experience|exp)",
             exp_text,
             re.IGNORECASE,
         )
@@ -899,7 +917,7 @@ def parse_resume(
     # If no experience section, check full text
     if not exp_entries and total_years == 0.0:
         stated = re.search(
-            r"(\d+\.?\d*)\+?\s*years?\s*(?:of\s+)?(?:experience|exp)",
+            r"(?:over|more than|approx\.?|nearly)?\s*(\d+\.?\d*)\+?\s*years?\s*(?:of\s+)?(?:professional\s+)?(?:experience|exp)",
             raw_text,
             re.IGNORECASE,
         )
